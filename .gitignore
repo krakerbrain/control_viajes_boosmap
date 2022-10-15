@@ -1,1 +1,6 @@
 config.php
+.env
+.htaccess
+composer.json
+composer.lock
+/vendor

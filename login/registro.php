@@ -90,8 +90,7 @@ include "../partials/header.php";
             <?php echo $error ?>
         </div>
 <div>
-    <a href="index.php">Ir al inicio</a>
-    <!-- <a href="http://biowork.tech/login/inicio.php">Ir al inicio</a> -->
+    <a href="<?php $_ENV['URL_LOGIN_INDEX'] ?>">Ir al inicio</a>
 </div>
 
     </form>

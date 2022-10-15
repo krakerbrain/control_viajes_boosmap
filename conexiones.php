@@ -17,11 +17,10 @@ while ($datos = $query->fetch()){
 switch ($ingresar) {
     case 'insertar':
         $destino    = $_POST['destino'];
-        $dia      = date("Y-d-m", strtotime($_POST['dia']));
+        $dia      = date("Y-m-d", strtotime(str_replace('/', '-',$_POST['dia'])));
         $hora      = $_POST['hora'];
         $monto      = $_POST['monto'];
         $fecha = $dia." ".$hora;
-       
        $sql = $con->prepare("INSERT INTO viajes(idusuario,destino,fecha,monto) VALUES (:idusuario,:destino,:fecha,:monto)");
        $sql->bindParam(':idusuario', $idusuario);
        $sql->bindParam(':destino', $destino);

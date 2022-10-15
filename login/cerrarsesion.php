@@ -1,6 +1,6 @@
 <?php
 session_start();
+include('../config.php');
 session_destroy();
-header("location:../login/index.php");
-// header("location:http://biowork.tech/login/index.php");
+header($_ENV['URL_REDIRECCION']);
 ?>

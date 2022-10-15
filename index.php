@@ -1,10 +1,10 @@
 <?php
 session_start();
 $sesion = isset($_SESSION['usuario']);
+require __DIR__ . '/config.php';
 
 if($sesion == null || $sesion == ""){
-  header("location:../boosmap/login/index.php");
-  // header("location:http://biowork.tech/login/index.php");
+  header($_ENV['URL_LOCAL']);
 }
 
 ?>
@@ -24,6 +24,7 @@ if($sesion == null || $sesion == ""){
     />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker3.standalone.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
   </head>
   <style>
     .btn{
@@ -35,13 +36,14 @@ if($sesion == null || $sesion == ""){
       left:540px
     }
   </style>
-  <body class="container" style="max-width:850px">
+  <body>
+  <div class="container" style="max-width:850px">
   <nav class="navbar navbar-dark bg-danger">
     <div class="container-fluid  d-flex  justify-content-between">
       <p class="text-light my-auto">Hola, <?= $_SESSION['usuario'] ?></p>
-      <a class="navbar-brand" style="font-size:12px"href="../boosmap/login/cerrarsesion.php">Cerrar Sesión</a>
-      <!-- <a class="navbar-brand" style="font-size:12px"href="http://biowork.tech/login/cerrarsesion.php">Cerrar Sesión</a> -->
-    </div>
+      <a class="navbar-brand" style="font-size:12px"href="<?= $_ENV['URL_SESSION'] ?>">Cerrar Sesión</a>
+     </div>
+
   </nav>
     <div>
       <h4>Datos del Mes</h4>
@@ -56,29 +58,29 @@ if($sesion == null || $sesion == ""){
         </tr>
       </table>
     </div>
-  <header class="row">
-    <div class="col-6">
-    <h4>Fecha</h4>
-    <div class="input-group date" id="datepicker">
-      <input type="text" class="form-control">
-      <span class="input-group-append">
-        <span class="input-group-text bg-white">
-          <i class="fa fa-calendar" ></i>
-         </span>
-      </span>
-    </div>
-  </div>
-  <div  class="col-6" style="text-align:center"> 
-    <h4>Rutas</h4>
-    <button type="submit" value="vina" class="btn btn-danger ">Viña del Mar</button>
-    <button type="submit" value="renaca" class="btn btn-danger">Reñaca</button>
-    <button type="submit" value="concon" class="btn btn-danger ">Concon</button>
-    <button type="submit" value="quilpue" class="btn btn-danger ">Quilpué</button>
-    <button type="submit" value="v_alemana" class="btn btn-danger ">V. Alemana</button>
-    <button type="submit" value="valpo" class="btn btn-danger">Valparaiso</button>
-</div>
-</header>
-
+    <header class="row">
+      <div class="col-6">
+        <h4>Fecha</h4>
+        <div class="input-group date" id="datepicker">
+          <input type="text" class="form-control">
+          <span class="input-group-append">
+            <span class="input-group-text bg-white">
+              <i class="fa fa-calendar" ></i>
+            </span>
+          </span>
+        </div>
+      </div>
+      <div  class="col-6" style="text-align:center"> 
+        <h4>Rutas</h4>
+        <button type="submit" value="vina" class="btn btn-danger ">Viña del Mar</button>
+        <button type="submit" value="renaca" class="btn btn-danger">Reñaca</button>
+        <button type="submit" value="concon" class="btn btn-danger ">Concon</button>
+        <button type="submit" value="quilpue" class="btn btn-danger ">Quilpué</button>
+        <button type="submit" value="v_alemana" class="btn btn-danger ">V. Alemana</button>
+        <button type="submit" value="valpo" class="btn btn-danger">Valparaiso</button>
+      </div>
+    </header>
+    
 <section>
   <h4>Viajes Realizados</h4>
   <table  class="table table-striped">
@@ -88,11 +90,10 @@ if($sesion == null || $sesion == ""){
   <td>Monto</td>
   <td style="width:10%">Eliminar</td>
 </thead>
-<tbody id="tabla">
-
-</tbody>
+<tbody id="tabla"></tbody>
   </table>
 </section>
+</div>
   </body>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" 
@@ -112,24 +113,16 @@ if($sesion == null || $sesion == ""){
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
   <script>
     
-    var btnCalendario = document.getElementsByClassName('input-group-append')[0]
 
-    btnCalendario.addEventListener('click', function(event){
-      var ventana = window.outerWidth;
-      var posicioncalendario = ventana*20/100;
-      console.log(document.getElementsByClassName('datepicker')[0])
-      document.getElementsByClassName('datepicker')[0].style.left = `${posicioncalendario}px`;
-    })
-
-
-    const date = new Date();
+const date = new Date();
 
 let day = date.getDate();
 let month = date.getMonth();
 let year = date.getFullYear();
 
 $("#datepicker").datepicker({
-  format: "dd/mm/yyyy",
+  format: "dd/mm/yyyy"
+
 });
 $("#datepicker").datepicker("setEndDate", new Date(year, month, day));
 $("#datepicker").datepicker("update", new Date(year, month, day));
@@ -161,45 +154,58 @@ for (let i = 0; i < botones.length; i++) {
   botones[i].addEventListener("click", function (e) {
     var hora = new Date();
     var dia = $("#datepicker").datepicker("getFormattedDate");
+  
     $.post("conexiones.php", {
       ingresar: "insertar",
       destino: e.target.innerText,
       dia: dia,
       hora: hora.toLocaleTimeString(),
       monto: montos[e.target.value],
+    }).done(function(){
+      obtener();
+      conteo();
+      total();
+    }).fail(function() {
+      alert( "error" );
     });
 
-    obtener();
-    conteo();
-    total();
+    
   });
 }
 
 function obtener() {
-  $.post("conexiones.php", { ingresar: "obtener" }, function (datos, estado) {
-    if (estado == "success") {
-      tabla.innerHTML = datos;
-    }
+  $.post("conexiones.php", { 
+    ingresar: "obtener" 
+  }).done(function(datos) {
+     tabla.innerHTML = datos;
   });
 }
 
 function conteo() {
-  $.post("conexiones.php", { ingresar: "conteo" }, function (datos, estado) {
+  $.post("conexiones.php", { 
+      ingresar: "conteo" 
+    }).done(function (datos) {
     numerodeviajes.innerHTML = datos;
   });
 }
 function total() {
-  $.post("conexiones.php", { ingresar: "totalmes" }, function (datos, estado) {
-    totalmes.innerHTML = datos;
+  $.post("conexiones.php", { 
+      ingresar: "totalmes" 
+    }).done (function (datos) {
+    totalmes.innerHTML = " $"+datos;
   });
 }
+
 function eliminaviaje(id) {
-  $.post("conexiones.php", { ingresar: "eliminar", id_viaje: id }, function (datos, estado) {
-    if (estado == "success") {
+  $.post("conexiones.php", { 
+      ingresar: "eliminar", 
+      id_viaje: id 
+    }).done (function (datos) {
+ 
       obtener();
       conteo();
       total();
-    }
+  
   });
 }
 
