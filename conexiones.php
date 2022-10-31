@@ -5,8 +5,10 @@ if(isset($_SESSION['usuario'])){
     $usuario = $_SESSION['usuario'];
 }
 
-
+/**Se recibe un parámetro que ejecuta el switch según lo que se recibe */
 $ingresar   = $_POST['ingresar'];
+
+/**Se obtiene el id del usuario según el nombre que use al iniciar sesión */
 $query = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :usuario");
 $query->bindParam(':usuario', $usuario);
 $query->execute();
@@ -19,13 +21,11 @@ switch ($ingresar) {
         $destino    = $_POST['destino'];
         $dia      = date("Y-m-d", strtotime(str_replace('/', '-',$_POST['dia'])));
         $hora      = $_POST['hora'];
-        $monto      = $_POST['monto'];
         $fecha = $dia." ".$hora;
-       $sql = $con->prepare("INSERT INTO viajes(idusuario,destino,fecha,monto) VALUES (:idusuario,:destino,:fecha,:monto)");
+       $sql = $con->prepare("INSERT INTO viajes(idusuario,destino,fecha,monto) VALUES (:idusuario,:destino,:fecha,(SELECT costoruta from rutas where ruta = :destino limit 1))");
        $sql->bindParam(':idusuario', $idusuario);
        $sql->bindParam(':destino', $destino);
        $sql->bindParam(':fecha', $fecha);
-       $sql->bindParam(':monto', $monto);
        $sql->execute();
         break;
     
@@ -43,6 +43,15 @@ switch ($ingresar) {
                     <i class='fa-solid fa-xmark text-danger'></i>
                 </td>
                 </tr>";
+      };
+      break;
+    case 'cargarutas':
+      $query = $con->prepare("SELECT * FROM rutas WHERE idusuario = :idusuario");
+      $query->bindParam(':idusuario', $idusuario);
+      $query->execute();
+      $datos = $query->fetchAll(PDO::FETCH_ASSOC);
+      foreach($datos as $ruta){
+        echo '<button value="'.$ruta['ruta'].'" class="btn btn-danger mr-1" onclick="insertaRuta(this)">'.$ruta['ruta'].'</button>';
       };
       break;
         case 'conteo';

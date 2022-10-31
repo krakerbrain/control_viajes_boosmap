@@ -38,13 +38,22 @@ if(isset($_POST['usuario']) && isset($_POST['correo']) &&isset($_POST['password'
          $error = "conex";
         }
     }
-
-
- 
 }
   
 include "../partials/header.php";  
 ?>
+<body class="bg-danger d-flex justify-content-center align-items-center vh-100">
+
+
+<div class="bg-white p-5 rounded">
+
+  <div class="justify-content-center">
+    <div class="">
+      <form action="" method="post" class="form-group">
+        <div class="text-center">
+          <h4>CONTROL DE VIAJES</h4>
+          <H4>BOOSMAP</H4>
+        </div>
     <div class="form-group text-center mt-3">
         <h5>Registro</h5>
     </div>
