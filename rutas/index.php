@@ -5,36 +5,45 @@ $sesion = isset($_SESSION['usuario']);
 require __DIR__ . '/../config.php';
 include __DIR__."/../partials/header.php"; 
 $indice = "rutas";
+$creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
 ?>
 
 <body>
     <div class="container px-0" style="max-width:850px">
         <?php include __DIR__."/../partials/navbar.php"; ?>
-       <div class="row-cols-lg-2 m-3">
+        <?php if($creado != "") {?>
+            <div class="alert alert-danger mt-4  alert-dismissible fade show" role="alert">
+                Bienvenido al sistema. Debe ingresar las rutas para poder llevar el registro.
+                Cuando lo desee puede ingresar aquí para modificar o agregar nuevas Rutas.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php } ?>
+        <div class="row-cols-lg-2 m-3">
         <form action="conexiones_rutas.php" method="post" class="mx-auto">
+        <button type="submit" disabled hidden aria-hidden="true"></button>
             <h4>Configuración de Rutas</h4>
             <div>
                 <label class="form-label" for="region">Región</label>
-            <select class="custom-select" name="region" id="region">
-                <option value="">Seleccione</option>
-            </select>
-            
-        </div>
-        <div>
-            <label class="form-label" for="comunas">Comuna</label>
-            <select class="custom-select" name="comunas" id="comunas">
-                <option value="">Seleccion</option>
-            </select>
-            
-        </div>
-        <div>
-            <label for="costoruta">Monto Líquido</label>
-            <input class="form-control" type="text" id="costoruta">
-        </div>
-        <div>
-            <input class="btn btn-danger w-100 my-4" type="button" value="Agregar" id="agregar">
-        </div>
-    </form>
+                <select class="custom-select" name="region" id="region">
+                    <option value="">Seleccione</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="comunas">Comuna</label>
+                <select class="custom-select" name="comunas" id="comunas" onchange="borraDatos()">
+                    <option value="">Seleccione</option>
+                </select>
+            </div>
+            <div>
+                <label for="costoruta">Monto Líquido</label>
+                <input class="form-control" type="text" id="costoruta">
+            </div>
+            <div>
+                <input class="btn btn-danger w-100 my-4" type="button" value="Agregar" id="agregar">
+            </div>
+        </form>
     </div> 
     <table class="table table-striped">
         <thead class="table-danger text-center">
@@ -50,6 +59,8 @@ $indice = "rutas";
 </html>
 
 <script>
+
+    
 const seleccionaRegion = document.getElementById("region");
 const btnAgregar = document.getElementById('agregar');
 
@@ -72,11 +83,20 @@ seleccionaRegion.addEventListener("change", function (e) {
     alert( "error" );
     });
 })
+document.querySelector('form').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        agregaRuta(e)
+    }
+});
 
 btnAgregar.addEventListener("click", function (e) {
-    var comunaseleccionada = e.target.form.comunas.value;
+    agregaRuta(e)
+});
+
+function agregaRuta(e){
+    var comunaseleccionada = e.target.form.comunas.selectedIndex == -1 ? 0 : e.target.form.comunas[e.target.form.comunas.selectedIndex].innerText;
     var costoruta = e.target.form.costoruta.value;
-    if(comunaseleccionada != "" && costoruta != ""){
+    if(comunaseleccionada != "" && comunaseleccionada != "Seleccione" && costoruta != ""){
         var conf = `¿Desea ingrear la comuna de ${comunaseleccionada} con un monto por viaje de $${costoruta}`;
             if(confirm(conf) == true){
                 $.post("conexiones_rutas.php", {
@@ -85,6 +105,7 @@ btnAgregar.addEventListener("click", function (e) {
                     costoruta: costoruta,
                 }).done(function(datos){
                 obtenerruta();
+                debugger
             }).fail(function() {
                 alert( "error" );
             });
@@ -94,7 +115,7 @@ btnAgregar.addEventListener("click", function (e) {
     }else{
         alert("Debe llenar todos los campos.")
     }
-});
+}
 
 function obtenerruta(){
     $.post("conexiones_rutas.php", {
@@ -120,4 +141,11 @@ function eliminaRuta(ruta,id){
         return
     }
 }
+
+
+function borraDatos(){
+    document.getElementById('costoruta').value = "";
+    document.getElementById('costoruta').focus();
+}
+
 </script>

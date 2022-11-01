@@ -1,7 +1,8 @@
 <?php
 include('../config.php');
 $error = "false";
-$creado = isset($_REQUEST['creado']);
+$creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
+
 if(isset($_POST['usuario']) && isset($_POST['contrasenia'])){
   $pass     = $_POST['contrasenia'];
   $usuario  = $_POST['usuario'];
@@ -15,9 +16,13 @@ if(isset($_POST['usuario']) && isset($_POST['contrasenia'])){
     if($datos['conteo'] > 0){
       
       if(password_verify($pass,$datos['clave'])){
-        header("location:../index.php");
         session_start();
         $_SESSION['usuario'] = $usuario;
+        if($creado == "true"){
+          header("location:../rutas/index.php?creado=".$creado);
+        }else{
+          header("location:../index.php");
+        }
       }else{
         $error = "true";
         session_abort();

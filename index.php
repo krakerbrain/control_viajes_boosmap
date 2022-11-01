@@ -6,7 +6,25 @@ $indice = "inicio";
 if($sesion == null || $sesion == ""){
   header($_ENV['URL_LOCAL']);
 }
-include __DIR__."../partials/header.php";  
+include "partials/header.php";
+
+$mes = date("m");
+$meses = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre'
+];
+$mesactual = $meses[$mes-1];
+
 ?>
 
   <style>
@@ -21,9 +39,9 @@ include __DIR__."../partials/header.php";
   </style>
 <body>
   <div class="container px-0" style="max-width:850px">
-    <?php include __DIR__."../partials/navbar.php" ?>
+    <?php include "partials/navbar.php" ?>
     <div class="ml-3">
-      <h4>Datos del Mes</h4>
+      <h4>Datos del Mes de <?= $mesactual ?></h4>
       <table>
         <tr>
           <td>Monto líquido del mes: </td>
@@ -67,7 +85,7 @@ include __DIR__."../partials/header.php";
     </section>
   </div>
 </body>
-<?php include __DIR__."../partials/boostrap_script.php" ?>
+<?php include "partials/boostrap_script.php" ?>
 <script>
 
 const date = new Date();

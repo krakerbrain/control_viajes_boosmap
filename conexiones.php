@@ -64,7 +64,7 @@ switch ($ingresar) {
         }
         break;
         case 'totalmes';
-        $query = $con->prepare("SELECT SUM(monto) as total FROM viajes WHERE idusuario = :idusuario");
+        $query = $con->prepare("SELECT SUM(monto) as total FROM viajes WHERE idusuario = :idusuario and extract(month from fecha) = extract(month from now())");
         $query->bindParam(':idusuario', $idusuario);
         $query->execute();
         $datos = $query->fetchAll(PDO::FETCH_ASSOC);
