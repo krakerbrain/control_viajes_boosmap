@@ -22,27 +22,13 @@ $datos = json_decode($json, true)["regiones"];
 $totalregiones = count($datos);
 
 switch ($ingresar) {
-    /*case 'cargaregiones':
-        $token = "rvoQ1IRbmKC3d6jyrTRTmK3BZjiXMhbYPc9BZcre";
-        $url = "https://api.datos.observatoriologistico.cl/api/v2/datastreams/COMUN-POR-REGIO/data.pjson/?auth_key=".$token;
-        $json = file_get_contents($url);
-        $datos = json_decode($json, true)['result'];
-        $totalregiones = count($datos)-1;
-   
-       for ($i=0; $i < $totalregiones; $i++) {
-        $regiones =  explode(" ",$datos[$i]['NOMBRE_REGION']);
-        $nombre_region = end($regiones);
-        echo "<option value=".$i.">".$nombre_region."</option>";
-       }
-
-        break;*/
     case 'cargaregiones':
         foreach ($datos as $key => $value) {
             echo "<option value=".$value["clave"].">".$value["region"]."</option>";
         }
     break;
     case 'cargacomunas':
-        $region= $_POST["region"];
+        $region = $_POST["region"];
         $comunas = $datos[$region]["comunas"];
         foreach ($datos as $key => $value) {
             if($value["clave"] == $region){

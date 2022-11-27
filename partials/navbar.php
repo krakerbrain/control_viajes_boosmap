@@ -1,4 +1,5 @@
 <?php
+
 $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";  
 ?>
 <nav class="navbar navbar-dark bg-danger lighten-4">
@@ -18,7 +19,10 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
         <a class="navbar-brand" style="font-size:12px"href="<?= $_ENV['URL_CONFIG'] ?>">Configurar Rutas</a>
       </li>
       <li class="nav-item">
-      <a class="navbar-brand" style="font-size:12px"href="<?= $_ENV['URL_SESSION'] ?>">Cerrar Sesión</a>
+        <a class="navbar-brand" style="font-size:12px"href="<?= $_ENV['URL_ESTADISTICAS'] ?>">Estadísticas</a>
+      </li>
+      <li class="nav-item">
+        <a class="navbar-brand" style="font-size:12px"href="<?= $_ENV['URL_SESSION'] ?>">Cerrar Sesión</a>
       </li>
     </ul>
   </div>

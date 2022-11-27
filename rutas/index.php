@@ -1,7 +1,6 @@
 <?php
 session_start();
 $sesion = isset($_SESSION['usuario']);
-
 require __DIR__ . '/../config.php';
 include __DIR__."/../partials/header.php"; 
 $indice = "rutas";
@@ -37,8 +36,16 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                 </select>
             </div>
             <div>
+                <label for="montobruto">Monto Bruto</label>
+                <input class="form-control" type="number" id="montobruto" onkeyup="calculomonto(this)">
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="nobruto">
+                <label class="form-check-label" for="nobruto">Seleccione si no conoce el monto bruto</label>
+            </div>
+            <div>
                 <label for="costoruta">Monto Líquido</label>
-                <input class="form-control" type="text" id="costoruta">
+                <input class="form-control" type="number" id="costoruta" placeholder = "0" disabled>
             </div>
             <div>
                 <input class="btn btn-danger w-100 my-4" type="button" value="Agregar" id="agregar">
@@ -60,7 +67,25 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
 
 <script>
 
-    
+function calculomonto(val){
+   var montobruto = val.value == "" ? 0 : val.value
+   var liquido = parseInt(montobruto)-(parseInt(montobruto) * 12.25 /100)
+   document.getElementById('costoruta').value   =  Math.round(liquido);
+}
+
+var nobruto = document.getElementById('nobruto');
+nobruto.addEventListener('change', function(e){
+    if(e.target.checked){
+        document.getElementById('montobruto').disabled = "true"
+        document.getElementById('costoruta').removeAttribute("disabled")
+    }else{
+        document.getElementById('costoruta').disabled = "true"
+        document.getElementById('costoruta').value = 0
+        document.getElementById('montobruto').removeAttribute("disabled")
+
+    }
+})
+
 const seleccionaRegion = document.getElementById("region");
 const btnAgregar = document.getElementById('agregar');
 
@@ -96,8 +121,9 @@ btnAgregar.addEventListener("click", function (e) {
 function agregaRuta(e){
     var comunaseleccionada = e.target.form.comunas.selectedIndex == -1 ? 0 : e.target.form.comunas[e.target.form.comunas.selectedIndex].innerText;
     var costoruta = e.target.form.costoruta.value;
-    if(comunaseleccionada != "" && comunaseleccionada != "Seleccione" && costoruta != ""){
-        var conf = `¿Desea ingrear la comuna de ${comunaseleccionada} con un monto por viaje de $${costoruta}`;
+    var montobruto = document.getElementById('montobruto');
+    if(comunaseleccionada != "" && comunaseleccionada != "Seleccione" && costoruta != "" && costoruta != 0){
+        var conf = `¿Desea ingrear la comuna de ${comunaseleccionada} con un monto líquido por viaje de $${costoruta}`;
             if(confirm(conf) == true){
                 $.post("conexiones_rutas.php", {
                     ingresar: "agregaviaje",
@@ -105,7 +131,6 @@ function agregaRuta(e){
                     costoruta: costoruta,
                 }).done(function(datos){
                 obtenerruta();
-                debugger
             }).fail(function() {
                 alert( "error" );
             });
@@ -113,7 +138,11 @@ function agregaRuta(e){
             return
         }
     }else{
-        alert("Debe llenar todos los campos.")
+        if(costoruta == 0){
+            alert("El monto no puede ser 0.")
+        }else{
+            alert("Debe llenar todos los campos.")
+        }
     }
 }
 

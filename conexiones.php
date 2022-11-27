@@ -22,7 +22,7 @@ switch ($ingresar) {
         $dia      = date("Y-m-d", strtotime(str_replace('/', '-',$_POST['dia'])));
         $hora      = $_POST['hora'];
         $fecha = $dia." ".$hora;
-       $sql = $con->prepare("INSERT INTO viajes(idusuario,destino,fecha,monto) VALUES (:idusuario,:destino,:fecha,(SELECT costoruta from rutas where ruta = :destino limit 1))");
+       $sql = $con->prepare("INSERT INTO viajes(idusuario,destino,fecha,monto) VALUES (:idusuario,:destino,:fecha,(SELECT costoruta from rutas where idusuario = :idusuario and ruta = :destino limit 1))");
        $sql->bindParam(':idusuario', $idusuario);
        $sql->bindParam(':destino', $destino);
        $sql->bindParam(':fecha', $fecha);
@@ -30,7 +30,7 @@ switch ($ingresar) {
         break;
     
     case 'obtener':
-      $query = $con->prepare("SELECT * FROM viajes WHERE idusuario = :idusuario ORDER BY fecha DESC LIMIT 10");
+      $query = $con->prepare("SELECT * FROM viajes WHERE idusuario = :idusuario and extract(month from fecha) = extract(month from now()) ORDER BY fecha DESC LIMIT 10");
       $query->bindParam(':idusuario', $idusuario);
       $query->execute();
       $datos = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -55,7 +55,7 @@ switch ($ingresar) {
       };
       break;
         case 'conteo';
-        $query = $con->prepare("SELECT COUNT(*) as conteo FROM viajes WHERE idusuario = :idusuario");
+        $query = $con->prepare("SELECT COUNT(*) as conteo FROM viajes WHERE idusuario = :idusuario and extract(month from fecha) = extract(month from now())");
         $query->bindParam(':idusuario', $idusuario);
         $query->execute();
         $datos = $query->fetchAll(PDO::FETCH_ASSOC);
