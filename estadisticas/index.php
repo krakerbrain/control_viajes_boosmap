@@ -10,13 +10,13 @@ $indice = "estadisticas";
 <body>
 <div class="container px-0" style="max-width:850px">
 <?php include __DIR__."/../partials/navbar.php"; ?>
-    <h4>Seleccione el mes del cual desea ver sus estadísticas mensuales</h4>
+    <h5>Seleccione un mes para ver sus estadísticas</h5>
     <form action="conexiones_estadisticas.php" method="post" class="mx-auto">
         <select name="selectMes" id="selectMes"></select>
     </form>
     <table id="estadisticas">
     </table>
-    <table class="table table-striped">
+    <table class="table table-striped mt-3">
         <thead class="table-danger text-center">
             <td class='p1' style="cursor:pointer" title="Puede ordenar por destino" onclick="viajesporruta('destino')">Destino</td>
             <td class='p1' style="cursor:pointer" title="Puede ordenar por cantidad de viajes" onclick="viajesporruta('conteo')">Viajes x Mes</td>
@@ -45,24 +45,36 @@ $indice = "estadisticas";
   'Diciembre'
 ];
 var selectMes = document.getElementById('selectMes')
+const fecha = new Date();
+const mesActual = fecha.getMonth();
 
 for (let i = 0; i < meses.length; i++) {
+    var mes = ""
     const element = meses[i];
-    var mes = `<option value="${i+1}">${meses[i]}</option>`;
+    if(i == mesActual){
+        mes += `<option value="${i+1}" selected>${meses[i]}</option>`;
+    }else{
+        mes += `<option value="${i+1}">${meses[i]}</option>`;
+    }
     selectMes.innerHTML += mes;
 }
+datosMes(selectMes.value)
 
 selectMes.addEventListener("change", function (e) {
+    datosMes(e.target.form.selectMes.value)
+})
+
+function datosMes(mes){
     $.post("conexiones_estadisticas.php", {
         ingresar: "pedidostotales",
-        mes: e.target.form.selectMes.value
+        mes: mes
     }).done(function(datos){
         totalviajes(datos)
-        viajesporruta('destino',e.target.form.selectMes.value)
+        viajesporruta('destino',mes)
     }).fail(function() {
         alert( "error" );
     });
-})
+}
 
 function totalviajes(datos){
     var tablaestadisticas = document.getElementById('estadisticas')
@@ -77,8 +89,6 @@ function viajesporruta(tipoorden,mes){
     var orden = `${tipoorden} ${ascdesc}`;
     document.getElementById('ordenconteo').value = ascdesc;
     conteoviajes.innerHTML = ""
-
-
     $.post("conexiones_estadisticas.php", {
         ingresar: "viajesxruta",
         mes: mes,
