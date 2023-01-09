@@ -16,7 +16,7 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
         <a class="nav-link" style="font-size:14px" href="<?= $rutainicio ?>">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="navbar-brand" style="font-size:14px"href="<?= $_ENV['URL_CONFIG'] ?>">Configurar Rutas</a>
+        <a class="navbar-brand" style="font-size:14px"href="<?= $_ENV['URL_CONFIG'] ?>">Configuraciones</a>
       </li>
       <li class="nav-item">
         <a class="navbar-brand" style="font-size:14px"href="<?= $_ENV['URL_ESTADISTICAS'] ?>">Estadísticas</a>

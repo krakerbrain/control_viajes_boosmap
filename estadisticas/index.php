@@ -10,7 +10,8 @@ $indice = "estadisticas";
 <body>
 <div class="container px-0" style="max-width:850px">
 <?php include __DIR__."/../partials/navbar.php"; ?>
-    <h5>Seleccione un mes para ver sus estadísticas</h5>
+<div class="mx-3">
+    <h6 class="my-2">Seleccione un mes para ver sus estadísticas</h6>
     <form action="conexiones_estadisticas.php" method="post" class="mx-auto">
         <select name="selectMes" id="selectMes"></select>
     </form>
@@ -26,6 +27,7 @@ $indice = "estadisticas";
         </tbody>
     </table>
     <input type="hidden" name="ordenconteo" id="ordenconteo" value="">
+</div>
 </div>
 </body>
 <?php include __DIR__."/../partials/boostrap_script.php" ?>

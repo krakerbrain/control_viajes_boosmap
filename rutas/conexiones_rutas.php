@@ -54,16 +54,9 @@ switch ($ingresar) {
         $query = $con->prepare("SELECT * FROM rutas WHERE idusuario = :idusuario");
         $query->bindParam(':idusuario', $idusuario);
         $query->execute();
-        $datos = $query->fetchAll(PDO::FETCH_ASSOC);
-        foreach($datos as $ruta){
-          echo "<tr>
-                  <td nowrap>".$ruta['ruta']."</td>".
-                  "<td class='text-center'>".$ruta['costoruta']."</td>
-                  <td style='cursor:pointer' class='text-center' onclick='eliminaRuta(\"".$ruta['ruta']."\",".$ruta['idruta'].")' >
-                      <i class='fa-solid fa-xmark text-danger'></i>
-                  </td>
-                  </tr>";
-        };
+        $datos = json_encode($query->fetchAll(PDO::FETCH_ASSOC));
+        echo $datos;
+
     break;
     case 'eliminaRuta';
         $idruta = $_POST['idruta'];
@@ -72,6 +65,26 @@ switch ($ingresar) {
         $query->bindParam(':idusuario', $idusuario);
         $query->execute();
     break;
+    case 'actualizaPrecios';
+        $nuevosprecios = json_decode($_POST['nuevosPrecios']);
+        $actualizaMes = $_POST['actualizaMes'];
+        $actualizaActual = $_POST['actualizaActual'];
+        var_dump($actualizaActual, $actualizaMes);
+        
+        for ($i=0; $i < count($nuevosprecios); $i++) { 
+            if($actualizaMes == "true"){
+                $query = $con->prepare("UPDATE viajes SET monto = :precio WHERE destino = (SELECT ruta from rutas WHERE idruta = :idruta) and date_format(fecha,'%m') = month(now())");
+                $query->bindParam(':precio', $nuevosprecios[$i]->precio);
+                $query->bindParam(':idruta', $nuevosprecios[$i]->id);
+                $query->execute();
+            }
+            if($actualizaActual == "true"){
+                $query = $con->prepare("UPDATE rutas SET costoruta = :precio WHERE idruta = :idruta");
+                $query->bindParam(':precio', $nuevosprecios[$i]->precio);
+                $query->bindParam(':idruta', $nuevosprecios[$i]->id);
+                $query->execute();
+            }
+        }
     default:
         # code...
     break;
