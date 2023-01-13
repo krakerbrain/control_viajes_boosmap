@@ -39,7 +39,7 @@ switch ($ingresar) {
                 <td nowrap>".$viaje['destino']."</td>".
                 "<td nowrap>".date('d-m-Y', strtotime($viaje['fecha']))."</td>".
                 "<td class='text-center'>".$viaje['monto']."</td>
-                <td style='cursor:pointer' class='text-center' onclick='eliminaviaje(".$viaje['idviaje'].")' >
+                <td style='cursor:pointer' class='text-center' onclick='eliminaViaje(".$viaje['idviaje'].")' >
                     <i class='fa-solid fa-xmark text-danger'></i>
                 </td>
                 </tr>";
@@ -51,26 +51,30 @@ switch ($ingresar) {
       $query->execute();
       $datos = $query->fetchAll(PDO::FETCH_ASSOC);
       foreach($datos as $ruta){
-        echo '<button value="'.$ruta['ruta'].'" class="btn btn-danger mr-1" onclick="insertaRuta(this)">'.$ruta['ruta'].'</button>';
+        echo '<button value="'.$ruta['ruta'].'" class="btn btn-danger mr-1" onclick="agregaRuta(this)">'.$ruta['ruta'].'</button>';
       };
       break;
-        case 'conteo';
-        $query = $con->prepare("SELECT COUNT(*) as conteo FROM viajes WHERE idusuario = :idusuario and extract(month from fecha) = extract(month from now())");
-        $query->bindParam(':idusuario', $idusuario);
-        $query->execute();
-        $datos = $query->fetchAll(PDO::FETCH_ASSOC);
-        foreach($datos as $conteo){
-            echo $conteo['conteo'];
-        }
-        break;
         case 'totalmes';
-        $query = $con->prepare("SELECT SUM(monto) as total FROM viajes WHERE idusuario = :idusuario and extract(month from fecha) = extract(month from now())");
-        $query->bindParam(':idusuario', $idusuario);
+
+        try {
+        $query = $con->prepare('CALL detalleViajes(?, @viajesmes, @montomes, @viajessemana, @montosemana, @viajesdia, @montodia)');
+        $query->bindParam(1, $idusuario, PDO::PARAM_INT);
         $query->execute();
-        $datos = $query->fetchAll(PDO::FETCH_ASSOC);
-        foreach($datos as $total){
-            echo $total['total'];
+        $query->closeCursor();
+
+        $select = $con->query('SELECT @viajesmes, @montomes, @viajessemana, @montosemana, @viajesdia, @montodia');
+        $result = $select->fetchAll(PDO::FETCH_ASSOC);
+        foreach($result as $datos){
+            echo "  <td class='text-center'>$".$datos['@montomes']."</td>
+                    <td class='text-center'>".$datos['@viajesmes']."</td>
+                    <td class='text-center'>$".$datos['@montosemana']."</td>
+                    <td class='text-center'>".$datos['@viajessemana']."</td>
+                    <td class='text-center'>$".$datos['@montodia']."</td>
+                    <td class='text-center'>".$datos['@viajesdia']."</td>";
         }
+        }catch (PDOException $e) {
+          die("Error occurred:" . $e->getMessage());
+        }   
         break;
         case 'eliminar';
         $idviaje = $_POST['id_viaje'];

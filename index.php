@@ -8,23 +8,6 @@ if($sesion == null || $sesion == ""){
 }
 include "partials/header.php";
 
-$mes = date("m");
-$meses = [
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Septiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre'
-];
-$mesactual = $meses[$mes-1];
-
 ?>
 
   <style>
@@ -40,22 +23,11 @@ $mesactual = $meses[$mes-1];
 <body>
   <div class="container px-0" style="max-width:850px">
     <?php include "partials/navbar.php" ?>
-    <div class="ml-3">
-      <h4>Datos del Mes de <?= $mesactual ?></h4>
-      <table>
-        <tr>
-          <td>Monto líquido del mes: </td>
-          <td id="monto"></td>
-        </tr>
-        <tr>
-          <td>Viajes realizados: </td>
-          <td id="numerodeviajes"></td>
-        </tr>
-      </table>
-    </div>
-    <header class="row ml-0">
-    <div class="col-6">
-      <h4>Fecha</h4>
+
+<header class="row mx-1">
+  <div class="col-sm-6">
+    <div class="pb-2">
+      <h5>Fecha</h5>
       <div class="input-group date" id="datepicker">
         <input type="text" class="form-control">
         <span class="input-group-append">
@@ -65,28 +37,50 @@ $mesactual = $meses[$mes-1];
         </span>
       </div>
     </div>
-    <div  class="col-6" style="text-align:center"> 
-      <h4>Rutas</h4>
+    <table class="table table-striped table-bordered table-sm">
+      <thead class="table-danger text-center">
+        <td colspan="2">Mes</td>
+        <td colspan="2">Semana</td>
+        <td colspan="2">Dia</td>
+      </thead>
+      <thead class="table-secondary text-center">
+        <td>Monto</td>
+        <td>Viajes</td>
+        <td>Monto</td>
+        <td>Viajes</td>
+        <td>Monto</td>
+        <td>Viajes</td>
+      </thead>
+      <tbody id="detallesViajes"></tbody>
+    </table>
+  </div>
+  <div  class="col-sm-6" style="text-align:center"> 
+      <h5>Rutas</h5>
       <div id="rutas">
       </div>
-    </div>
-    </header>
-    <section class="mx-3">
-    <h4>Viajes Realizados</h4>
-      <table  class="table table-striped">
+  </div>
+</header>
+    <section>
+    <h5 class="mx-3">Ultimos 10 viajes</h5>
+      <table  class="table table-striped" style="width:97%;margin: 0 auto">
         <thead class="table-danger text-center">
           <td>Destino</td>
           <td>Fecha</td>
           <td>Monto</td>
           <td style="width:10%">Eliminar</td>
         </thead>
-        <tbody id="tabla" class="text-center"></tbody>
+        <tbody id="tablaUltimosViajes" class="text-center"></tbody>
       </table>
     </section>
   </div>
 </body>
 <?php include "partials/boostrap_script.php" ?>
 <script>
+window.onload = function () {
+  detallesViajes();
+  cargaBotonesRutas();
+  obtenerUltimosViajes();
+};
 
 const date = new Date();
 let day = date.getDate();
@@ -98,18 +92,15 @@ $("#datepicker").datepicker({
 $("#datepicker").datepicker("setEndDate", new Date(year, month, day));
 $("#datepicker").datepicker("update", new Date(year, month, day));
 
-var tabla = document.getElementById("tabla");
-var numerodeviajes = document.getElementById("numerodeviajes");
-var totalmes = document.getElementById("monto");
+function cargaBotonesRutas(){
+  $.post("conexiones.php", { 
+    ingresar: "cargarutas" 
+  }).done(function(datos) {
+     rutas.innerHTML = datos;
+  });
+}
 
-window.onload = function () {
-  obtener();
-  conteo();
-  total();
-  cargarutas();
-};
-
-function insertaRuta(e){
+function agregaRuta(e){
     var hora = new Date();
     var dia = $("#datepicker").datepicker("getFormattedDate");
     $.post("conexiones.php", {
@@ -118,58 +109,37 @@ function insertaRuta(e){
       dia: dia,
       hora: hora.toLocaleTimeString(),
     }).done(function(data,error){
-      obtener();
-      conteo();
-      total();
+      obtenerUltimosViajes();
+      detallesViajes();
     }).fail(function() {
       alert( "error" );
     });
 }
 
-function obtener() {
+function obtenerUltimosViajes() {
   $.post("conexiones.php", { 
     ingresar: "obtener" 
   }).done(function(datos) {
-     tabla.innerHTML = datos;
+    tablaUltimosViajes.innerHTML = datos;
   });
 }
 
-function conteo() {
-  $.post("conexiones.php", { 
-      ingresar: "conteo" 
-    }).done(function (datos) {
-    numerodeviajes.innerHTML = datos;
-  });
-}
-function total() {
+function detallesViajes() {
   $.post("conexiones.php", { 
       ingresar: "totalmes" 
     }).done (function (datos) {
-    totalmes.innerHTML = " $"+datos;
+      detallesViajes.innerHTML = datos;
   });
 }
 
-function eliminaviaje(id) {
+function eliminaViaje(id) {
   $.post("conexiones.php", { 
       ingresar: "eliminar", 
       id_viaje: id 
     }).done (function (datos) {
- 
-      obtener();
-      conteo();
-      total();
-  
+      obtenerUltimosViajes();
+      detallesViajes();
   });
 }
-
-function cargarutas(){
-  $.post("conexiones.php", { 
-    ingresar: "cargarutas" 
-  }).done(function(datos) {
-     rutas.innerHTML = datos;
-  });
-}
-
   </script>
-
 </html>

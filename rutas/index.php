@@ -21,10 +21,10 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
         <?php } ?>
         <fieldset style="margin-top:20px">
             <legend style="font-size:1em;cursor:pointer" class="align-items-center bg-danger d-flex justify-content-between p-1 text-light" onclick="ocultaFieldset('ocultaRutas')">
-            <span>Configuración de Rutas</span>
-            <div class="ocultaRutas">
-                <i class="bi bi-caret-down-square-fill"></i>
-            </div>
+                <span>Configuración de Rutas</span>
+                <div class="ocultaRutas">
+                    <i class="bi bi-caret-down-square-fill"></i>
+                </div>
             </legend>
             <div class="ocultaRutas" style="display:block">
                 <div id="montosActualizados"class="alert alert-danger" role="alert" style="display:none">
@@ -32,8 +32,8 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                 </div>
                 <div class="row-cols-lg-2 m-3">
                     <form action="conexiones_rutas.php" method="post" class="mx-auto">
-                    <button type="submit" disabled hidden aria-hidden="true"></button>
-                    <div>
+                        <button type="submit" disabled hidden aria-hidden="true"></button>
+                        <div>
                             <label class="form-label" for="region">Región</label>
                             <select class="custom-select" name="region" id="region">
                                 <option value="">Seleccione</option>
@@ -83,8 +83,8 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                 <table class="table table-striped w-75 mx-auto">
                     <thead class="table-danger text-center">
                         <td>Destino</td>
-                        <td>Monto Bruto <input type="checkbox" id="checkEditaBruto" name="" onclick="editaMonto(this,'editaBruto')"></td>
-                        <td>Monto Líquido <input type="checkbox" id="checkEditaLiquido" name="" onclick="editaMonto(this,'editaLiquido')"></td>
+                        <td nowrap>Monto Bruto <input type="checkbox" id="checkEditaBruto" name="" onclick="editaMonto(this,'editaBruto')"></td>
+                        <td nowrap>Monto Líquido <input type="checkbox" id="checkEditaLiquido" name="" onclick="editaMonto(this,'editaLiquido')"></td>
                     </thead>
                     <tbody id="tablamodifica" class="text-center"></tbody>
                 </table>
@@ -101,28 +101,28 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                   </label>
                 </div>
                 <div data-bs-toggle="tooltip" data-bs-placement="top" title="Debe seleccionar al menos una opción">
-                <button type="button" id="guardar" class="btn btn-danger w-75 my-4" data-toggle="modal" data-target="#exampleModal" onclick="obtieneNuevosPrecios()" disabled>
-                  Guardar
-                </button>
+                    <button type="button" id="guardar" class="btn btn-danger w-75 my-4" data-toggle="modal" data-target="#exampleModal" onclick="obtieneNuevosPrecios()" disabled>
+                        Guardar
+                    </button>
                 </div>
             </div>
         </fieldset>
+                <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">PRECIOS ACTUALIZADOS</h5>
+            </div>
+            <div class="modal-body">
+                Los precios han sido actualizados
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="location.reload()">Cerrar</button>
+            </div>
+        </div>
+        <!-- fin modal -->
     </div>
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">PRECIOS ACTUALIZADOS</h5>
-        </div>
-        <div class="modal-body">
-            Los precios han sido actualizados
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="location.reload()">Cerrar</button>
-        </div>
-    </div>
-<!-- fin modal -->
 </body>
     <?php include __DIR__."/../partials/boostrap_script.php" ?>
 </html>
@@ -187,11 +187,11 @@ function ocultaFieldset(elemento){
 function calculomonto(val,campoActualiza){
    let montobruto = val.value == "" ? 0 : val.value
    let monto;
-   if(typeof(campoActualiza) != 'number'){
-       monto = parseInt(montobruto)+(parseInt(montobruto) * 0.1495)
-   }else{
+   if(typeof(campoActualiza) == 'number' || campoActualiza == 'costoruta'){
        monto = parseInt(montobruto)-(parseInt(montobruto) * 0.13)
-   }
+    }else{
+       monto = parseInt(montobruto)+(parseInt(montobruto) * 0.1495)
+    }
    document.getElementById(campoActualiza).value   =  Math.round(monto);
 }
 
@@ -300,16 +300,16 @@ function obtenerruta(){
                                 <td class='text-center'>
                                     <input type='text' 
                                             id='bruto${clave.idruta}'
-                                            class='editaBruto text-center border-0 bg-light' 
-                                            data-value='${Math.round(clave.costoruta+(clave.costoruta*0.1495))}' 
-                                            value='${Math.round(clave.costoruta+(clave.costoruta*0.1495))}'
+                                            class='editaBruto text-center border-0 bg-light w-100' 
+                                            data-value='${Math.round(parseInt(clave.costoruta)+(parseInt(clave.costoruta)*0.1495))}' 
+                                            value='${Math.round(parseInt(clave.costoruta)+(parseInt(clave.costoruta)*0.1495))}'
                                             onkeyup="calculomonto(this,${clave.idruta})"
                                             disabled />
                                 </td>
                                 <td class='text-center'>
                                     <input type='text'
                                             id='${clave.idruta}'  
-                                            class='editaLiquido text-center border-0 bg-light' 
+                                            class='editaLiquido text-center border-0 bg-light w-100' 
                                             data-value='${clave.costoruta}' 
                                             value='${clave.costoruta}'
                                             onkeyup="calculomonto(this,'bruto${clave.idruta}')"

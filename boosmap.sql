@@ -106,3 +106,11 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `detalleViajes`(IN `_idusuario` INT, OUT `viajesmes` INT, OUT `montomes` INT, OUT `viajessemana` INT, OUT `montosemana` INT, OUT `viajesdia` INT, OUT `montodia` INT)
+BEGIN
+SELECT COUNT(*) , SUM(monto) into viajesmes, montomes FROM viajes WHERE idusuario = _idusuario and extract(month from fecha) = extract(month from now());
+SELECT COUNT(*) , SUM(monto) into viajessemana, montosemana FROM viajes WHERE idusuario = _idusuario and extract(week from fecha) = extract(week from now());
+SELECT COUNT(*) , SUM(monto) into viajesdia, montodia FROM viajes WHERE idusuario = _idusuario and DATE_FORMAT(fecha, '%Y-%m-%d') = CURDATE();
+DELIMITER ;
