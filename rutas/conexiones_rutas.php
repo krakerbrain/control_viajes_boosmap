@@ -83,7 +83,7 @@ switch ($ingresar) {
                 $query->bindParam(':precio', $nuevosprecios[$i]->precio);
                 $query->bindParam(':idruta', $nuevosprecios[$i]->id);
                 $query->execute();
-            }
+            }   
         }
     default:
         # code...

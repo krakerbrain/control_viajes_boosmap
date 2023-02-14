@@ -1,7 +1,7 @@
 <?php
 session_start();
 $sesion = isset($_SESSION['usuario']);
-require __DIR__ . '/config.php';
+require __DIR__ . './config.php';
 $indice = "inicio";
 if($sesion == null || $sesion == ""){
   header($_ENV['URL_LOCAL']);
@@ -24,11 +24,28 @@ include "partials/header.php";
   <div class="container px-0" style="max-width:850px">
     <?php include "partials/navbar.php" ?>
 
-<header class="row mx-1">
-  <div class="col-sm-6">
-    <div class="pb-2">
-      <h5>Fecha</h5>
-      <div class="input-group date" id="datepicker">
+<header class="row m-1">
+  <div class="col-sm-7">
+  <table class="table table-striped table-bordered table-sm">
+                                            <thead class="text-center">
+                                              <td colspan="3">
+                                                <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('semana',this)">Semana</button>
+                                                <button class="btn btn-danger btn_periodo mx-4" onclick="detallesViajes('hoy',this)">Hoy</button>
+                                                <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('mes',this)">Mes</button>
+                                              </td>
+                                            </thead>
+                                            <thead class="table-secondary text-center">
+                                              <td>Monto Bruto</td>
+                                              <td>Monto Líquido</td>
+                                              <td>Viajes</td>
+                                            </thead>
+                                            <tbody  id="detalles_viajes"></tbody>
+                                          </table>
+  </div>
+
+
+  <div  class="col-sm-5" style="text-align:center"> 
+      <div class="input-group date mb-2" id="datepicker">
         <input type="text" class="form-control">
         <span class="input-group-append">
           <span class="input-group-text bg-white">
@@ -36,26 +53,6 @@ include "partials/header.php";
           </span>
         </span>
       </div>
-    </div>
-    <table class="table table-striped table-bordered table-sm">
-      <thead class="table-danger text-center">
-        <td colspan="2">Mes</td>
-        <td colspan="2">Semana</td>
-        <td colspan="2">Dia</td>
-      </thead>
-      <thead class="table-secondary text-center">
-        <td>Monto</td>
-        <td>Viajes</td>
-        <td>Monto</td>
-        <td>Viajes</td>
-        <td>Monto</td>
-        <td>Viajes</td>
-      </thead>
-      <tbody id="detallesViajes"></tbody>
-    </table>
-  </div>
-  <div  class="col-sm-6" style="text-align:center"> 
-      <h5>Rutas</h5>
       <div id="rutas">
       </div>
   </div>
@@ -76,11 +73,6 @@ include "partials/header.php";
 </body>
 <?php include "partials/boostrap_script.php" ?>
 <script>
-window.onload = function () {
-  detallesViajes();
-  cargaBotonesRutas();
-  obtenerUltimosViajes();
-};
 
 const date = new Date();
 let day = date.getDate();
@@ -92,13 +84,11 @@ $("#datepicker").datepicker({
 $("#datepicker").datepicker("setEndDate", new Date(year, month, day));
 $("#datepicker").datepicker("update", new Date(year, month, day));
 
-function cargaBotonesRutas(){
-  $.post("conexiones.php", { 
-    ingresar: "cargarutas" 
-  }).done(function(datos) {
-     rutas.innerHTML = datos;
-  });
-}
+window.onload = function () {
+  cargaBotonesRutas();
+  detallesViajes('hoy', 'inicial');
+  obtenerUltimosViajes();
+};
 
 function agregaRuta(e){
     var hora = new Date();
@@ -110,7 +100,7 @@ function agregaRuta(e){
       hora: hora.toLocaleTimeString(),
     }).done(function(data,error){
       obtenerUltimosViajes();
-      detallesViajes();
+      detallesViajes('hoy', 'inicial');
     }).fail(function() {
       alert( "error" );
     });
@@ -124,22 +114,52 @@ function obtenerUltimosViajes() {
   });
 }
 
-function detallesViajes() {
+function detallesViajes(periodo, elemento) {
+  let btn_periodo = document.getElementsByClassName("btn_periodo")
+  for (let i = 0; i < btn_periodo.length; i++) {
+    const element = btn_periodo[i];
+    if(elemento != 'inicial'){
+      element.classList.remove("btn-danger")
+      element.classList.add("btn-outline-danger");
+    }
+  }
+  if(elemento && elemento != 'inicial'){
+    elemento.classList.remove("btn-outline-danger");
+    elemento.classList.add("btn-danger");
+  }
   $.post("conexiones.php", { 
-      ingresar: "totalmes" 
-    }).done (function (datos) {
-      detallesViajes.innerHTML = datos;
+      ingresar: "totalmes",
+      periodo: periodo 
+    }).done (function (data) {
+      let datos = JSON.parse(data);
+          datos.forEach(element => {
+            detalles_viajes.innerHTML = `
+                                            <td class="text-center">$${Math.round(element.monto_total/0.870)}</td>
+                                            <td class="text-center">$${element.monto_total == null ? 0 : element.monto_total}</td>
+                                            <td class="text-center">${element.viajes}</td>
+                                        `
+          })
+      // detallesViajesTabla.innerHTML = datos;
   });
 }
-
 function eliminaViaje(id) {
   $.post("conexiones.php", { 
       ingresar: "eliminar", 
       id_viaje: id 
     }).done (function (datos) {
       obtenerUltimosViajes();
-      detallesViajes();
+      detallesViajes('hoy', 'inicial');
   });
 }
+
+function cargaBotonesRutas(){
+  $.post("conexiones.php", { 
+    ingresar: "cargarutas" 
+  }).done(function(datos) {
+     rutas.innerHTML = datos;
+  });
+}
+
   </script>
+
 </html>

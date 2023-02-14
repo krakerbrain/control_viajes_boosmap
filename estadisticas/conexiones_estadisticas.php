@@ -23,7 +23,7 @@ switch ($ingresar) {
         $query->execute();
         $datos = $query->fetchAll(PDO::FETCH_ASSOC);
         foreach($datos as $totalviajes){
-            $montobruto = ($totalviajes['ingresos'] * 13.975 /100) + $totalviajes['ingresos'];
+            $montobruto = ($totalviajes['ingresos'] / 0.87);
           echo "<tr>
                   <td nowrap>Viajes completados: ".$totalviajes['totalviajes']."</td>
                   </tr>

@@ -55,23 +55,18 @@ switch ($ingresar) {
       };
       break;
         case 'totalmes';
-
+        $mes = $_POST['periodo'];
         try {
-        $query = $con->prepare('CALL detalleViajes(?, @viajesmes, @montomes, @viajessemana, @montosemana, @viajesdia, @montodia)');
+        $query = $con->prepare('CALL detalles_viajes(?,?, @viajes, @total)');
         $query->bindParam(1, $idusuario, PDO::PARAM_INT);
+        $query->bindParam(2, $mes, PDO::PARAM_STR_CHAR);
         $query->execute();
         $query->closeCursor();
 
-        $select = $con->query('SELECT @viajesmes, @montomes, @viajessemana, @montosemana, @viajesdia, @montodia');
-        $result = $select->fetchAll(PDO::FETCH_ASSOC);
-        foreach($result as $datos){
-            echo "  <td class='text-center'>$".$datos['@montomes']."</td>
-                    <td class='text-center'>".$datos['@viajesmes']."</td>
-                    <td class='text-center'>$".$datos['@montosemana']."</td>
-                    <td class='text-center'>".$datos['@viajessemana']."</td>
-                    <td class='text-center'>$".$datos['@montodia']."</td>
-                    <td class='text-center'>".$datos['@viajesdia']."</td>";
-        }
+        $select = $con->query('SELECT @viajes as viajes, @total as monto_total');
+        $datos = $select->fetchAll(PDO::FETCH_ASSOC);
+        $json = json_encode($datos);
+        echo $json; 
         }catch (PDOException $e) {
           die("Error occurred:" . $e->getMessage());
         }   

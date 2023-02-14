@@ -190,7 +190,7 @@ function calculomonto(val,campoActualiza){
    if(typeof(campoActualiza) == 'number' || campoActualiza == 'costoruta'){
        monto = parseInt(montobruto)-(parseInt(montobruto) * 0.13)
     }else{
-       monto = parseInt(montobruto)+(parseInt(montobruto) * 0.1495)
+       monto = parseInt(montobruto)+(parseInt(montobruto) /0.870)
     }
    document.getElementById(campoActualiza).value   =  Math.round(monto);
 }
@@ -301,8 +301,8 @@ function obtenerruta(){
                                     <input type='text' 
                                             id='bruto${clave.idruta}'
                                             class='editaBruto text-center border-0 bg-light w-100' 
-                                            data-value='${Math.round(parseInt(clave.costoruta)+(parseInt(clave.costoruta)*0.1495))}' 
-                                            value='${Math.round(parseInt(clave.costoruta)+(parseInt(clave.costoruta)*0.1495))}'
+                                            data-value='${Math.round(clave.costoruta/0.870)}' 
+                                            value='${Math.round(clave.costoruta/0.870)}'
                                             onkeyup="calculomonto(this,${clave.idruta})"
                                             disabled />
                                 </td>
