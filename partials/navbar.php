@@ -24,6 +24,9 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
       <li class="nav-item">
         <a class="navbar-brand" style="font-size:14px"href="<?= $_ENV['URL_SESSION'] ?>">Cerrar Sesión</a>
       </li>
+      <li class="nav-item">
+        <a class="navbar-brand" style="font-size:14px"href="<?= $_ENV['URL_DOWNLOAD'] ?>">Descarga la App</a>
+      </li>
     </ul>
   </div>
 </nav>

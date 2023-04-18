@@ -29,34 +29,41 @@ switch ($ingresar) {
        $sql->execute();
         break;
     
-    case 'obtener':
-      $query = $con->prepare("SELECT * FROM viajes WHERE idusuario = :idusuario and extract(month from fecha) = extract(month from now()) ORDER BY fecha DESC LIMIT 10");
-      $query->bindParam(':idusuario', $idusuario);
-      $query->execute();
-      $datos = $query->fetchAll(PDO::FETCH_ASSOC);
-      foreach($datos as $viaje){
-        echo "<tr>
-                <td nowrap>".$viaje['destino']."</td>".
-                "<td nowrap>".date('d-m-Y', strtotime($viaje['fecha']))."</td>".
-                "<td class='text-center'>".$viaje['monto']."</td>
-                <td style='cursor:pointer' class='text-center' onclick='eliminaViaje(".$viaje['idviaje'].")' >
-                    <i class='fa-solid fa-xmark text-danger'></i>
-                </td>
-                </tr>";
-      };
-      break;
+        case 'obtener':
+          $limit   = $_POST['limit'];
+          $offset  = $_POST['offset'];
+      
+          // Obtener el conteo total de filas
+          $queryTotalFilas = $con->prepare("SELECT COUNT(*) as totalFilas FROM viajes WHERE idusuario = :idusuario AND MONTH(fecha) = MONTH(NOW())");
+          $queryTotalFilas->bindParam(':idusuario', $idusuario);
+          $queryTotalFilas->execute();
+          $totalFilas = $queryTotalFilas->fetch(PDO::FETCH_ASSOC)['totalFilas'];
+      
+          // Consulta para obtener los datos paginados
+          $query = $con->prepare("SELECT *, DATE_FORMAT(fecha, '%d-%m-%Y') AS fecha FROM viajes WHERE idusuario = :idusuario AND MONTH(fecha) = MONTH(NOW()) ORDER BY CASE WHEN fecha < CURDATE() THEN fecha ELSE CURDATE() END DESC, idviaje DESC LIMIT :limit OFFSET :offset");
+          $query->bindParam(':idusuario', $idusuario);
+          $query->bindParam(':limit', $limit, PDO::PARAM_INT); // Parámetro de límite de filas por página
+          $query->bindParam(':offset', $offset, PDO::PARAM_INT); // Parámetro de inicio de filas
+          $query->execute();
+          $datos = $query->fetchAll(PDO::FETCH_ASSOC);
+          $json = json_encode(array("data" => $datos, "cantidadFilas" => $totalFilas)); // Agregar el conteo total de filas al JSON
+          echo $json;
+          break;
+      
+        
     case 'cargarutas':
       $query = $con->prepare("SELECT * FROM rutas WHERE idusuario = :idusuario");
       $query->bindParam(':idusuario', $idusuario);
       $query->execute();
       $datos = $query->fetchAll(PDO::FETCH_ASSOC);
       foreach($datos as $ruta){
-        echo '<button value="'.$ruta['ruta'].'" class="btn btn-danger mr-1" onclick="agregaRuta(this)">'.$ruta['ruta'].'</button>';
+        echo '<button value="'.$ruta['ruta'].'" class="btn btn-danger mr-1" onclick="agregaRuta(this)" style="font-size:0.6em">'.$ruta['ruta'].'</button>';
       };
       break;
         case 'totalmes';
         $mes = $_POST['periodo'];
         try {
+          // En producción se debe verificar la hora del servidor. Hostinger por ejemplo tiene una diferencia de -03:00. 
         $query = $con->prepare('CALL detalles_viajes(?,?, @viajes, @total)');
         $query->bindParam(1, $idusuario, PDO::PARAM_INT);
         $query->bindParam(2, $mes, PDO::PARAM_STR_CHAR);
@@ -71,14 +78,13 @@ switch ($ingresar) {
           die("Error occurred:" . $e->getMessage());
         }   
         break;
-        case 'eliminar';
-        $idviaje = $_POST['id_viaje'];
-    
-        $query = $con->prepare("DELETE FROM viajes WHERE idviaje = :idviaje AND idusuario = :idusuario");
-        $query->bindParam(':idviaje', $idviaje);
-        $query->bindParam(':idusuario', $idusuario);
-        $query->execute();
-        break;
+    case 'eliminar';
+    $idviaje = $_POST['id_viaje'];
+    $query = $con->prepare("DELETE FROM viajes WHERE idviaje = :idviaje AND idusuario = :idusuario");
+    $query->bindParam(':idviaje', $idviaje);
+    $query->bindParam(':idusuario', $idusuario);
+    $query->execute();
+    break;
 
     default:
         # code...

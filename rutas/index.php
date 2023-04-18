@@ -125,6 +125,7 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
     </div>
 </body>
     <?php include __DIR__."/../partials/boostrap_script.php" ?>
+    <script type="text/javascript" src="../componente/js/manejo-de-fieldsets.js"></script>
 </html>
 
 <script>
@@ -168,19 +169,6 @@ function actualizaPrecios(nuevosprecios,actualizaMes, actualizaActual){
         }).fail(function() {
             alert( "error" );
         });
-    }
-}
-
-
-function ocultaFieldset(elemento){  
-    if(document.getElementsByClassName(elemento)[1].style.display == "block"){
-        document.getElementsByClassName(elemento)[1].style.display = "none"
-        document.getElementsByClassName(elemento)[0].firstElementChild.classList.remove("bi-caret-up-square-fill");
-        document.getElementsByClassName(elemento)[0].firstElementChild.classList.add("bi-caret-down-square-fill");
-    }else{
-        document.getElementsByClassName(elemento)[1].style.display = "block"
-        document.getElementsByClassName(elemento)[0].firstElementChild.classList.remove("bi-caret-down-square-fill");
-        document.getElementsByClassName(elemento)[0].firstElementChild.classList.add("bi-caret-up-square-fill");
     }
 }
 

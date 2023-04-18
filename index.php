@@ -1,7 +1,7 @@
 <?php
 session_start();
 $sesion = isset($_SESSION['usuario']);
-require __DIR__ . './config.php';
+require __DIR__ . '/config.php';
 $indice = "inicio";
 if($sesion == null || $sesion == ""){
   header($_ENV['URL_LOCAL']);
@@ -19,6 +19,28 @@ include "partials/header.php";
     .datepicker{
       left:540px
     }
+    .nuevoDato {
+      background-color: transparent;
+      animation-name: fondo;
+      animation-duration: 2s;
+      animation-fill-mode: forwards;
+    }
+
+    .page-item.active .page-link {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+    .page-link{
+      color: #dc3545;
+    }
+    @keyframes fondo {
+      from {
+        background-color: #ed969e;
+      }
+      to {
+        background-color: #f2f2f2;
+      }
+    }
   </style>
 <body>
   <div class="container px-0" style="max-width:850px">
@@ -26,11 +48,12 @@ include "partials/header.php";
 
 <header class="row m-1">
   <div class="col-sm-7">
-  <table class="table table-striped table-bordered table-sm">
+    <p id="lista_excel"></p>
+  <table class="table table-striped table-bordered table-sm" style="font-size:small">
                                             <thead class="text-center">
                                               <td colspan="3">
                                                 <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('semana',this)">Semana</button>
-                                                <button class="btn btn-danger btn_periodo mx-4" onclick="detallesViajes('hoy',this)">Hoy</button>
+                                                <button class="btn btn-danger btn_periodo mx-3" onclick="detallesViajes('hoy',this)">Hoy</button>
                                                 <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('mes',this)">Mes</button>
                                               </td>
                                             </thead>
@@ -53,26 +76,37 @@ include "partials/header.php";
           </span>
         </span>
       </div>
-      <div id="rutas">
+      <div id="rutas" class="d-flex flex-wrap justify-content-center">
       </div>
   </div>
 </header>
-    <section>
-    <h5 class="mx-3">Ultimos 10 viajes</h5>
-      <table  class="table table-striped" style="width:97%;margin: 0 auto">
-        <thead class="table-danger text-center">
-          <td>Destino</td>
-          <td>Fecha</td>
-          <td>Monto</td>
-          <td style="width:10%">Eliminar</td>
-        </thead>
-        <tbody id="tablaUltimosViajes" class="text-center"></tbody>
-      </table>
-    </section>
+<h6 class="mx-3" >Ultimos 10 viajes</h6>
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center mt-3">
+    <!-- <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+    <li class="page-item"><a class="page-link" href="#" onclick="obtenerUltimosViajes(false,1)">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">Next</a></li> -->
+  </ul>
+</nav>
+<section style="max-height: 400px; overflow-y: auto;">
+  <table  class="table table-striped" style="width:97%;margin: 0 auto; table-layout:fixed;font-size:small">
+    <thead class="table-danger text-center" style="position: sticky; top:-1px; z-index: 1;">
+      <td style="width:23%">Destino</td>
+      <td style="width:20%">Fecha</td>
+      <td style="width:13%">Monto</td>
+      <td style="width:16%">Eliminar</td>
+    </thead>
+    <tbody id="tablaUltimosViajes" class="text-center"></tbody>
+  </table>
+</section>
+
   </div>
 </body>
 <?php include "partials/boostrap_script.php" ?>
 <script>
+
+
+
 
 const date = new Date();
 let day = date.getDate();
@@ -87,32 +121,131 @@ $("#datepicker").datepicker("update", new Date(year, month, day));
 window.onload = function () {
   cargaBotonesRutas();
   detallesViajes('hoy', 'inicial');
-  obtenerUltimosViajes();
+  obtenerUltimosViajes(false);
 };
 
 function agregaRuta(e){
     var hora = new Date();
     var dia = $("#datepicker").datepicker("getFormattedDate");
+
     $.post("conexiones.php", {
       ingresar: "insertar",
       destino: e.value,
       dia: dia,
       hora: hora.toLocaleTimeString(),
     }).done(function(data,error){
-      obtenerUltimosViajes();
+      obtenerUltimosViajes(comparaFecha(dia));
       detallesViajes('hoy', 'inicial');
     }).fail(function() {
       alert( "error" );
     });
 }
 
-function obtenerUltimosViajes() {
+function comparaFecha(dia){
+  // Obtener la fecha de hoy en el mismo formato que la fecha ingresada
+  var hoy = new Date();
+  var hoyDia = ("0" + hoy.getDate()).slice(-2);
+  var hoyMes = ("0" + (hoy.getMonth() + 1)).slice(-2);
+  var hoyAnio = hoy.getFullYear();
+  var fechaHoy = hoyDia + "-" + hoyMes + "-" + hoyAnio;
+
+  return dia === fechaHoy ? true : false
+}
+
+
+
+function obtenerUltimosViajes(nuevoViaje, numeroPagina = 1) {
+  tablaUltimosViajes.innerHTML = ""
+  let limit = 10;
+  let offset = (numeroPagina -1 ) * limit;
   $.post("conexiones.php", { 
-    ingresar: "obtener" 
+    ingresar: "obtener",
+    limit: limit,
+    offset: offset,
+    dataType: "json" 
   }).done(function(datos) {
-    tablaUltimosViajes.innerHTML = datos;
+    let data = JSON.parse(datos).data;
+    let filas = JSON.parse(datos).cantidadFilas;
+    data.forEach((element, index) => {
+      tablaUltimosViajes.innerHTML += `<tr class=${nuevoViaje == true && index == 0 ? "nuevoDato" : ""}>
+      <td nowrap>${element.destino}</td>
+      <td nowrap>${element.fecha}</td>
+      <td class='text-center'>${element.monto.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
+      <td style='cursor:pointer' class='text-center' onclick='eliminaViaje(${element.idviaje})' >
+      <i class='fa-solid fa-xmark text-danger'></i>
+      </td>
+      </tr>`
+    })
+    crearPaginas(filas,numeroPagina);
   });
 }
+
+function crearPaginas(filas, paginaActual) {
+  let limit = 10; // Cantidad de resultados por página
+  let numPaginas = Math.ceil(filas / limit); // Cálculo del número total de páginas
+
+  // Obtener el elemento de la barra de paginación
+  let paginacion = document.querySelector('.pagination');
+  paginacion.innerHTML = ''; // Limpiar el contenido actual de la barra de paginación
+
+  // Calcular el rango de páginas a mostrar
+  let rangoInicio = Math.max(1, paginaActual - 2);
+  let rangoFin = Math.min(numPaginas, rangoInicio + 4);
+  
+  // Crear enlace "Anterior" si no está en la primera página
+  if (paginaActual > 1) {
+    let liAnterior = document.createElement('li');
+    liAnterior.classList.add('page-item');
+    let enlaceAnterior = document.createElement('a');
+    enlaceAnterior.classList.add('page-link');
+    enlaceAnterior.href = '#';
+    enlaceAnterior.textContent = 'Previous';
+    enlaceAnterior.onclick = function() {
+      obtenerUltimosViajes(false, paginaActual - 1); // Llamar a la función con la página anterior
+    };
+    liAnterior.appendChild(enlaceAnterior);
+    paginacion.appendChild(liAnterior);
+  }
+
+  // Crear enlaces numéricos de páginas dentro del rango
+  for (let i = rangoInicio; i <= rangoFin; i++) {
+    let li = document.createElement('li');
+    li.classList.add('page-item');
+    let enlace = document.createElement('a');
+    enlace.classList.add('page-link');
+    enlace.href = '#';
+    enlace.textContent = i;
+    if (i === paginaActual) {
+      li.classList.add('active'); // Marcar como activa la página actual
+    } else {
+      enlace.onclick = function() {
+        obtenerUltimosViajes(false, i); // Llamar a la función con el número de página correspondiente
+      };
+    }
+    li.appendChild(enlace);
+    paginacion.appendChild(li);
+  }
+
+  // Crear enlace "Siguiente" si no está en la última página
+  if (paginaActual < numPaginas) {
+    let liSiguiente = document.createElement('li');
+    liSiguiente.classList.add('page-item');
+    let enlaceSiguiente = document.createElement('a');
+    enlaceSiguiente.classList.add('page-link');
+    enlaceSiguiente.href = '#';
+    enlaceSiguiente.textContent = 'Next';
+    enlaceSiguiente.onclick = function() {
+      obtenerUltimosViajes(false, paginaActual + 1); // Llamar a la función con la página siguiente
+    };
+    liSiguiente.appendChild(enlaceSiguiente);
+    paginacion.appendChild(liSiguiente);
+  }
+}
+
+
+
+
+
 
 function detallesViajes(periodo, elemento) {
   let btn_periodo = document.getElementsByClassName("btn_periodo")
@@ -134,8 +267,8 @@ function detallesViajes(periodo, elemento) {
       let datos = JSON.parse(data);
           datos.forEach(element => {
             detalles_viajes.innerHTML = `
-                                            <td class="text-center">$${Math.round(element.monto_total/0.870)}</td>
-                                            <td class="text-center">$${element.monto_total == null ? 0 : element.monto_total}</td>
+                                            <td class="text-center">${Math.round(element.monto_total/0.870).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
+                                            <td class="text-center">${(element.monto_total == null ? 0 : element.monto_total).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
                                             <td class="text-center">${element.viajes}</td>
                                         `
           })
