@@ -155,11 +155,11 @@ function cambiaIconoOrden(tipoorden, ascdesc){
     if(ascdesc == "asc"){
         ascdesc = "desc";
         icono.classList.remove('fa-sort');
-        icono.classList.add('fa-sort-down');
+        icono.classList.add('fa-sort-up');
     } else if(ascdesc == "desc"){
         ascdesc = "";
         icono.classList.remove('fa-sort');
-        icono.classList.add('fa-sort-up');
+        icono.classList.add('fa-sort-down');
     } else {
         ascdesc = "asc";
         icono.classList.remove('fa-sort');

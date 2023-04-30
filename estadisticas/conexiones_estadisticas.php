@@ -40,10 +40,10 @@ switch ($ingresar) {
                   <td nowrap>Viajes completados: ".$totalviajes['totalviajes']."</td>
                   </tr>
                   <tr>
-                  <td nowrap>Ingresos Líquidos totales: ".$totalviajes['ingresos']."</td>
+                  <td nowrap>Ingresos Líquidos totales: $".number_format($totalviajes['ingresos'], 0, ',', '.')."</td>
                   </tr>
                   <tr>
-                  <td nowrap>Ingresos Brutos totales: ".round($montobruto)."</td>
+                  <td nowrap>Ingresos Brutos totales: $".number_format(round($montobruto), 0, ',', '.')."</td>
                 </tr>";
         };
 

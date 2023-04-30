@@ -2,6 +2,7 @@
 include('../config.php');
 $error = "false";
 $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
+$cambio_clave = isset($_REQUEST['cambio_clave']) ? $_REQUEST['cambio_clave'] : "";
 
 if(isset($_POST['usuario']) && isset($_POST['contrasenia'])){
   $pass     = $_POST['contrasenia'];
@@ -28,7 +29,7 @@ if(isset($_POST['usuario']) && isset($_POST['contrasenia'])){
         session_abort();
       }
     }else{
-      $error = "true";
+      $error = "noexiste";
       session_abort();
     }
   }
@@ -51,13 +52,16 @@ include "../partials/header.php";
           <H4>BOOSMAP</H4>
         </div>
         <div class="form-group text-center mt-3">
-            <h5 class="mb-3">Ingresar</h5>
-            <?php if($creado == "true"){ ?>
-              <div class="mb-3">
+          <h5 class="mb-3">Ingresar</h5>
+            <div class="mb-3">
+              <?php if($creado == "true"){ ?>
                 <span class="text-danger fw-semibold">¡Se ha registrado correctamente!</span><br>
                 <small>Por favor ingrese al sistema.</small>
-              </div>
-            <?php } ?>
+              <?php } else if ($cambio_clave == "true") {?>
+                <span class="text-danger fw-semibold">¡El cambio de clave ha sido exitoso!</span><br>
+                <small>Por favor ingrese al sistema.</small>
+              <?php }?>
+            </div>
         </div>
         <div class="input-group">
           <div class="input-group-text bg-danger text-light">
@@ -70,20 +74,34 @@ include "../partials/header.php";
             <i class="fa-solid fa-key"></i>
           </div>
           <input type="password" name="contrasenia" id="contrasenia" class="form-control" placeholder="Ingrese su contraseña">
+          <div class="input-group-text bg-light">
+            <a href="#" class="pe-auto text-danger">
+                <i class="fa-solid fa-eye" onclick="verpass()"></i>
+            </a>  
+          </div>
         </div>
         <div class="form-group mt-3">
           <input type="submit" value="Ingresar" class="btn btn-danger w-100">
         </div>
         <?php if($error == "true"){ ?>
-          <span class=" d-flex justify-content-center mt-1">Datos incorrectos.</span>
+          <span class=" d-flex justify-content-center mt-1">Password incorrecto.</span>
         <?php }else if($error == "vacio") { ?>
-            <span class=" d-flex justify-content-center mt-1">Debe llenar todos los campos</span>
+          <span class=" d-flex justify-content-center mt-1">Debe llenar todos los campos.</span>
+        <?php }else if($error == "noexiste") { ?>
+          <span class=" d-flex justify-content-center mt-1">Usuario No Existe.</span>
         <?php } ?>
     </form>
     <div class="d-flex gap-1 justify-content-center mt-1">
-      <div>¿No tiene una cuenta?</div>
+      <div style="margin-right:5px">¿No tiene una cuenta?</div>
       <a href="registro.php" class="text-decoration-none text-danger fw-semibold">Registrese</a>
     </div>
+    <a href="recupera.php" class="text-decoration-none"><p class="text-center text-danger">¿Olvidó su contraseña?</p></a>
+    <script>
+        function verpass(){
+            var pass = document.getElementById('contrasenia');
+            pass.type = pass.type == "password" ? "text" : "password"
+        }
+    </script>
 <?php
 include "../partials/footer.php";  
 ?>

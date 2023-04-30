@@ -53,7 +53,7 @@ include "partials/header.php";
                                             <thead class="text-center">
                                               <td colspan="3">
                                                 <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('semana',this)">Semana</button>
-                                                <button class="btn btn-danger btn_periodo mx-3" onclick="detallesViajes('hoy',this)">Hoy</button>
+                                                <button class="btn btn-danger btn_periodo" onclick="detallesViajes('hoy',this)">Hoy</button>
                                                 <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('mes',this)">Mes</button>
                                               </td>
                                             </thead>
@@ -80,12 +80,9 @@ include "partials/header.php";
       </div>
   </div>
 </header>
-<h6 class="mx-3" >Ultimos 10 viajes</h6>
+<h6 class="mx-3" >Ultimos viajes</h6>
 <nav aria-label="Page navigation example">
-  <ul class="pagination justify-content-center mt-3">
-    <!-- <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-    <li class="page-item"><a class="page-link" href="#" onclick="obtenerUltimosViajes(false,1)">1</a></li>
-    <li class="page-item"><a class="page-link" href="#">Next</a></li> -->
+  <ul class="pagination justify-content-center mt-3" style="font-size:0.8rem">
   </ul>
 </nav>
 <section style="max-height: 400px; overflow-y: auto;">
@@ -241,11 +238,6 @@ function crearPaginas(filas, paginaActual) {
     paginacion.appendChild(liSiguiente);
   }
 }
-
-
-
-
-
 
 function detallesViajes(periodo, elemento) {
   let btn_periodo = document.getElementsByClassName("btn_periodo")
