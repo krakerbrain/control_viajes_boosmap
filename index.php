@@ -144,7 +144,7 @@ function comparaFecha(dia){
   var hoyDia = ("0" + hoy.getDate()).slice(-2);
   var hoyMes = ("0" + (hoy.getMonth() + 1)).slice(-2);
   var hoyAnio = hoy.getFullYear();
-  var fechaHoy = hoyDia + "-" + hoyMes + "-" + hoyAnio;
+  var fechaHoy = hoyDia + "/" + hoyMes + "/" + hoyAnio;
 
   return dia === fechaHoy ? true : false
 }
