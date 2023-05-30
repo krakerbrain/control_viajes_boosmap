@@ -7,7 +7,8 @@ use PHPMailer\PHPMailer\Exception;
 
 
 //Create an instance; passing `true` enables exceptions
-$mail = new PHPMailer(true);
+$mail       = new PHPMailer(true);
+$mailAviso  = new PHPMailer(true);
 
 try {
     //Server settings
@@ -25,8 +26,8 @@ try {
     $mail->addAddress($correo, $usuario_registro);     //Add a recipient
     // $mail->addAddress('ellen@example.com');               //Name is optional
     $mail->addReplyTo($_ENV['DIRECCIONCORREO'], 'Registro');
-    // $mail->addCC('cc@example.com');
-    // $mail->addBCC('bcc@example.com');
+    $mail->addCC($_ENV['DIRECCIONCORREO']);
+    // $mail->addBCC('bcc@example.com');    
 
     //Attachments
     // $mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
@@ -46,8 +47,34 @@ try {
                     </div>';
     $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
+        //Server settings
+        $mailAviso->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+        $mailAviso->isSMTP();                                            //Send using SMTP
+        $mailAviso->Host       = 'SMTP.titan.email';                     //Set the SMTP server to send through
+        $mailAviso->SMTPAuth   = true;                                   //Enable SMTP authentication
+        $mailAviso->Username   = $_ENV['DIRECCIONCORREO'];                     //SMTP username
+        $mailAviso->Password   = $_ENV['MAILPASS'];                              //SMTP password
+        $mailAviso->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+        $mailAviso->Port       = 465;  
+
+        //Recipients
+        $mailAviso->setFrom($_ENV['DIRECCIONCORREO'], 'Registro de viajes Boosmap');
+        $mailAviso->addAddress($_ENV['CORREOADMIN'], 'Mario Montenegro');
+        $mailAviso->addReplyTo($_ENV['DIRECCIONCORREO'], 'Registro');
+
+            //Content
+        $mailAviso->isHTML(true); 
+        $mailAviso->Subject = 'Se ha registrado '.$usuario_registro;
+        $mailAviso->Body    = '<div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
+	                    <h1>Se ha registrado un nuevo usuario</h1>
+	                    <p>'.$correo.',</p>
+	                    <p>'.$usuario_registro.'</p>
+                    </div>';
+
     $mail->send();
+    $mailAviso->send();
     echo 'Message has been sent';
+    
 } catch (Exception $e) {
     echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
 }

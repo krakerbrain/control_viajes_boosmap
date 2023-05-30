@@ -69,7 +69,6 @@ switch ($ingresar) {
         $nuevosprecios = json_decode($_POST['nuevosPrecios']);
         $actualizaMes = $_POST['actualizaMes'];
         $actualizaActual = $_POST['actualizaActual'];
-        var_dump($actualizaActual, $actualizaMes);
         
         for ($i=0; $i < count($nuevosprecios); $i++) { 
             if($actualizaMes == "true"){
@@ -85,6 +84,20 @@ switch ($ingresar) {
                 $query->execute();
             }   
         }
+        break;
+        case 'verificarComunas':
+            $comuna = $_POST['comuna'];
+            $query = $con->prepare("SELECT count(*) FROM rutas WHERE ruta = :comuna");
+            $query->bindParam(':comuna', $comuna);
+            $query->execute();
+            $count = $query->fetchColumn();
+
+            if ($count > 0) {
+                echo "true";
+            } else {
+                echo "false";
+            }
+        break;
     default:
         # code...
     break;

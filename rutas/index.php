@@ -50,7 +50,7 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                             <input class="form-control" type="number" id="montobruto" onkeyup="calculomonto(this,'costoruta')">
                         </div>
                         <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="nobruto">
+                            <input type="checkbox" class="form-check-input" id="nobruto" onchange="checkNoBruto(event)">
                             <label class="form-check-label" for="nobruto">Seleccione si no conoce el monto bruto</label>
                         </div>
                         <div>
@@ -80,11 +80,11 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                 </div>
             </legend>
             <div class="modificaMontos text-center" style="display:none">
-                <table class="table table-striped w-75 mx-auto">
+                <table class="table table-striped mx-auto">
                     <thead class="table-danger text-center">
                         <td>Destino</td>
-                        <td nowrap>Monto Bruto <input type="checkbox" id="checkEditaBruto" name="" onclick="editaMonto(this,'editaBruto')"></td>
-                        <td nowrap>Monto Líquido <input type="checkbox" id="checkEditaLiquido" name="" onclick="editaMonto(this,'editaLiquido')"></td>
+                        <td >Monto Bruto <input type="checkbox" id="checkEditaBruto" name="" onclick="editaMonto(this,'editaBruto')"></td>
+                        <td >Monto Líquido <input type="checkbox" id="checkEditaLiquido" name="" onclick="editaMonto(this,'editaLiquido')"></td>
                     </thead>
                     <tbody id="tablamodifica" class="text-center"></tbody>
                 </table>
@@ -107,7 +107,7 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                 </div>
             </div>
         </fieldset>
-                <!-- Modal -->
+        <!-- Modal Actualiza Precios-->
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -118,7 +118,8 @@ $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
                 Los precios han sido actualizados
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="location.reload()">Cerrar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger" id="modalConfirm" style="display:none">Confirmar</button>
             </div>
         </div>
         <!-- fin modal -->
@@ -178,23 +179,21 @@ function calculomonto(val,campoActualiza){
    if(typeof(campoActualiza) == 'number' || campoActualiza == 'costoruta'){
        monto = parseInt(montobruto)-(parseInt(montobruto) * 0.13)
     }else{
-       monto = parseInt(montobruto)+(parseInt(montobruto) /0.870)
+       monto = parseInt(montobruto) /0.870
     }
    document.getElementById(campoActualiza).value   =  Math.round(monto);
 }
 
-var nobruto = document.getElementById('nobruto');
-nobruto.addEventListener('change', function(e){
-    if(e.target.checked){
+function checkNoBruto(e){
+    if(e != undefined && e.target.checked){
         document.getElementById('montobruto').disabled = "true"
         document.getElementById('costoruta').removeAttribute("disabled")
     }else{
         document.getElementById('costoruta').disabled = "true"
         document.getElementById('costoruta').value = 0
         document.getElementById('montobruto').removeAttribute("disabled")
-
     }
-})
+}
 
 const seleccionaRegion = document.getElementById("region");
 const btnAgregar = document.getElementById('agregar');
@@ -229,42 +228,96 @@ seleccionaRegion.addEventListener("change", function (e) {
         alert( "error" );
     });
 })
+
 document.querySelector('form').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
-        agregaRuta(e)
+        validaRuta(e)
     }
 });
 
 btnAgregar.addEventListener("click", function (e) {
-    agregaRuta(e)
+    validaRuta(e)
 });
 
-function agregaRuta(e){
-    var comunaseleccionada = e.target.form.comunas.selectedIndex == -1 ? 0 : e.target.form.comunas[e.target.form.comunas.selectedIndex].innerText;
+async function validaRuta(e) {
+    var comunaSeleccionada = e.target.form.comunas.selectedIndex == -1 ? 0 : e.target.form.comunas[e.target.form.comunas.selectedIndex].innerText;
     var costoruta = e.target.form.costoruta.value;
     var montobruto = document.getElementById('montobruto');
-    if(comunaseleccionada != "" && comunaseleccionada != "Seleccione" && costoruta != "" && costoruta != 0){
-        var conf = `¿Desea ingrear la comuna de ${comunaseleccionada} con un monto líquido por viaje de $${costoruta}`;
-            if(confirm(conf) == true){
-                $.post("conexiones_rutas.php", {
-                    ingresar: "agregaviaje",
-                    comuna:  comunaseleccionada,
-                    costoruta: costoruta,
-                }).done(function(datos){
-                obtenerruta();
-            }).fail(function() {
-                alert( "error" );
-            });
-        }else{
-            return
+
+    try {
+        var datos = await verificaComuna(comunaSeleccionada);
+
+        if (datos === "true") {
+            mostrarModal("Error", "La comuna seleccionada ya ha sido ingresada", 'cierre');
+            return;
         }
-    }else{
-        if(costoruta == 0){
-            alert("El monto no puede ser 0.")
-        }else{
-            alert("Debe llenar todos los campos.")
+
+        if (comunaSeleccionada === "" || comunaSeleccionada === "Seleccione" || costoruta === "" || costoruta === 0) {
+            if (costoruta == 0) {
+                mostrarModal("Error", "El monto no puede ser 0.", 'cierre');
+            } else {
+                mostrarModal("Error", "Debe llenar todos los campos.", 'cierre');
+            }
+            return;
         }
+        var conf = `¿Desea ingresar la comuna de ${comunaSeleccionada} con un monto líquido por viaje de ${parseFloat(costoruta).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}`;
+        mostrarModal("Confirmación", conf, 'confirmacion', comunaSeleccionada, costoruta);
+    } catch (error) {
+        console.error(error);
+        mostrarModal("Error", "Error al realizar la verificación.", 'cierre');
     }
+}
+
+function verificaComuna(comunaSeleccionada){
+    return new Promise(function(resolve, reject) {
+        $.post("conexiones_rutas.php", {
+            ingresar: "verificarComunas",
+            comuna: comunaSeleccionada
+        }).done(function (datos) {
+           resolve(datos);
+        }).fail(function () {
+            reject("error");
+        });
+    });
+}
+
+function mostrarModal(titulo, contenido, accion, comuna, costo) {
+    var modalTitle = document.getElementById("exampleModalLabel");
+    var modalBody = document.querySelector("#exampleModal .modal-body");
+    var modalFooter = document.querySelector("#exampleModal .modal-footer");
+    var closeButton = document.querySelector("#exampleModal .modal-footer button");
+
+    modalTitle.innerText = titulo;
+    modalBody.innerText = contenido;
+
+    
+    if (accion === "cierre") {
+        closeButton.setAttribute("onclick", `$('#exampleModal').modal('hide')`);
+    } else if(accion === 'confirmacion'){
+        var confirmButton = document.getElementById('modalConfirm');
+        confirmButton.style.display = "block";
+        confirmButton.addEventListener("click", function() {
+            agregaRuta(comuna, costo);
+        });
+    }else{
+        closeButton.setAttribute("onclick", "location.reload()");
+    }
+
+    $("#exampleModal").modal("show");
+}
+
+function agregaRuta(comunaSeleccionada,costoruta){
+    $.post("conexiones_rutas.php", {
+        ingresar: "agregaviaje",
+        comuna: comunaSeleccionada,
+        costoruta: costoruta,
+    }).done(function(datos) {
+        obtenerruta();
+        document.getElementById('modalConfirm').style.display = "none";
+        mostrarModal("Éxito", "La comuna ha sido agregada correctamente.", "cierre");
+    }).fail(function() {
+        alert("error");
+    });
 }
 
 function obtenerruta(){
@@ -363,7 +416,9 @@ function eliminaRuta(ruta,id){
 
 function borraDatos(){
     document.getElementById('costoruta').value = "";
-    document.getElementById('costoruta').focus();
+    document.getElementById('montobruto').value = "";
+    checkNoBruto()
+    document.getElementById('montobruto').focus();
 }
 
 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
