@@ -87,8 +87,9 @@ switch ($ingresar) {
         break;
         case 'verificarComunas':
             $comuna = $_POST['comuna'];
-            $query = $con->prepare("SELECT count(*) FROM rutas WHERE ruta = :comuna");
+            $query = $con->prepare("SELECT count(*) FROM rutas WHERE ruta = :comuna AND idusuario = :idusuario");
             $query->bindParam(':comuna', $comuna);
+            $query->bindParam(':idusuario', $idusuario);
             $query->execute();
             $count = $query->fetchColumn();
 

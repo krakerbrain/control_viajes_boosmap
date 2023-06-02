@@ -11,10 +11,10 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
         <i class="fas fa-bars fa-1x"></i>
       </span>
     </button>
-    <a href="#" data-toggle="modal" data-target="#whatsappModal" title="Dudas o cunsultas">
+    <!-- <a href="#" data-toggle="modal" data-target="#whatsappModal" title="Dudas o cunsultas">
       <i class="fa-regular fa-circle-question text-light p-1" style="font-size:20px"></i>
-    </a>
-    <!-- Modal de WhatsApp -->
+    </a> -->
+    <!-- Modal de WhatsApp
     <div class="modal fade" id="whatsappModal" tabindex="-1" role="dialog" aria-labelledby="whatsappModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -26,11 +26,12 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
           </div>
           <div class="modal-body">
             <p>Si tienes dudas o consultas, puedes contactarme por WhatsApp haciendo clic en el siguiente enlace:</p>
-            <a href="https://api.whatsapp.com/send?phone=56975325574">Enviar mensaje por WhatsApp</a>
+            <a href="#" onclick="openWhatsApp()" >Enviar mensaje por WhatsApp</a>
+            
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
   <div class="collapse navbar-collapse" id="navbarSupportedContent1">
     <ul class="navbar-nav mr-auto">
@@ -75,6 +76,12 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
   <script>
     function confirmarCerrarSesion() {
       $('#confirmModal').modal('show');
+    }
+    var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
+
+    // Función para abrir WhatsApp
+    function openWhatsApp() {
+      window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
     }
   </script>
 </nav>
