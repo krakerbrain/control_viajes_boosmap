@@ -30,9 +30,15 @@ function ocultaFieldset(elemento) {
     document.getElementsByClassName(elemento)[1].style.display = "none";
     document.getElementsByClassName(elemento)[0].firstElementChild.classList.remove("bi-caret-up-square-fill");
     document.getElementsByClassName(elemento)[0].firstElementChild.classList.add("bi-caret-down-square-fill");
+    if (document.getElementsByClassName("popover")[0] != undefined) {
+      document.getElementsByClassName("popover")[0].classList.remove("show");
+    }
   } else {
     document.getElementsByClassName(elemento)[1].style.display = "block";
     document.getElementsByClassName(elemento)[0].firstElementChild.classList.remove("bi-caret-down-square-fill");
     document.getElementsByClassName(elemento)[0].firstElementChild.classList.add("bi-caret-up-square-fill");
+    if (document.getElementsByClassName("popover")[0] != undefined) {
+      document.getElementsByClassName("popover")[0].classList.remove("show");
+    }
   }
 }

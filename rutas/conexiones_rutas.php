@@ -43,7 +43,7 @@ switch ($ingresar) {
     case 'agregaviaje':
         $comuna = $_POST['comuna'];
         $costoruta = $_POST['costoruta'];
-        var_dump($idusuario);
+        // var_dump($idusuario);
        $sql = $con->prepare("INSERT INTO rutas(idusuario,ruta,costoruta) VALUES (:idusuario,:ruta,:costoruta)");
        $sql->bindParam(':idusuario', $idusuario);
        $sql->bindParam(':ruta', $comuna);
