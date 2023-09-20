@@ -11,6 +11,7 @@ window.onload = function () {
   fechaActual();
   llenarSelect();
   getRutas();
+  llenaGrafico();
 };
 function fechaActual() {
   var fecha = "";
@@ -132,4 +133,77 @@ function cambiaIconoOrden(tipoorden, ascdesc) {
     icono.classList.add("fa-sort");
   }
   document.getElementById("ordenconteo").value = ascdesc;
+}
+
+function llenaGrafico() {
+  $.post("conexiones_estadisticas.php", {
+    ingresar: "mesesConDatos",
+  })
+    .done(function (datos) {
+      // Parsea los datos JSON obtenidos
+      var datosJSON = JSON.parse(datos);
+
+      // Extrae los valores de 'mes', 'viajes', y 'monto'
+      var meses = datosJSON.map(function (item) {
+        return item.mes;
+      });
+
+      var viajes = datosJSON.map(function (item) {
+        return item.viajes;
+      });
+
+      var montos = datosJSON.map(function (item) {
+        return item.monto;
+      });
+
+      // Crea el gráfico con los datos obtenidos
+      const ctx = document.getElementById("myChart");
+
+      var myChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: meses,
+          datasets: [
+            {
+              label: "Ingresos",
+              data: montos,
+              yAxisID: "ingresos",
+              fill: true,
+              // ... other options
+            },
+            {
+              label: "Viajes",
+              data: viajes,
+              yAxisID: "viajes",
+              fill: true,
+              // ... other options
+            },
+          ],
+        },
+        options: {
+          scales: {
+            ingresos: {
+              position: "left",
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Ingresos",
+              },
+            },
+            viajes: {
+              position: "right",
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Viajes",
+              },
+            },
+          },
+          // ... other options
+        },
+      });
+    })
+    .fail(function () {
+      alert("error");
+    });
 }

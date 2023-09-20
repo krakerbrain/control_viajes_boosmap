@@ -40,7 +40,9 @@ try {
 	                    <a href="'.$_ENV['URL_CAMBIO_CLAVE'].'?correo='.urlencode($correo).'&clave='.urlencode($clave_recuperacion).'">Cambio de clave</a>
 	                    <p>Saludos</p>
                     </div>';
-    $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+    $mail->AltBody = 'Para cambiar tu clave, copia y pega la siguiente URL en tu navegador web:
+                    '.$_ENV['URL_CAMBIO_CLAVE'].'?correo='.urlencode($correo).'&clave='.urlencode($clave_recuperacion).'
+                    Saludos';
 
     $mail->send();
     echo 'Message has been sent';

@@ -1,6 +1,5 @@
 <?php
 include('../config.php');
-// Se declara variable $creado para modificarla a true cuando el usuario cree su  primera ruta
 $creado = "false";
 $error = "";
 
@@ -9,12 +8,12 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
     $correo = $_POST['correo'];
     $pass = $_POST['password'];
     $pass2 = $_POST['password2'];
-    
+
     if (!empty($usuario_registro) && !empty($correo) && !empty($pass) && !empty($pass2)) {
         // Los campos no están vacíos, proceder con la validación y la inserción en la base de datos
-        
-        try{
-        
+
+        try {
+
             $query = $con->prepare("CALL validar_registro(:usuario, :correo, :pass, :pass2, @error)");
             $query->bindParam(':usuario', $usuario_registro);
             $query->bindParam(':correo', $correo);
@@ -22,14 +21,13 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
             $query->bindParam(':pass2', $pass2);
             $query->execute();
         } catch (PDOException $e) {
-            // En caso de que ocurra un error, se captura la excepción y se maneja aquí
             echo "Error en la ejecución de la consulta: " . $e->getMessage();
         }
-        
+
         // Obtener el mensaje de error desde la variable de sesión de MySQL
         $errorQuery = $con->query("SELECT @error")->fetch(PDO::FETCH_ASSOC);
         $error = $errorQuery['@error'];
-        
+
         if ($error) {
             // Mostrar el mensaje de error
             $error = '<p class="alert alert-danger">' . $error . '</p>';
@@ -44,11 +42,11 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
             $count2 = $query->rowCount();
             // $idusuario = $con->lastInsertId();
 
-            if($count2){
-              header("location:index.php?creado=true");
-              include(__DIR__.'/../mail/regMail.php');
+            if ($count2) {
+                header("location:index.php?creado=true");
+                include(__DIR__ . '/../mail/regMail.php');
             } else {
-              $error = "conex";
+                $error = "conex";
             }
         }
     } else {
@@ -56,8 +54,8 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
     }
 }
 
-  
-include "../partials/header.php";  
+
+include "../partials/header.php";
 ?>
 
 <body class="bg-danger d-flex justify-content-center align-items-center vh-100">
@@ -126,12 +124,12 @@ include "../partials/header.php";
                 }
             }
 
-            <?php if($error == "correo"){ ?>
+            <?php if ($error == "correo") { ?>
             document.getElementById('correo').focus();
-            <?php }else if($error == "vacio"){ ?>
+            <?php } else if ($error == "vacio") { ?>
             document.getElementById('usuario').focus();
             <?php } ?>
             </script>
             <?php
-include "../partials/footer.php";  
-?>
+            include "../partials/footer.php";
+            ?>
