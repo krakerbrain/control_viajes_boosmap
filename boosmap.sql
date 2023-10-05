@@ -108,9 +108,20 @@ COMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `detalleViajes`(IN `_idusuario` INT, OUT `viajesmes` INT, OUT `montomes` INT, OUT `viajessemana` INT, OUT `montosemana` INT, OUT `viajesdia` INT, OUT `montodia` INT)
-BEGIN
-SELECT COUNT(*) , SUM(monto) into viajesmes, montomes FROM viajes WHERE idusuario = _idusuario and extract(month from fecha) = extract(month from now());
-SELECT COUNT(*) , SUM(monto) into viajessemana, montosemana FROM viajes WHERE idusuario = _idusuario and extract(week from fecha) = extract(week from now());
-SELECT COUNT(*) , SUM(monto) into viajesdia, montodia FROM viajes WHERE idusuario = _idusuario and DATE_FORMAT(fecha, '%Y-%m-%d') = CURDATE();
+CREATE PROCEDURE `detalles_viajes`(IN `_idusuario` INT, IN `_periodo` VARCHAR(10), OUT `viajes` INT, OUT `total` INT)
+CASE _periodo
+WHEN 'mes' THEN
+SELECT COUNT(*) , SUM(monto) into viajes, total FROM viajes WHERE idusuario = _idusuario and extract(month from fecha) = extract(month from now());
+WHEN 'semana' THEN
+      SELECT COUNT(*), SUM(monto) INTO viajes, total
+      FROM viajes
+      WHERE idusuario = _idusuario 
+      AND fecha >= DATE_SUB(NOW(), 
+      INTERVAL DAYOFWEEK(NOW()) - 1 DAY)
+      AND fecha < DATE_ADD(DATE_SUB(NOW(), 
+      INTERVAL DAYOFWEEK(NOW()) - 1 DAY), 
+      INTERVAL 7 DAY);
+WHEN 'hoy' THEN
+SELECT COUNT(*) , SUM(monto) into viajes, total FROM viajes WHERE idusuario = _idusuario and DATE_FORMAT(fecha, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d');
+END CASE$$
 DELIMITER ;

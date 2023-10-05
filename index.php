@@ -11,7 +11,7 @@ include "partials/header.php";
 ?>
 
 <style>
-.btn {
+/* .btn {
     font-size: 12px;
     width: 100px;
     margin-bottom: 3px;
@@ -45,7 +45,7 @@ include "partials/header.php";
     to {
         background-color: #f2f2f2;
     }
-}
+} */
 </style>
 
 <body>

@@ -1,6 +1,7 @@
 <?php
 
-$rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";  
+$rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
+
 ?>
 <nav class="navbar navbar-dark bg-danger lighten-4">
     <a class="navbar-brand" href="<?= $rutainicio ?>">Hola, <?= ucfirst($_SESSION['usuario']) ?></a>
@@ -19,6 +20,11 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
                 <a class="nav-link" style="font-size:14px" href="<?= $rutainicio ?>">Inicio <span
                         class="sr-only">(current)</span></a>
             </li>
+            <?php if ($_SESSION['usuario'] == $_ENV['USUARIO_ADMIN']) { ?>
+            <li class="nav-item">
+                <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_OTRAS_APPS'] ?>">Otras Apps</a>
+            </li>
+            <?php } ?>
             <li class="nav-item">
                 <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_ACTUALIZA'] ?>">Actualiza Datos</a>
             </li>

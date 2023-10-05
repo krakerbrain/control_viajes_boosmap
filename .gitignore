@@ -5,4 +5,4 @@ composer.json
 composer.lock
 /vendor
 requerimientos.MD
-token_api.txt
+*.txt

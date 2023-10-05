@@ -55,7 +55,12 @@ switch ($ingresar) {
         if (!empty($tipoorden)) {
             $order_by = "ORDER BY " . $tipoorden;
         }
-        $query = $con->prepare("SELECT destino, count(destino) as conteo FROM viajes WHERE idusuario = :idusuario AND extract(month FROM fecha) = :mes GROUP BY destino " . $order_by);
+        $query = $con->prepare("SELECT destino, count(destino) as conteo 
+                                FROM viajes 
+                                WHERE idusuario = :idusuario 
+                                AND extract(month FROM fecha) = :mes 
+                                AND EXTRACT(YEAR FROM FECHA) = EXTRACT(YEAR FROM NOW()) 
+                                GROUP BY destino " . $order_by);
         $query->bindParam(':idusuario', $idusuario);
         $query->bindParam(':mes', $mes);
         $query->execute();

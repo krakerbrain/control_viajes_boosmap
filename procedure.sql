@@ -42,3 +42,78 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+
+-- Se obtienen datos semanal, mensual y diario
+
+DELIMITER //
+
+CREATE PROCEDURE obtenerDatosPeriodicos(_idusuario INT)
+BEGIN
+    -- Crear tabla temporal para almacenar los resultados
+    CREATE TEMPORARY TABLE IF NOT EXISTS resultados (
+        periodo VARCHAR(10),
+        viajes INT,
+        total DECIMAL(10, 2)
+    );
+
+    -- Obtener datos de la semana
+    INSERT INTO resultados (periodo, viajes, total)
+    SELECT
+        'semana' AS periodo,
+        COUNT(*) AS viajes,
+        SUM(monto) AS total
+    FROM
+        viajes
+    WHERE
+        idusuario = _idusuario
+        AND YEARWEEK(fecha, 1) = YEARWEEK(CURRENT_DATE(), 1);
+
+    -- Obtener datos del mes
+    INSERT INTO resultados (periodo, viajes, total)
+    SELECT
+        'mes' AS periodo,
+        COUNT(*) AS viajes,
+        SUM(monto) AS total
+    FROM
+        viajes
+    WHERE
+        idusuario = _idusuario
+        AND YEAR(fecha) = YEAR(CURRENT_DATE())
+        AND MONTH(fecha) = MONTH(CURRENT_DATE());
+
+    -- Obtener datos del día
+    INSERT INTO resultados (periodo, viajes, total)
+    SELECT
+        'dia' AS periodo,
+        COUNT(*) AS viajes,
+        SUM(monto) AS total
+    FROM
+        viajes
+    WHERE
+        idusuario = _idusuario
+        AND DATE(fecha) = DATE(CURRENT_DATE());
+
+    -- Seleccionar los resultados de la tabla temporal
+    SELECT * FROM resultados;
+
+    -- Eliminar la tabla temporal
+    DROP TEMPORARY TABLE IF EXISTS resultados;
+END //
+
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE `detalles_viajes`(IN `_idusuario` INT, IN `_periodo` VARCHAR(10), IN `_fechaInicio` VARCHAR(10), IN `_fechaFin` VARCHAR(10), OUT `viajes` INT, OUT `total` INT)
+CASE _periodo
+WHEN 'mes' THEN
+SELECT COUNT(*) , SUM(monto) into viajes, total FROM viajes WHERE idusuario = _idusuario and extract(month from fecha) = extract(month from now()) AND extract(year from fecha) = extract(year from now());
+WHEN 'semana' THEN
+SELECT COUNT(*) , SUM(monto) into viajes, total
+FROM viajes
+WHERE idusuario = _idusuario
+  AND fecha >= _fechaInicio
+  AND fecha <= _fechaFin;
+WHEN 'hoy' THEN
+SELECT COUNT(*) , SUM(monto) into viajes, total FROM viajes WHERE idusuario = _idusuario and DATE_FORMAT(fecha, '%Y-%m-%d') = DATE_FORMAT(date_add(now(),interval -3 hour), '%Y-%m-%d');
+END CASE$$
+DELIMITER ;

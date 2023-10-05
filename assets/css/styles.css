@@ -1,0 +1,35 @@
+.btn {
+  font-size: 12px;
+  width: 100px;
+  margin-bottom: 3px;
+}
+
+.datepicker {
+  left: 540px;
+}
+
+.nuevoDato {
+  background-color: transparent;
+  animation-name: fondo;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+}
+
+.page-item.active .page-link {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.page-link {
+  color: #dc3545;
+}
+
+@keyframes fondo {
+  from {
+    background-color: #ed969e;
+  }
+
+  to {
+    background-color: #f2f2f2;
+  }
+}
