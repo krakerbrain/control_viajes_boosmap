@@ -14,6 +14,11 @@ while ($datos = $query->fetch()) {
     $idusuario = $datos[0];
 };
 
+// Verificar si ya existe un registro para hoy
+date_default_timezone_set('America/Santiago');
+$fechaHoy = date('Y-m-d');
+$fechayHoraHoy = date('Y-m-d H:i:s');
+
 switch ($ingresar) {
     case 'agregaApp':
         /**
@@ -43,8 +48,9 @@ switch ($ingresar) {
     case 'totalesPeriodo';
 
         try {
-            $query = $con->prepare('CALL obtenerDatosPeriodicos(?)');
+            $query = $con->prepare('CALL obtenerDatosPeriodicos(?,?)');
             $query->bindParam(1, $idusuario, PDO::PARAM_INT);
+            $query->bindParam(2, $fechaHoy, PDO::PARAM_STR_CHAR);
             $query->execute();
 
             // Obtener los resultados directamente de la rutina
@@ -89,11 +95,6 @@ switch ($ingresar) {
     case 'registraGanancia':
         $idApp = $_POST['idApp'];
         $monto = $_POST['monto'];
-
-        // Verificar si ya existe un registro para hoy
-        date_default_timezone_set('America/Santiago');
-        $fechaHoy = date('Y-m-d');
-        $fechayHoraHoy = date('Y-m-d H:i:s');
 
         try {
             $query = $con->prepare('CALL RegistraGanancia(?,?,?,?,?)');
@@ -141,13 +142,14 @@ switch ($ingresar) {
         break;
     case 'obtenerDataApps':
         $query = $con->prepare("SELECT idapp,
-                                    SUM(CASE WHEN DATE(fecha) = CURDATE() THEN monto ELSE 0 END) AS monto_dia,
-                                    SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(CURDATE(),1) THEN monto ELSE 0 END) AS monto_semana,
-                                    SUM(CASE WHEN YEAR(fecha) = YEAR(CURDATE()) AND MONTH(fecha) = MONTH(CURDATE()) THEN monto ELSE 0 END) AS monto_mes
+                                    SUM(CASE WHEN DATE(fecha) = :fechaHoy THEN monto ELSE 0 END) AS monto_dia,
+                                    SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(:fechaHoy,1) THEN monto ELSE 0 END) AS monto_semana,
+                                    SUM(CASE WHEN YEAR(fecha) = YEAR(:fechaHoy) AND MONTH(fecha) = MONTH(:fechaHoy) THEN monto ELSE 0 END) AS monto_mes
                                 FROM viajes_aplicaciones
                                 WHERE idusuario = :idusuario
                                 GROUP BY idapp;");
         $query->bindParam(':idusuario', $idusuario);
+        $query->bindParam(':fechaHoy', $fechaHoy);
         $query->execute();
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $json_result = json_encode($result);
@@ -160,23 +162,24 @@ switch ($ingresar) {
         SUM(monto_mes) AS total_monto_mes
     FROM (
         SELECT
-            SUM(CASE WHEN DATE(fecha) = CURDATE() THEN monto ELSE 0 END) AS monto_dia,
-            SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(CURDATE(),1) THEN monto ELSE 0 END) AS monto_semana,
-            SUM(CASE WHEN YEAR(fecha) = YEAR(CURDATE()) AND MONTH(fecha) = MONTH(CURDATE()) THEN monto ELSE 0 END) AS monto_mes
+            SUM(CASE WHEN DATE(fecha) = :fechaHoy THEN monto ELSE 0 END) AS monto_dia,
+            SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(:fechaHoy,1) THEN monto ELSE 0 END) AS monto_semana,
+            SUM(CASE WHEN YEAR(fecha) = YEAR(:fechaHoy) AND MONTH(fecha) = MONTH(:fechaHoy) THEN monto ELSE 0 END) AS monto_mes
         FROM viajes
-        WHERE YEAR(fecha) = YEAR(CURDATE())
+        WHERE YEAR(fecha) = YEAR(:fechaHoy)
         AND idusuario = :idusuario
         UNION ALL
         SELECT
-            SUM(CASE WHEN DATE(fecha) = CURDATE() THEN monto ELSE 0 END) AS monto_dia,
-            SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(CURDATE(),1) THEN monto ELSE 0 END) AS monto_semana,
-            SUM(CASE WHEN YEAR(fecha) = YEAR(CURDATE()) AND MONTH(fecha) = MONTH(CURDATE()) THEN monto ELSE 0 END) AS monto_mes
+            SUM(CASE WHEN DATE(fecha) = :fechaHoy THEN monto ELSE 0 END) AS monto_dia,
+            SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(:fechaHoy,1) THEN monto ELSE 0 END) AS monto_semana,
+            SUM(CASE WHEN YEAR(fecha) = YEAR(:fechaHoy) AND MONTH(fecha) = MONTH(:fechaHoy) THEN monto ELSE 0 END) AS monto_mes
         FROM viajes_aplicaciones
-        WHERE YEAR(fecha) = YEAR(CURDATE())
+        WHERE YEAR(fecha) = YEAR(:fechaHoy)
         AND idusuario = :idusuario
     ) AS subquery_total;
     ");
         $query->bindParam(':idusuario', $idusuario);
+        $query->bindParam(':fechaHoy', $fechaHoy);
         $query->execute();
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $json_result = json_encode($result);

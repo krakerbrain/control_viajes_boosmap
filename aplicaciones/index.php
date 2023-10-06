@@ -19,7 +19,7 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
         <?php include __DIR__ . "/../partials/navbar.php"; ?>
         <div class="mx-3">
             <div class="row-cols-lg-2 m-2">
-                <h6 class="mx-auto my-2">CONTROL DE GANANCIAS DE APLICACIONES</h6>
+                <h6 class="mx-auto my-2">REGISTRO OTRAS APPS</h6>
                 <form action="conexiones_app.php" id="registraApp" method="post" class="mx-auto">
                     <input type="checkbox" name="checkboxRegistroApp" id="checkboxRegistroApp"> Registrar Nueva
                     Aplicación
@@ -37,8 +37,7 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
 
                     <form id="registraGanancias" action="conexiones_app.php" method="post" class="mx-auto pt-2">
                         <div class="form-group d-flex">
-                            <input class="form-control" type="number" id="inputRegistraGanancia"
-                                placeholder="Último registro App">
+                            <input class="form-control" type="number" id="inputRegistraGanancia" placeholder="Último registro App">
                             <input class="btn btn-danger mx-2" type="submit" value="Agregar" id="agregar">
                         </div>
                     </form>
@@ -50,14 +49,13 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
                                 <td style="width: 20%;">App</td>
                                 <td style="width: 30%;">Monto</td>
                                 <td style="width: 40%;">Fecha</td>
-                                <td style="width: 10%;">Acciones</td>
+                                <td style="width: 10%;">Acción</td>
                             </tr>
                         </thead>
                         <tbody class="text-center" id="tablaRegistro"></tbody>
                     </table>
                 </div>
-                <div id="carouselExampleControls" class="carousel slide mx-auto" data-ride="carousel"
-                    data-interval="false">
+                <div id="carouselExampleControls" class="carousel slide mx-auto" data-ride="carousel" data-interval="false">
                     <div id="carruselGanancias" class="carousel-inner">
                         <div class="carousel-item active">
                             <div class="text-center">
@@ -84,21 +82,19 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
                         </div>
                     </div>
                     <style>
-                    .carousel-control-prev {
-                        left: -20px;
-                    }
+                        .carousel-control-prev {
+                            left: -20px;
+                        }
 
-                    .carousel-control-next {
-                        right: -20px;
-                    }
+                        .carousel-control-next {
+                            right: -20px;
+                        }
                     </style>
-                    <button class="carousel-control-prev" type="button" data-target="#carouselExampleControls"
-                        data-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-target="#carouselExampleControls" data-slide="prev">
                         <span class="bg-secondary carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="sr-only">Previous</span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-target="#carouselExampleControls"
-                        data-slide="next">
+                    <button class="carousel-control-next" type="button" data-target="#carouselExampleControls" data-slide="next">
                         <span class="bg-secondary carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="sr-only">Next</span>
                     </button>
@@ -150,115 +146,115 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
 
 <?php include __DIR__ . "/../partials/boostrap_script.php" ?>
 <script>
-window.onload = function() {
-    detallesBoosmap();
-    opcionesRegistradorGanancias();
-    obtenerUltimasGanancias(false);
-    totalesMes();
-};
-// Obtener referencias a los elementos del DOM
-let checkbox = document.getElementById('checkboxRegistroApp');
-let nombreAppInput = document.getElementById('nombreApp');
-let agregaAppBtn = document.getElementById('agregaApp');
+    window.onload = function() {
+        detallesBoosmap();
+        opcionesRegistradorGanancias();
+        obtenerUltimasGanancias(false);
+        totalesMes();
+    };
+    // Obtener referencias a los elementos del DOM
+    let checkbox = document.getElementById('checkboxRegistroApp');
+    let nombreAppInput = document.getElementById('nombreApp');
+    let agregaAppBtn = document.getElementById('agregaApp');
 
-// Escuchar el evento "change" del checkbox
-checkbox.addEventListener('change', function() {
-    if (this.checked) {
-        nombreAppInput.disabled = false;
-        agregaAppBtn.disabled = false;
+    // Escuchar el evento "change" del checkbox
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            nombreAppInput.disabled = false;
+            agregaAppBtn.disabled = false;
 
-    } else {
-        nombreAppInput.disabled = true;
-        agregaAppBtn.disabled = true;
-    }
-});
-
-document.getElementById("registraApp").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    $.post("../aplicaciones/conexiones_app.php", {
-        ingresar: "agregaApp",
-        nombreApp: nombreAppInput.value.trim().toUpperCase(),
-    }).done(function(datos) {
-
-        nombreAppInput.value = "";
-        nombreAppInput.disabled = true;
-        agregaAppBtn.disabled = true;
-        checkbox.checked = false;
-        tipoDatoParaTablaAplicacion(datos);
-
-    }).fail(function(error) {
-        console.log(error)
+        } else {
+            nombreAppInput.disabled = true;
+            agregaAppBtn.disabled = true;
+        }
     });
-})
 
-function detallesBoosmap() {
+    document.getElementById("registraApp").addEventListener("submit", function(event) {
+        event.preventDefault();
 
-    $.post("conexiones_app.php", {
-        ingresar: "totalesPeriodo",
-    }).done(function(data) {
-        let datos = JSON.parse(data);
-        // console.log(datos)
-        document.getElementById("dataBoosmap").innerHTML = `
+        $.post("../aplicaciones/conexiones_app.php", {
+            ingresar: "agregaApp",
+            nombreApp: nombreAppInput.value.trim().toUpperCase(),
+        }).done(function(datos) {
+
+            nombreAppInput.value = "";
+            nombreAppInput.disabled = true;
+            agregaAppBtn.disabled = true;
+            checkbox.checked = false;
+            tipoDatoParaTablaAplicacion(datos);
+
+        }).fail(function(error) {
+            console.log(error)
+        });
+    })
+
+    function detallesBoosmap() {
+
+        $.post("conexiones_app.php", {
+            ingresar: "totalesPeriodo",
+        }).done(function(data) {
+            let datos = JSON.parse(data);
+            // console.log(datos)
+            document.getElementById("dataBoosmap").innerHTML = `
                                                     <td>${formatoMoneda(datos[0].total)}</td>
                                                     <td>${formatoMoneda(datos[2].total)}</td>
                                                     <td>${formatoMoneda(datos[1].total)}</td>
                                                     `
-    }).fail(function(error) {
-        console.log(error)
-    });
-}
+        }).fail(function(error) {
+            console.log(error)
+        });
+    }
 
-function opcionesRegistradorGanancias() {
-    $.post("conexiones_app.php", {
-        ingresar: "appRegistradas",
-    }).done(function(data) {
-        let datos = JSON.parse(data);
-        creaOpcionesdeRegistro(datos);
-        tipoDatoParaTablaAplicacion(datos);
-        llenaDataApps();
-    }).fail(function(error) {
-        console.log(error)
-    });
-}
+    function opcionesRegistradorGanancias() {
+        $.post("conexiones_app.php", {
+            ingresar: "appRegistradas",
+        }).done(function(data) {
+            let datos = JSON.parse(data);
+            creaOpcionesdeRegistro(datos);
+            tipoDatoParaTablaAplicacion(datos);
+            llenaDataApps();
+        }).fail(function(error) {
+            console.log(error)
+        });
+    }
 
-function creaOpcionesdeRegistro(datos) {
-    document.getElementById("appNombre").innerHTML = "<option>Aplicaciones registradas</option>";
-    datos.forEach(element => {
-        document.getElementById("appNombre").innerHTML +=
-            `<option value="${element.id}">${element.nombre_app}</option>`
-    });
-}
+    function creaOpcionesdeRegistro(datos) {
+        document.getElementById("appNombre").innerHTML = "<option>Aplicaciones registradas</option>";
+        datos.forEach(element => {
+            document.getElementById("appNombre").innerHTML +=
+                `<option value="${element.id}">${element.nombre_app}</option>`
+        });
+    }
 
-function tipoDatoParaTablaAplicacion(datos) {
-    if (typeof(datos) != "object" && datos == 'duplicate') {
-        showModal(datos);
-    } else {
-        if (typeof(datos) != "object") {
-            $.post("conexiones_app.php", {
-                ingresar: "appRegistradas",
-                nombreApp: datos
-            }).done(function(data) {
-                let datos = JSON.parse(data);
-                creaOpcionesdeRegistro(datos)
-                creaTablaAplicacion(datos);
-                showModal();
-            }).fail(function(error) {
-                console.log(error)
-            });
-
-
+    function tipoDatoParaTablaAplicacion(datos) {
+        if (typeof(datos) != "object" && datos == 'duplicate') {
+            showModal(datos);
         } else {
-            creaTablaAplicacion(datos);
+            if (typeof(datos) != "object") {
+                $.post("conexiones_app.php", {
+                    ingresar: "appRegistradas",
+                    nombreApp: datos
+                }).done(function(data) {
+                    let datos = JSON.parse(data);
+                    creaOpcionesdeRegistro(datos)
+                    creaTablaAplicacion(datos);
+                    showModal();
+                }).fail(function(error) {
+                    console.log(error)
+                });
+
+
+            } else {
+                creaTablaAplicacion(datos);
+            }
         }
     }
-}
 
-function creaTablaAplicacion(datos) {
+    function creaTablaAplicacion(datos) {
 
-    datos.forEach(element => {
-        document.getElementById("carruselGanancias").innerHTML +=
-            `<div class="carousel-item">
+        datos.forEach(element => {
+            document.getElementById("carruselGanancias").innerHTML +=
+                `<div class="carousel-item">
                             <div class="text-center">
                                 <table class="table table-striped table-sm">
                                     <thead class="table-danger">
@@ -283,115 +279,114 @@ function creaTablaAplicacion(datos) {
                                 </table>
                             </div>
                         </div>`
-    });
+        });
 
-}
+    }
 
-function llenaDataApps() {
-    $.post("conexiones_app.php", {
-        ingresar: "obtenerDataApps",
-    }).done(function(data) {
-        let montosApp = JSON.parse(data);
-        montosApp.forEach(montos => {
-            document.getElementById(`data-${montos.idapp}`).innerHTML = "";
-            document.getElementById(`data-${montos.idapp}`).innerHTML += `
+    function llenaDataApps() {
+        $.post("conexiones_app.php", {
+            ingresar: "obtenerDataApps",
+        }).done(function(data) {
+            let montosApp = JSON.parse(data);
+            montosApp.forEach(montos => {
+                document.getElementById(`data-${montos.idapp}`).innerHTML = "";
+                document.getElementById(`data-${montos.idapp}`).innerHTML += `
                             <td>${formatoMoneda(montos.monto_semana)}</td>
                             <td>${formatoMoneda(montos.monto_dia)}</td>
                             <td>${formatoMoneda(montos.monto_mes)}</td>
                             `
-        })
-    }).fail(function(error) {
-        console.log(error)
-    });
-}
+            })
+        }).fail(function(error) {
+            console.log(error)
+        });
+    }
 
-document.getElementById("registraGanancias").addEventListener("submit", function(event) {
-    event.preventDefault();
-    let appNombre = document.getElementById("appNombre")
-    let inputRegistraGanancia = document.getElementById("inputRegistraGanancia")
+    document.getElementById("registraGanancias").addEventListener("submit", function(event) {
+        event.preventDefault();
+        let appNombre = document.getElementById("appNombre")
+        let inputRegistraGanancia = document.getElementById("inputRegistraGanancia")
 
-    $.post("conexiones_app.php", {
-        ingresar: "registraGanancia",
-        idApp: appNombre.value,
-        monto: inputRegistraGanancia.value
-    }).done(function(datos) {
-        let data = JSON.parse(datos);
-        let resultado = data[0].resultado;
-        if (resultado != 'ok') {
-            alert(resultado)
-        } else {
-            appNombre.value = "";
-            inputRegistraGanancia.value = "";
-            obtenerUltimasGanancias(true)
-            llenaDataApps();
-            totalesMes();
-        }
-    }).fail(function(error) {
-        console.log(error)
-    });
-})
+        $.post("conexiones_app.php", {
+            ingresar: "registraGanancia",
+            idApp: appNombre.value,
+            monto: inputRegistraGanancia.value
+        }).done(function(datos) {
+            let data = JSON.parse(datos);
+            let resultado = data[0].resultado;
+            if (resultado != 'ok') {
+                alert(resultado)
+            } else {
+                appNombre.value = "";
+                inputRegistraGanancia.value = "";
+                obtenerUltimasGanancias(true)
+                llenaDataApps();
+                totalesMes();
+            }
+        }).fail(function(error) {
+            console.log(error)
+        });
+    })
 
-function obtenerUltimasGanancias(nuevoViaje) {
-    let tablaRegistro = document.getElementById("tablaRegistro")
-    $.post("conexiones_app.php", {
-        ingresar: "ultimasGanancias",
-    }).done(function(data) {
+    function obtenerUltimasGanancias(nuevoViaje) {
+        let tablaRegistro = document.getElementById("tablaRegistro")
+        $.post("conexiones_app.php", {
+            ingresar: "ultimasGanancias",
+        }).done(function(data) {
 
-        let datos = JSON.parse(data);
-        tablaRegistro.innerHTML = "";
-        datos.forEach((element, index) => {
+            let datos = JSON.parse(data);
+            tablaRegistro.innerHTML = "";
+            datos.forEach((element, index) => {
 
-            tablaRegistro.innerHTML +=
-                `<tr class=${nuevoViaje == true && index == 0 ? "nuevoDato" : ""}>
+                tablaRegistro.innerHTML +=
+                    `<tr class=${nuevoViaje == true && index == 0 ? "nuevoDato" : ""}>
                     <td>${element.nombre_app}</td>
                     <td>${formatoMoneda(element.monto)}</td>
                     <td>${element.fecha}</td>
                     <td><a style="cursor: pointer" onclick="borrarGanancia(${element.id})"><i class="fas fa-trash-alt"></i></a></td>
                 </tr>`
+            });
+
+        }).fail(function(error) {
+            console.log(error)
         });
+    }
 
-    }).fail(function(error) {
-        console.log(error)
+    const formatoMoneda = moneda => Math.round(moneda).toLocaleString('es-CL', {
+        style: 'currency',
+        currency: 'CLP'
     });
-}
 
-const formatoMoneda = moneda => Math.round(moneda).toLocaleString('es-CL', {
-    style: 'currency',
-    currency: 'CLP'
-});
+    function borrarGanancia(id) {
 
-function borrarGanancia(id) {
+        $.post("conexiones_app.php", {
+            ingresar: "borrarGanancia",
+            id: id
+        }).done(function(datos) {
+            obtenerUltimasGanancias(false)
+        }).fail(function(error) {
+            console.log(error)
+        })
+    }
 
-    $.post("conexiones_app.php", {
-        ingresar: "borrarGanancia",
-        id: id
-    }).done(function(datos) {
-        obtenerUltimasGanancias(false)
-    }).fail(function(error) {
-        console.log(error)
-    })
-}
-
-function totalesMes() {
-    $.post("conexiones_app.php", {
-        ingresar: "totalesMes",
-    }).done(function(data) {
-        let datos = JSON.parse(data);
-        document.getElementById("dataTotales").innerHTML = "";
-        document.getElementById("dataTotales").innerHTML = `<td>${formatoMoneda(datos[0].total_monto_semana)}</td>
+    function totalesMes() {
+        $.post("conexiones_app.php", {
+            ingresar: "totalesMes",
+        }).done(function(data) {
+            let datos = JSON.parse(data);
+            document.getElementById("dataTotales").innerHTML = "";
+            document.getElementById("dataTotales").innerHTML = `<td>${formatoMoneda(datos[0].total_monto_semana)}</td>
                                                                 <td>${formatoMoneda(datos[0].total_monto_dia)}</td>
                                                                 <td>${formatoMoneda(datos[0].total_monto_mes)}</td>`;
+        })
 
-    })
-
-}
-
-function showModal(datos) {
-    if (datos == 'duplicate') {
-
-        document.getElementById("modalAppLabel").textContent = "ERROR";
-        document.getElementById("modalAppMensaje").textContent = "La aplicación ya ha sido agregada"
     }
-    $('#modalApp').modal('show');
-}
+
+    function showModal(datos) {
+        if (datos == 'duplicate') {
+
+            document.getElementById("modalAppLabel").textContent = "ERROR";
+            document.getElementById("modalAppMensaje").textContent = "La aplicación ya ha sido agregada"
+        }
+        $('#modalApp').modal('show');
+    }
 </script>
