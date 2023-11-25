@@ -140,6 +140,7 @@ function llenaGrafico() {
     ingresar: "mesesConDatos",
   })
     .done(function (datos) {
+      console.log(datos);
       // Parsea los datos JSON obtenidos
       var datosJSON = JSON.parse(datos);
 
@@ -188,6 +189,15 @@ function llenaGrafico() {
               title: {
                 display: true,
                 text: "Ingresos",
+              },
+              ticks: {
+                callback: function (value, index, values) {
+                  if (value >= 1000000) {
+                    return (value / 1000000).toFixed(value % 1000000 === 0 ? 0 : 1) + "Millón";
+                  } else {
+                    return (value / 1000).toFixed(value % 1000 === 0 ? 0 : 1) + "mil";
+                  }
+                },
               },
             },
             viajes: {

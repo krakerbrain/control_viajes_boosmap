@@ -95,14 +95,17 @@ switch ($ingresar) {
     case 'registraGanancia':
         $idApp = $_POST['idApp'];
         $monto = $_POST['monto'];
+        $fecha = (!empty($_POST['fecha'])) ? $_POST['fecha'] : $fechaHoy;
+        $fechaYHora = (!empty($_POST['fechaYHora'])) ? $_POST['fechaYHora'] : $fechayHoraHoy;
+
 
         try {
             $query = $con->prepare('CALL RegistraGanancia(?,?,?,?,?)');
             $query->bindParam(1, $idApp, PDO::PARAM_INT);
             $query->bindParam(2, $monto, PDO::PARAM_INT);
             $query->bindParam(3, $idusuario, PDO::PARAM_INT);
-            $query->bindParam(4, $fechaHoy, PDO::PARAM_STR);
-            $query->bindParam(5, $fechayHoraHoy, PDO::PARAM_STR);
+            $query->bindParam(4, $fecha, PDO::PARAM_STR);
+            $query->bindParam(5, $fechaYHora, PDO::PARAM_STR);
             $query->execute();
 
             // Obtener los resultados directamente de la rutina

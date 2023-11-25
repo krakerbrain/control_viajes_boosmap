@@ -31,16 +31,20 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
 
                 <div class="mx-auto">
 
+                    <input type="date" name="fecha" id="fecha" class="form-control mb-2">
                     <select class="form-control" name="appNombre" id="appNombre">
                         <option value="">Aplicaciones registradas</option>
                     </select>
 
-                    <form id="registraGanancias" action="conexiones_app.php" method="post" class="mx-auto pt-2">
-                        <div class="form-group d-flex">
+                    <form id="registraGanancias" action="conexiones_app.php" method="post" class="mx-auto">
+                        <div class="form-group d-flex mt-2">
                             <input class="form-control" type="number" id="inputRegistraGanancia" placeholder="Último registro App">
                             <input class="btn btn-danger mx-2" type="submit" value="Agregar" id="agregar">
                         </div>
                     </form>
+                    <div id="campoVacioAlerta" class="alert alert-danger" role="alert" style="display: none;">
+                        Los campos Aplicación y Monto son obligatorios
+                    </div>
                 </div>
                 <div class="mx-auto">
                     <table class="table table-striped table-sm" style="font-size: 0.9em;">
@@ -305,27 +309,45 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
         event.preventDefault();
         let appNombre = document.getElementById("appNombre")
         let inputRegistraGanancia = document.getElementById("inputRegistraGanancia")
+        let fecha = document.getElementById("fecha");
+        let fechaRegistro = fecha.value == "" ? "" : fecha.value + " 12:00:00";
 
-        $.post("conexiones_app.php", {
-            ingresar: "registraGanancia",
-            idApp: appNombre.value,
-            monto: inputRegistraGanancia.value
-        }).done(function(datos) {
-            let data = JSON.parse(datos);
-            let resultado = data[0].resultado;
-            if (resultado != 'ok') {
-                alert(resultado)
-            } else {
-                appNombre.value = "";
-                inputRegistraGanancia.value = "";
-                obtenerUltimasGanancias(true)
-                llenaDataApps();
-                totalesMes();
-            }
-        }).fail(function(error) {
-            console.log(error)
-        });
+        if (validaCampo(appNombre, inputRegistraGanancia)) {
+
+            $.post("conexiones_app.php", {
+                ingresar: "registraGanancia",
+                idApp: appNombre.value,
+                monto: inputRegistraGanancia.value,
+                fecha: fecha.value,
+                fechaYHora: fechaRegistro
+            }).done(function(datos) {
+
+                let data = JSON.parse(datos);
+                let resultado = data[0].resultado;
+                if (resultado != 'ok') {
+                    alert(resultado)
+                } else {
+                    appNombre.value = "";
+                    inputRegistraGanancia.value = "";
+                    fecha.value = "";
+                    obtenerUltimasGanancias(true)
+                    llenaDataApps();
+                    totalesMes();
+                }
+            }).fail(function(error) {
+                console.log(error)
+            });
+        };
     })
+
+    function validaCampo(nombre, monto, fecha) {
+        if (nombre.value == "" || monto.value == "") {
+            document.getElementById("campoVacioAlerta").style.display = "block";
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     function obtenerUltimasGanancias(nuevoViaje) {
         let tablaRegistro = document.getElementById("tablaRegistro")
