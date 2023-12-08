@@ -3,33 +3,34 @@ include('../config.php');
 
 $error = "";
 
-if(isset($_POST['correo'])){
+if (isset($_POST['correo'])) {
     $correo  = $_POST['correo'];
-    $query = $con->prepare("SELECT correo FROM usuarios WHERE correo = :correo");
+    $query = $con->prepare("SELECT correo FROM usuarios WHERE correo = :correo AND activo = 1");
     $query->bindParam(':correo', $correo);
     $query->execute();
     $count = $query->rowCount();
 
-    if(!filter_var($correo, FILTER_VALIDATE_EMAIL)){
+    if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         $error = '<p class="alert alert-danger">Formato de correo incorrecto</p>';
-    }else{
-        if($count > 0){
+    } else {
+        if ($count > 0) {
             $clave_recuperacion = bin2hex(random_bytes(16)); // 16 bytes = 32 caracteres en hexadecimal
             $stmt = $con->prepare("UPDATE usuarios SET clave = :clave WHERE correo = :correo");
             $stmt->bindParam(':correo', $correo);
             $stmt->bindParam(':clave', $clave_recuperacion);
             $stmt->execute();
-            header("location:aviso_correo.php?correo=".$correo);
-            include(__DIR__.'/../mail/recoveryMail.php');
-        }else{
-            $error = '<p class="alert alert-danger">El correo '.$correo.' no existe</p>';
+            header("location:aviso_correo.php?correo=" . $correo);
+            include(__DIR__ . '/../mail/recoveryMail.php');
+        } else {
+            $error = '<p class="alert alert-danger">El correo ' . $correo . ' no existe o está inactivo.</p>';
         }
     }
 }
 
 
-include "../partials/header.php";  
+include "../partials/header.php";
 ?>
+
 <body class="bg-danger d-flex justify-content-center align-items-center vh-100">
     <div class="bg-white p-5 rounded">
         <div class="justify-content-center">
@@ -41,7 +42,7 @@ include "../partials/header.php";
                     <div class="input-group-text bg-danger text-light">
                         <i class="fa-solid fa-envelope"></i>
                     </div>
-                    <input type="mail" name="correo" id="correo" class="form-control" placeholder="Ingrese su correo" >
+                    <input type="mail" name="correo" id="correo" class="form-control" placeholder="Ingrese su correo">
                 </div>
                 <div class="form-group mt-3">
                     <input type="submit" value="Enviar" class="btn btn-danger w-100">
@@ -53,6 +54,6 @@ include "../partials/header.php";
                     <?php echo $error ?>
                 </div>
             </form>
-<?php
-include "../partials/footer.php";  
-?>        
+            <?php
+            include "../partials/footer.php";
+            ?>
