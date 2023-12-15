@@ -1,4 +1,3 @@
-
 <fieldset>
     <legend style="font-size:1em;cursor:pointer" class="align-items-center bg-danger d-flex justify-content-between p-1 text-light" onclick="ocultaFieldset('filtro')">
         <span>Filtros</span>
@@ -28,84 +27,76 @@
                 <input class="btn btn-outline-danger mt-auto" type="button" value="Limpiar" style="margin-bottom: 9px;width:85px" onclick="limpiarFormulario()">
             </div>
         </form>
-        <div id="mensajeResultados" class="d-flex flex-wrap justify-content-around"style="margin-left: 13px;margin-bottom: 10px;">
+        <div id="mensajeResultados" class="d-flex flex-wrap justify-content-between" style="margin-left: 13px;margin-bottom: 10px;">
             <!-- <span>Se encontraron</span> -->
         </div>
         <section style="max-height: 400px; overflow-y: auto;">
-        <table  class="table table-striped" style="width:97%;margin: 0 auto; table-layout:fixed;font-size:small">
-            <thead class="table-danger text-center" style="position: sticky; top:-1px; z-index: 1;">
-                <td style="width:23%">Destino</td>
-                <td style="width:20%">Fecha</td>
-                <td style="width:13%">Monto</td>
-            </thead>
-            <tbody id="tablaFiltros" class="text-center"></tbody>
-        </table>
+            <table class="table table-striped" style="width:97%;margin: 0 auto; table-layout:fixed">
+                <thead class="table-danger text-center" style="position: sticky; top:-1px; z-index: 1;">
+                    <td>Destino</td>
+                    <td>Viajes</td>
+                </thead>
+                <tbody id="tablaFiltros" class="text-center"></tbody>
+            </table>
         </section>
     </div>
 </fieldset>
 
 <script>
-
-    function limpiarFormulario(){
+    function limpiarFormulario() {
         document.getElementById('formFiltro').reset();
         tablaFiltros.innerHTML = "";
-        mensajeResultados.innerHTML = ""; 
+        mensajeResultados.innerHTML = "";
     }
 
-    function getRutas(){
-        // debugger
-        $.post("../filtros/conexiones_filtro.php", { 
-        ingresar: "getRutas" 
+    function getRutas() {
+
+        $.post("../filtros/conexiones_filtro.php", {
+            ingresar: "getRutas"
         }).done(function(datos) {
             var jsonDatos = JSON.parse(datos);
-                // ruta.innerHTML = `<option id=""></option>`
+            // ruta.innerHTML = `<option id=""></option>`
             jsonDatos.forEach(element => {
                 ruta.innerHTML += `<option id="${element.idruta}">${element.ruta}</option>`
             });
         });
     }
-document.getElementById("formFiltro").addEventListener("submit", function(event) {
-  event.preventDefault(); // Esto evita que el formulario se envíe automáticamente
+    document.getElementById("formFiltro").addEventListener("submit", function(event) {
+        event.preventDefault();
+        // Obtén los datos del formulario
+        let ruta = document.getElementById("ruta").value;
+        let desde = document.getElementById("desde").value;
+        let hasta = document.getElementById("hasta").value;
 
-  // Aquí puedes realizar cualquier validación o procesamiento de los datos del formulario
+        // Realiza la petición POST a conexiones.php con los datos del formulario
+        $.post("../filtros/conexiones_filtro.php", {
+            ingresar: "getViajes",
+            ruta: ruta,
+            desde: desde,
+            hasta: hasta,
+            orden: "GROUP BY destino DESC"
+        }).done(function(datos) {
 
-  // Obtén los datos del formulario
-  var ruta = document.getElementById("ruta").value;
-  var desde = document.getElementById("desde").value;
-  var hasta = document.getElementById("hasta").value;
+            let resultados = JSON.parse(datos);
+            console.log(resultados)
+            let sumaConteo = 0;
+            let sumaIngreso = 0;
+            tablaFiltros.innerHTML = "";
+            resultados.forEach(element => {
+                tablaFiltros.innerHTML +=
+                    `<tr>
+                        <td nowrap>${element.destino}</td>
+                        <td nowrap>${element.conteo}</td>
+                    </tr>`
+                sumaIngreso += parseInt(element.ingreso, 10);
+                mensajeResultados.innerHTML =
+                    `<span>Viajes completados: ${ sumaConteo += element.conteo} </span>
+                    <span>Total(liquido): ${sumaIngreso.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</span>`;
 
-  // Realiza la petición POST a conexiones.php con los datos del formulario
-  $.post("../filtros/conexiones_filtro.php", { 
-    ingresar: "getViajes",
-    ruta: ruta,
-    desde: desde,
-    hasta: hasta,
-    orden: "ORDER BY idviaje ASC"
-  }).done(function(datos) {
-        let jsonResultados = JSON.parse(datos);
-        let jsonDatos = JSON.parse(jsonResultados.resultados);
-        let jsonFilas = JSON.parse(jsonResultados.filas);
-        mensajeResultados.innerHTML = ""
-        tablaFiltros.innerHTML = ""; 
-        let sumaMonto = jsonDatos.reduce((total, element) => total + parseFloat(element.monto), 0);
+            })
 
-    jsonDatos.forEach(element => {
-        tablaFiltros.innerHTML += `<tr id="${element.idviaje}">
-      <td nowrap>${element.destino}</td>
-      <td nowrap>${element.fecha}</td>
-      <td class='text-center'>${element.monto.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
-      </tr>`
-    })
-    mensajeResultados.innerHTML = `<span>Se obtuvieron ${jsonFilas} resultados</span>
-                                    <span>Total(liquido): ${sumaMonto.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</span>`;
-    // Aquí puedes manejar la respuesta del servidor, si es necesario
-  }).fail(function(error){
-        console.log(error)
+        }).fail(function(error) {
+            console.log(error)
+        });
     });
-});
-
-
-
-
 </script>
-

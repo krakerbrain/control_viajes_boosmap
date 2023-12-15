@@ -83,13 +83,13 @@ function totalviajes(datos) {
 
 function viajesporruta(ordenColumna, tipoorden, fecha) {
   fecha = fecha == undefined ? selectMes.value : fecha;
-  var mesAnio = fecha;
-  var partes = mesAnio.split("-"); // Divide el string en base al guión ("-")
-  var mes = partes[0];
-
-  var mes = mes == undefined ? document.getElementById("selectMes").value : mes;
-  var conteoviajes = document.getElementById("conteoviajes");
-  var ascdesc = !ordenColumna ? "" : document.getElementById("ordenconteo").value;
+  let mesAnio = fecha;
+  let partes = mesAnio.split("-"); // Divide el string en base al guión ("-")
+  let mes = partes[0];
+  let annio = partes[1];
+  mes = mes == undefined ? document.getElementById("selectMes").value : mes;
+  let conteoviajes = document.getElementById("conteoviajes");
+  let ascdesc = !ordenColumna ? "" : document.getElementById("ordenconteo").value;
   let orden = "";
   if (ascdesc != "") {
     orden = `${tipoorden} ${ascdesc}`;
@@ -99,6 +99,7 @@ function viajesporruta(ordenColumna, tipoorden, fecha) {
   $.post("conexiones_estadisticas.php", {
     ingresar: "viajesxruta",
     mes: mes,
+    annio: annio,
     tipoorden: orden,
   })
     .done(function (datos) {
@@ -140,7 +141,6 @@ function llenaGrafico() {
     ingresar: "mesesConDatos",
   })
     .done(function (datos) {
-      console.log(datos);
       // Parsea los datos JSON obtenidos
       var datosJSON = JSON.parse(datos);
 

@@ -49,7 +49,9 @@ switch ($ingresar) {
 
         break;
     case 'viajesxruta':
-        $mes = $mes = $_POST['mes'];
+        $mes = $_POST['mes'];
+        $annio = $_POST['annio'];
+
         $tipoorden = isset($_POST['tipoorden']) ? $_POST['tipoorden'] : "";
         $order_by = "";
         if (!empty($tipoorden)) {
@@ -59,10 +61,11 @@ switch ($ingresar) {
                                 FROM viajes 
                                 WHERE idusuario = :idusuario 
                                 AND extract(month FROM fecha) = :mes 
-                                AND EXTRACT(YEAR FROM FECHA) = EXTRACT(YEAR FROM NOW()) 
+                                AND EXTRACT(YEAR FROM fecha) = :annio 
                                 GROUP BY destino " . $order_by);
         $query->bindParam(':idusuario', $idusuario);
         $query->bindParam(':mes', $mes);
+        $query->bindParam(':annio', $annio);
         $query->execute();
         $datos = $query->fetchAll(PDO::FETCH_ASSOC);
         foreach ($datos as $conteoviajes) {
