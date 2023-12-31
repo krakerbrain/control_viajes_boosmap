@@ -33,8 +33,6 @@ include "partials/header.php";
                     <tbody id="detalles_viajes"></tbody>
                 </table>
             </div>
-
-
             <div class="col-sm-5" style="text-align:center">
                 <div class="input-group date mb-2" id="datepicker">
                     <input type="text" class="form-control">
@@ -66,6 +64,52 @@ include "partials/header.php";
         </section>
 
     </div>
+
+    <!-- Modal de mensaje -->
+    <div class="modal fade" id="modalMensaje" tabindex="-1" role="dialog" aria-labelledby="modalMensajeGeneral" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-light">
+                    <h5 class="modal-title" id="modalMensajeGeneral">AVISO DE ACTUALIZACIÓN</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true" class="text-light">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Durante los próximos días se harán algunas actualizaciones de la app para modificar el nuevo
+                        porcentaje
+                        del ISLR.</p>
+                    <p> El mismo pasa de 13% a 13.75%.</p>
+                    <p>Como el pago de la última quincena (en Viña del Mar) es en Enero va a haber una diferencia en el
+                        pago y para que los montos sean mostrados lo más cercano posible a la realidad es necesario
+                        actualizar
+                        el monto de todos los viajes desde el 16/12 en adelante.</p>
+                    <p>También se actualizará el monto actual de las rutas ya que, como esta app refleja el monto
+                        líquido pagado por viaje,
+                        al haber un cambio de % de retención de ISLR el monto líquido es menos dinero por viaje que el
+                        año anterior.</p>
+                    <p>Trataré de ser lo más cuidadoso posible para no alterar los datos registrados, pero si llega a
+                        pasar algo recuerden que pueden
+                        contactarme para ayudarlos a corregir cualquier problema. Los que tienen mi número pueden
+                        hacerlo
+                        por ahí y si no por correo: admin@biowork.xyz</p>
+                    <!-- Checkbox -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="checkNoMostrar">
+                        <label class="form-check-label small" for="checkNoMostrar">
+                            He leído y no deseo ver de nuevo este mensaje
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="guardarDecision()">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- fin modal mensaje-->
+
 </body>
 <?php include "partials/boostrap_script.php" ?>
 <script>
@@ -83,6 +127,8 @@ include "partials/header.php";
         cargaBotonesRutas();
         detallesViajes('hoy', 'inicial');
         obtenerUltimosViajes(false);
+        mostrarModal();
+
     };
 
     function agregaRuta(e) {
@@ -103,13 +149,13 @@ include "partials/header.php";
     }
 
     function comparaFecha(dia) {
-        // Obtener la fecha de hoy en el mismo formato que la fecha ingresada
+        // Esta funcion verifica si la fecha ingresada es igual a la fecha de hoy, si es asi retorna true, de lo contrario false. Si es true
+        // la funcion obtenerUltimosViajes() se encarga de mostrar los viajes de hoy y crea un efecto para mostrar al usuario que se agregó un viaje actual
         var hoy = new Date();
         var hoyDia = ("0" + hoy.getDate()).slice(-2);
         var hoyMes = ("0" + (hoy.getMonth() + 1)).slice(-2);
         var hoyAnio = hoy.getFullYear();
         var fechaHoy = hoyDia + "/" + hoyMes + "/" + hoyAnio;
-
         return dia === fechaHoy ? true : false
     }
 
@@ -203,7 +249,8 @@ include "partials/header.php";
         }
     }
 
-    function detallesViajes(periodo, elemento) {
+    async function detallesViajes(periodo, elemento) {
+
         let btn_periodo = document.getElementsByClassName("btn_periodo")
         for (let i = 0; i < btn_periodo.length; i++) {
             const element = btn_periodo[i];
@@ -219,16 +266,61 @@ include "partials/header.php";
         $.post("conexiones.php", {
             ingresar: "totalmes",
             periodo: periodo
-        }).done(function(data) {
+        }).done(async function(data) {
             let datos = JSON.parse(data);
+            const {
+                factor
+            } = await calculaFactorIslr();
             datos.forEach(element => {
                 detalles_viajes.innerHTML = `
-                                            <td class="text-center">${Math.round(element.monto_total/0.870).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
+                                            <td class="text-center">${Math.round(element.monto_total/factor).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
                                             <td class="text-center">${(element.monto_total == null ? 0 : element.monto_total).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
                                             <td class="text-center">${element.viajes}</td>
                                         `
             })
         });
+    }
+    async function cargarArchivoJSON(url) {
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error al cargar el archivo JSON:', error);
+            return null;
+        }
+    }
+
+    async function calculaFactorIslr() {
+        try {
+            const islrData = await cargarArchivoJSON('islr.json');
+
+            // Obtener el año actual y el mes actual
+            const currentDate = new Date();
+            const anioActual = currentDate.getFullYear();
+            const mesActual = currentDate.getMonth() + 1;
+            const anioParaCalculo = mesActual === 12 ? anioActual + 1 : anioActual;
+
+            // Buscar el factor correspondiente al año actual en el archivo islr.json
+            let factor;
+            let impuesto;
+
+            for (const islr of islrData) {
+                if (islr.anio === anioParaCalculo) {
+                    factor = islr.factor;
+                    impuesto = islr.impuesto;
+                    break;
+                }
+            }
+
+            return {
+                factor,
+                impuesto
+            };
+        } catch (error) {
+            console.error('Error al leer el archivo JSON:', error);
+            return null;
+        }
     }
 
     function eliminaViaje(id) {
@@ -236,9 +328,27 @@ include "partials/header.php";
             ingresar: "eliminar",
             id_viaje: id
         }).done(function(datos) {
-            obtenerUltimosViajes();
+            let paginaActiva = obtenerPaginaActiva();
+            obtenerUltimosViajes(false, paginaActiva);
             detallesViajes('hoy', 'inicial');
         });
+    }
+
+    function obtenerPaginaActiva() {
+        // Obtener el elemento de la página activa
+        let paginaActivaElement = document.querySelector('.pagination .page-item.active');
+
+        // Verificar si se encontró un elemento activo
+        if (paginaActivaElement) {
+            // Obtener el número de la página activa
+            let numeroPaginaActiva = paginaActivaElement.querySelector('.page-link').textContent;
+
+            // Imprimir el número de la página activa en la consola
+            return parseInt(numeroPaginaActiva);
+        } else {
+            return 1;
+        }
+
     }
 
     function cargaBotonesRutas() {
@@ -247,6 +357,24 @@ include "partials/header.php";
         }).done(function(datos) {
             rutas.innerHTML = datos;
         });
+    }
+
+    // Función para guardar la decisión en localStorage
+    function guardarDecision() {
+        // Verificar si el checkbox está marcado
+        var checkbox = document.getElementById('checkNoMostrar');
+        if (checkbox.checked) {
+            // Guardar en localStorage
+            localStorage.setItem('noMostrarModal', 'true');
+        }
+    }
+
+    function mostrarModal() {
+        // Verificar si la decisión de no mostrar el modal está almacenada en localStorage
+        if (localStorage.getItem('noMostrarModal') !== 'true') {
+            // Mostrar el modal
+            $('#modalMensaje').modal('show');
+        }
     }
 </script>
 

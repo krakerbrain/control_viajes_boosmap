@@ -214,13 +214,18 @@ if (isset($_REQUEST['creado'])) {
         }
     }
 
-    function calculomonto(val, campoActualiza) {
+    async function calculomonto(val, campoActualiza) {
+        const {
+            factor,
+            impuesto
+        } = await calculaFactorIslr();
+        console.log(factor, impuesto)
         let montobruto = val.value == "" ? 0 : val.value
         let monto;
         if (typeof(campoActualiza) == 'number' || campoActualiza == 'costoruta') {
-            monto = parseInt(montobruto) - (parseInt(montobruto) * 0.13)
+            monto = parseInt(montobruto) - (parseInt(montobruto) * (impuesto / 100))
         } else {
-            monto = parseInt(montobruto) / 0.870
+            monto = parseInt(montobruto) / factor
         }
         document.getElementById(campoActualiza).value = Math.round(monto);
     }
@@ -377,21 +382,60 @@ if (isset($_REQUEST['creado'])) {
         }
         return
     }
+
+    async function cargarArchivoJSON(url) {
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error al cargar el archivo JSON:', error);
+            return null;
+        }
+    }
+
+
     async function agregaRutaVina() {
         try {
-            const response = await fetch('ruta-vina.json');
-            const data = await response.json();
 
-            for (let i = 0; i < data.length; i++) {
-                const ruta = data[i].comuna;
-                const costoRuta = data[i]["monto-liquido"];
-                var datos = await verificaComuna(ruta);
+            // Cargar los datos de los archivos JSON
+            const comunasData = await cargarArchivoJSON('ruta-vina.json');
+            const islrData = await cargarArchivoJSON('../islr.json');
+
+            if (!comunasData || !islrData) {
+                console.error('No se pudieron cargar los datos necesarios.');
+                return;
+            }
+
+            // Obtener el año actual y el mes actual
+            const currentDate = new Date();
+            const anioActual = currentDate.getFullYear();
+            const mesActual = currentDate.getMonth() + 1;
+            const anioParaCalculo = mesActual === 12 ? anioActual + 1 : anioActual;
+
+            for (let i = 0; i < comunasData.length; i++) {
+                const comuna = comunasData[i].comuna;
+                const montoBruto = comunasData[i]["monto-bruto"];
+
+                // Si el mes actual es diciembre, se toma el año siguiente
+
+                // Buscar el factor correspondiente al año actual en el archivo islr.json
+                let factor = 0.87; // Valor predeterminado si no se encuentra el año actual
+                for (const islr of islrData) {
+                    if (islr.anio === anioParaCalculo) {
+                        factor = islr.factor;
+                        break;
+                    }
+                }
+                // Calcular el costo líquido
+                const costoLiquido = Math.round(montoBruto * factor);
+                var datos = await verificaComuna(comuna);
                 if (datos != "true") {
                     // Realizar la inserción en la base de datos utilizando la consulta SQL
                     $.post("conexiones_rutas.php", {
                         ingresar: "agregaviaje",
-                        comuna: ruta,
-                        costoruta: costoRuta
+                        comuna: comuna,
+                        costoruta: costoLiquido
                     }).done(function(datos) {
                         obtenerruta();
                         document.getElementsByClassName('ocultaRutas')[1].style.display = "block";
@@ -415,11 +459,13 @@ if (isset($_REQUEST['creado'])) {
     function obtenerruta() {
         $.post("conexiones_rutas.php", {
             ingresar: "obtenerRutas"
-        }).done(function(datos) {
+        }).done(async function(datos) {
             let data = JSON.parse(datos);
             let configuraRutas = "";
             let modificaMontos = "";
-
+            const {
+                factor
+            } = await calculaFactorIslr();
             data.map(function(clave) {
                 configuraRutas += `<tr>
                         <td nowrap>${clave.ruta}</td>
@@ -434,8 +480,8 @@ if (isset($_REQUEST['creado'])) {
                                     <input type='text' 
                                             id='bruto${clave.idruta}'
                                             class='editaBruto text-center border-0 bg-light w-100' 
-                                            data-value='${Math.round(clave.costoruta/0.870)}' 
-                                            value='${Math.round(clave.costoruta/0.870)}'
+                                            data-value='${Math.round(clave.costoruta/factor)}' 
+                                            value='${Math.round(clave.costoruta/factor)}'
                                             onkeyup="calculomonto(this,${clave.idruta})"
                                             disabled />
                                 </td>
@@ -458,6 +504,37 @@ if (isset($_REQUEST['creado'])) {
         }).fail(function() {
             alert("error");
         });
+    }
+    async function calculaFactorIslr() {
+        try {
+            const islrData = await cargarArchivoJSON('../islr.json');
+
+            // Obtener el año actual y el mes actual
+            const currentDate = new Date();
+            const anioActual = currentDate.getFullYear();
+            const mesActual = currentDate.getMonth() + 1;
+            const anioParaCalculo = mesActual === 12 ? anioActual + 1 : anioActual;
+
+            // Buscar el factor correspondiente al año actual en el archivo islr.json
+            let factor;
+            let impuesto;
+
+            for (const islr of islrData) {
+                if (islr.anio === anioParaCalculo) {
+                    factor = islr.factor;
+                    impuesto = islr.impuesto;
+                    break;
+                }
+            }
+
+            return {
+                factor,
+                impuesto
+            };
+        } catch (error) {
+            console.error('Error al leer el archivo JSON:', error);
+            return null;
+        }
     }
 
     function editaMonto(checkbox, campos) {

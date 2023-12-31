@@ -1,0 +1,17 @@
+[
+  {
+    "anio": 2022,
+    "impuesto": 12.25,
+    "factor": 0.878
+  },
+  {
+    "anio": 2023,
+    "impuesto": 13,
+    "factor": 0.87
+  },
+  {
+    "anio": 2024,
+    "impuesto": 13.75,
+    "factor": 0.8625
+  }
+]

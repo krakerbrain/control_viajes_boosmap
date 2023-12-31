@@ -1,26 +1,26 @@
 [
   {
     "comuna": "Viña del Mar",
-    "monto-liquido": 3173
+    "monto-bruto": 3647
   },
   {
     "comuna": "Valparaiso",
-    "monto-liquido": 4072
+    "monto-bruto": 4681
   },
   {
     "comuna": "Concon",
-    "monto-liquido": 4568
+    "monto-bruto": 5251
   },
   {
     "comuna": "Quilpué",
-    "monto-liquido": 3973
+    "monto-bruto": 4567
   },
   {
     "comuna": "Villa Alemana",
-    "monto-liquido": 4568
+    "monto-bruto": 5251
   },
   {
     "comuna": "Reñaca",
-    "monto-liquido": 3577
+    "monto-bruto": 4111
   }
 ]

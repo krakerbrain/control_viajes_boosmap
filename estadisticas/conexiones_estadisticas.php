@@ -14,9 +14,11 @@ while ($datos = $query->fetch()) {
     $idusuario = $datos[0];
 };
 
+
 switch ($ingresar) {
     case 'select_mes':
-        $query = $con->prepare("SELECT DISTINCT MONTH(fecha) AS mes, YEAR(fecha) AS anio FROM viajes ORDER BY fecha ASC");
+        $query = $con->prepare("SELECT DISTINCT MONTH(fecha) AS mes, YEAR(fecha) AS anio FROM viajes WHERE idusuario = :idusuario ORDER BY fecha ASC");
+        $query->bindParam(':idusuario', $idusuario);
         $query->execute();
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $json_result = json_encode($result);
@@ -28,6 +30,21 @@ switch ($ingresar) {
         $mes = $mesAnio[0]; // Obtiene el mes de la primera parte del valor
         $anio = $mesAnio[1]; // Obtiene el año de la segunda parte del valor
 
+        // Cargar el contenido del archivo JSON
+        $jsonFilePath = '../islr.json';
+        $jsonContent = file_get_contents($jsonFilePath);
+        $islrData = json_decode($jsonContent, true);
+
+        // Obtener el factor correspondiente al año
+        foreach ($islrData as $islr) {
+            $anioFactor = $mes == 12 ? $anio + 1 : $anio;
+            if ($islr['anio'] == $anioFactor) {
+                $factor = $islr['factor'];
+                break;
+            }
+        }
+
+
         $query = $con->prepare("SELECT count(*) AS totalviajes, sum(monto) as ingresos  FROM viajes WHERE idusuario = :idusuario AND MONTH(fecha) = :mes AND YEAR(fecha) = :anio");
         $query->bindParam(':idusuario', $idusuario);
         $query->bindParam(':mes', $mes);
@@ -35,7 +52,7 @@ switch ($ingresar) {
         $query->execute();
         $datos = $query->fetchAll(PDO::FETCH_ASSOC);
         foreach ($datos as $totalviajes) {
-            $montobruto = ($totalviajes['ingresos'] / 0.87);
+            $montobruto = ($totalviajes['ingresos'] / $factor);
             echo "<tr>
                   <td nowrap>Viajes completados: " . $totalviajes['totalviajes'] . "</td>
                   </tr>
