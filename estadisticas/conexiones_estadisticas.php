@@ -112,9 +112,10 @@ function obtenerMesesEIngresos($con, $idusuario)
     for ($i = 5; $i >= 0; $i--) {
         $mes = ($mesActual - $i + 12) % 12; // Asegura que el mes esté en el rango de 1 a 12
         $mes = $mes == 0 ? 12 : $mes;
+        $annio = $mes > $mesActual ? $annioActual - 1 : $annioActual;
         $query = $con->prepare("SELECT extract(month FROM fecha) as mes, SUM(monto) as ingreso, count(destino) as conteo FROM viajes WHERE idusuario = :idusuario AND extract(year FROM fecha) = :anio AND extract(month FROM fecha) = :mes GROUP BY mes");
         $query->bindParam(':idusuario', $idusuario);
-        $query->bindParam(':anio', $annioActual);
+        $query->bindParam(':anio', $annio);
         $query->bindParam(':mes', $mes);
         $query->execute();
         $resultado = $query->fetch(PDO::FETCH_ASSOC);
