@@ -30,28 +30,19 @@ switch ($ingresar) {
     $sql->execute();
     break;
 
-  case 'obtener':
+  case 'getUltimosViajes':
     $limit   = $_POST['limit'];
     $offset  = $_POST['offset'];
 
     // Obtener el conteo total de filas
-    $queryTotalFilas = $con->prepare("SELECT COUNT(*) as totalFilas FROM viajes WHERE idusuario = :idusuario AND MONTH(fecha) = MONTH(NOW())");
-    $queryTotalFilas->bindParam(':idusuario', $idusuario);
-    $queryTotalFilas->execute();
-    $totalFilas = $queryTotalFilas->fetch(PDO::FETCH_ASSOC)['totalFilas'];
+    $totalFilas = obtenerTotalFilas($con, $idusuario);
 
     // Consulta para obtener los datos paginados
-    $query = $con->prepare("SELECT *, DATE_FORMAT(fecha, '%d-%m-%Y') AS fecha FROM viajes WHERE idusuario = :idusuario AND MONTH(fecha) = MONTH(NOW()) AND YEAR(fecha) = YEAR(NOW()) ORDER BY CASE WHEN fecha < CURDATE() THEN fecha ELSE CURDATE() END DESC, idviaje DESC LIMIT :limit OFFSET :offset");
-    $query->bindParam(':idusuario', $idusuario);
-    $query->bindParam(':limit', $limit, PDO::PARAM_INT); // Parámetro de límite de filas por página
-    $query->bindParam(':offset', $offset, PDO::PARAM_INT); // Parámetro de inicio de filas
-    $query->execute();
-    $datos = $query->fetchAll(PDO::FETCH_ASSOC);
-    $json = json_encode(array("data" => $datos, "cantidadFilas" => $totalFilas)); // Agregar el conteo total de filas al JSON
+    $datos = obtenerDatosPaginados($con, $idusuario, $limit, $offset);
+
+    $json = json_encode(array("data" => $datos, "cantidadFilas" => $totalFilas));
     echo $json;
     break;
-
-
   case 'cargarutas':
     $query = $con->prepare("SELECT * FROM rutas WHERE idusuario = :idusuario");
     $query->bindParam(':idusuario', $idusuario);
@@ -98,8 +89,132 @@ switch ($ingresar) {
     $query->bindParam(':idusuario', $idusuario);
     $query->execute();
     break;
+  case 'agregaDetalles':
+    // Verificar si se ha recibido la clave 'datos' en la solicitud POST
+    if (isset($_POST['datos'])) {
+      // Decodificar la cadena JSON en un array asociativo
+      $datos = json_decode($_POST['datos'], true);
+
+      // Verificar si la decodificación fue exitosa
+      if ($datos !== null) {
+        foreach ($datos as $data) {
+          if (strpos($data['id'], 'fila_') !== false) {
+            $tablaDetalle = strtolower($data['descripcion']) . 's';
+
+            $sql = $con->prepare("INSERT INTO $tablaDetalle(idusuario,idviaje,monto) VALUES (:idusuario,:idviaje,:monto)");
+            $sql->bindParam(':idusuario', $idusuario);
+            $sql->bindParam(':idviaje', $data['idViaje']);
+            $sql->bindParam(':monto', $data['monto']);
+            $sql->execute();
+          }
+        }
+        echo "true";
+      } else {
+        // La decodificación JSON falló
+        echo "Error al decodificar los datos JSON.";
+      }
+    } else {
+      // La clave 'datos' no está presente en la solicitud POST
+      echo "No se recibieron datos.";
+    }
+    break;
+
+  case 'getDetalles':
+    $idviaje = $_POST['idViaje'];
+    // Supongamos que tienes una conexión PDO llamada $con y una variable $idusuario definida
+
+    // Array asociativo para almacenar la información de extras y peajes
+    $resultado = array();
+
+    // Consulta para obtener datos de la tabla 'extras'
+    $queryExtras = $con->prepare("SELECT id, idviaje, monto FROM extras WHERE idusuario = :idusuario AND idviaje = :idviaje");
+    $queryExtras->bindParam(':idusuario', $idusuario);
+    $queryExtras->bindParam(':idviaje', $idviaje);
+    $queryExtras->execute();
+    $datosExtras = $queryExtras->fetchAll(PDO::FETCH_ASSOC);
+
+    // Estructurar datos de 'extras' y agregar al resultado
+    foreach ($datosExtras as $datoExtra) {
+      $resultado[] = array(
+        'id' => $datoExtra['id'],
+        'idViaje' => $datoExtra['idviaje'],
+        'descripcion' => 'Extra',
+        'monto' => $datoExtra['monto']
+      );
+    }
+
+    // Consulta para obtener datos de la tabla 'peajes'
+    $queryPeajes = $con->prepare("SELECT id,idviaje, monto FROM peajes WHERE idusuario = :idusuario AND idviaje = :idviaje");
+    $queryPeajes->bindParam(':idusuario', $idusuario);
+    $queryPeajes->bindParam(':idviaje', $idviaje);
+    $queryPeajes->execute();
+    $datosPeajes = $queryPeajes->fetchAll(PDO::FETCH_ASSOC);
+
+    // Estructurar datos de 'peajes' y agregar al resultado
+    foreach ($datosPeajes as $datoPeaje) {
+      $resultado[] = array(
+        'id' => $datoPeaje['id'],
+        'idViaje' => $datoPeaje['idviaje'],
+        'descripcion' => 'Peaje',
+        'monto' => $datoPeaje['monto']
+      );
+    }
+
+    // Imprimir el resultado como JSON
+    echo json_encode($resultado);
+    break;
+  case 'eliminaDataDetalle':
+    $id = $_POST['id'];
+    $descripcion = $_POST['descripcion'];
+    $tablaDetalle = strtolower($descripcion) . 's';
+
+    $query = $con->prepare("DELETE FROM $tablaDetalle WHERE id = :id AND idusuario = :idusuario");
+    $query->bindParam(':id', $id);
+    $query->bindParam(':idusuario', $idusuario);
+    if ($query->execute()) {
+      echo "true";
+    } else {
+      echo "false";
+    };
+
+    break;
 
   default:
     # code...
     break;
+}
+
+function obtenerTotalFilas($con, $idusuario)
+{
+  $queryTotalFilas = $con->prepare("SELECT COUNT(*) as totalFilas FROM viajes WHERE idusuario = :idusuario AND MONTH(fecha) = MONTH(NOW())");
+  $queryTotalFilas->bindParam(':idusuario', $idusuario);
+  $queryTotalFilas->execute();
+  return $queryTotalFilas->fetch(PDO::FETCH_ASSOC)['totalFilas'];
+}
+
+function obtenerDatosPaginados($con, $idusuario, $limit, $offset)
+{
+  $query = $con->prepare("SELECT 
+                            viajes.*,
+                            DATE_FORMAT(viajes.fecha, '%d-%m-%Y') AS fecha,
+                            EXISTS (SELECT 1 FROM peajes WHERE peajes.idviaje = viajes.idviaje 
+                                    OR EXISTS (SELECT 1 FROM extras WHERE extras.idviaje = viajes.idviaje)) AS tiene_detalles
+                        FROM 
+                            viajes
+                        WHERE 
+                            viajes.idusuario = :idusuario 
+                            AND MONTH(viajes.fecha) = MONTH(NOW()) 
+                            AND YEAR(viajes.fecha) = YEAR(NOW()) 
+                        ORDER BY 
+                            CASE WHEN viajes.fecha < CURDATE() THEN viajes.fecha ELSE CURDATE() END DESC, 
+                            viajes.idviaje DESC 
+                        LIMIT 
+                            :limit OFFSET :offset");
+
+  $query->bindParam(':idusuario', $idusuario);
+  $query->bindParam(':limit', $limit, PDO::PARAM_INT);
+  $query->bindParam(':offset', $offset, PDO::PARAM_INT);
+  $query->execute();
+
+  return $query->fetchAll(PDO::FETCH_ASSOC);
 }

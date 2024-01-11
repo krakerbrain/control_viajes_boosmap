@@ -68,7 +68,8 @@ function datosMes(fecha) {
     mes: fecha,
   })
     .done(function (datos) {
-      totalviajes(datos);
+      let data = JSON.parse(datos);
+      totalviajes(data);
       viajesporruta(false, "destino", fecha);
     })
     .fail(function () {
@@ -76,9 +77,46 @@ function datosMes(fecha) {
     });
 }
 
-function totalviajes(datos) {
+async function totalviajes(datos) {
   var tablaestadisticas = document.getElementById("estadisticas");
-  tablaestadisticas.innerHTML = datos;
+  const { factor } = await calculaFactorIslr();
+  datos.forEach((element) => {
+    let montoBruto = element.montoLiquido / factor;
+    let extrasBruto = element.totalExtras / factor;
+    let totalBruto = parseInt(montoBruto) + parseInt(extrasBruto);
+    let totalLiquido = parseInt(element.montoLiquido) + parseInt(element.totalExtras);
+    let displayExtra = "";
+    let colspan = "";
+    if (element.conteoExtras == 0) {
+      displayExtra = "d-none";
+      colspan = "colspan=2";
+    }
+    let displayPeaje = element.conteoPeajes == 0 ? "d-none" : "";
+
+    tablaestadisticas.innerHTML = `
+                                  <tr>
+                                    <td ${colspan}">VIAJES COMPLETADOS: ${element.totalviajes}</td>
+                                    <td class="${displayExtra}">EXTRAS: ${element.conteoExtras}</td>
+                                  </tr>
+                                  <tr class="${displayExtra}">
+                                    <td>VIAJES BRUTO: ${formatoMoneda(montoBruto)}</td>
+                                    <td>VIAJES LIQUIDO: ${formatoMoneda(element.montoLiquido)}</td>
+                                  </tr>
+                                  <tr class="${displayExtra}">
+                                    <td>EXTRAS BRUTO: ${formatoMoneda(extrasBruto)}</td>
+                                    <td>EXTRAS LIQUIDO: ${formatoMoneda(element.totalExtras)}</td>
+                                  </tr>
+                                  <tr >
+                                    <td>TOTAL BRUTO: ${formatoMoneda(totalBruto)}</td>
+                                    <td>TOTAL LIQUIDO: ${formatoMoneda(totalLiquido)}</td>
+                                  </tr>
+                                  <tr class="${displayPeaje}">
+                                    <td colspan="2">PEAJES (${element.conteoPeajes}): ${formatoMoneda(
+      element.totalPeajes
+    )} <span class="text-danger small">**Los peajes no afectan el total**</span></td>
+                                  </tr>
+                                  `;
+  });
 }
 
 function viajesporruta(ordenColumna, tipoorden, fecha) {

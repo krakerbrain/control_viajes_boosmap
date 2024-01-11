@@ -117,3 +117,7 @@ WHEN 'hoy' THEN
 SELECT COUNT(*) , SUM(monto) into viajes, total FROM viajes WHERE idusuario = _idusuario and DATE_FORMAT(fecha, '%Y-%m-%d') = DATE_FORMAT(date_add(now(),interval -3 hour), '%Y-%m-%d');
 END CASE$$
 DELIMITER ;
+
+
+
+

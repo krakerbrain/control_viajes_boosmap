@@ -19,7 +19,10 @@ $indice = "estadisticas";
                     <form action="conexiones_estadisticas.php" method="post" class="mx-auto">
                         <select name="selectMes" id="selectMes"></select>
                     </form>
-                    <table id="estadisticas"></table>
+
+                    <table class="table table-sm table-striped table-bordered text-center small mt-3">
+                        <tbody id="estadisticas"></tbody>
+                    </table>
                 </div>
                 <div>
                     <h6 class=" my-2">Gráfico mes a mes</h6>

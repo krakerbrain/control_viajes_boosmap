@@ -8,7 +8,7 @@ if (isset($_POST['usuario']) && isset($_POST['contrasenia'])) {
   $pass     = $_POST['contrasenia'];
   $usuario  = $_POST['usuario'];
   if ($pass != "" && $usuario != "") {
-    $query = $con->prepare("SELECT count(*) as conteo, clave, activo FROM usuarios WHERE nombre = :usuario");
+    $query = $con->prepare("SELECT count(*) as conteo, clave, activo, otrasapps, admin FROM usuarios WHERE nombre = :usuario");
     $query->bindParam(':usuario', $usuario);
     $query->execute();
     $result = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -19,6 +19,8 @@ if (isset($_POST['usuario']) && isset($_POST['contrasenia'])) {
         if (password_verify($pass, $datos['clave'])) {
           session_start();
           $_SESSION['usuario'] = $usuario;
+          $_SESSION['admin'] = $datos['admin'] == 1 ? true : false;
+          $_SESSION['otrasapps'] = $datos['otrasapps'] == 1 ? true : false;
 
           $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
           $sqlUsuario->bindParam(':nombreUsuario', $_SESSION['usuario']);

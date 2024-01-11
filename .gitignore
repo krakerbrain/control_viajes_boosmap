@@ -7,3 +7,5 @@ composer.lock
 requerimientos.MD
 *.txt
 querysGenerales.sql
+/backup
+/PRUEBAS

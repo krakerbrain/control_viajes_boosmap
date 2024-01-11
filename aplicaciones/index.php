@@ -7,8 +7,8 @@ include __DIR__ . "/../partials/header.php";
 $indice = "aplicaciones";
 
 // Verificar si el usuario está autenticado y es "admin2"
-if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
-    // Si el usuario no está autenticado o no es "admin2", redirigir o mostrar un mensaje de error.
+if (!$sesion || !$_SESSION['otrasapps']) {
+    // Si el usuario no está autenticado o no tiene activo el modulo, redirigir o mostrar un mensaje de error.
     header($_ENV['URL_LOCAL']);
     exit();
 }
@@ -372,11 +372,6 @@ if (!$sesion || $_SESSION['usuario'] !== $_ENV['USUARIO_ADMIN']) {
             console.log(error)
         });
     }
-
-    const formatoMoneda = moneda => Math.round(moneda).toLocaleString('es-CL', {
-        style: 'currency',
-        currency: 'CLP'
-    });
 
     function borrarGanancia(id) {
 

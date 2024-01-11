@@ -51,64 +51,29 @@ include "partials/header.php";
             <ul class="pagination justify-content-center mt-3" style="font-size:0.8rem">
             </ul>
         </nav>
+
+
+        <div class="container text-right mx-n3">
+            <span class="small">Leyenda de acciones: </span>
+            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="Agrega Viajes"><i class="fa-solid fa-plus text-success" style="font-size: 1rem"></i></a>
+            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="Viaje con detalles"><i class="fa-solid fa-check text-warning" style="font-size: 1rem"></i></a>
+            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="Elimina Viaje"><i class="fa-solid fa-xmark text-danger" style="font-size: 1rem"></i></a>
+        </div>
         <section style="max-height: 400px; overflow-y: auto;">
             <table class="table table-striped" style="width:97%;margin: 0 auto; table-layout:fixed;font-size:small">
                 <thead class="table-danger text-center" style="position: sticky; top:-1px; z-index: 1;">
                     <td style="width:23%">Destino</td>
                     <td style="width:20%">Fecha</td>
                     <td style="width:13%">Monto</td>
-                    <td style="width:16%">Eliminar</td>
+                    <td style="width:16%">Acciones</td>
                 </thead>
                 <tbody id="tablaUltimosViajes" class="text-center"></tbody>
             </table>
         </section>
 
     </div>
-
-    <!-- Modal de mensaje -->
-    <div class="modal fade" id="modalMensaje" tabindex="-1" role="dialog" aria-labelledby="modalMensajeGeneral" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-light">
-                    <h5 class="modal-title" id="modalMensajeGeneral">AVISO DE ACTUALIZACIÓN</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                        <span aria-hidden="true" class="text-light">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Durante los próximos días se harán algunas actualizaciones de la app para modificar el nuevo
-                        porcentaje
-                        del ISLR.</p>
-                    <p> El mismo pasa de 13% a 13.75%.</p>
-                    <p>Como el pago de la última quincena (en Viña del Mar) es en Enero va a haber una diferencia en el
-                        pago y para que los montos sean mostrados lo más cercano posible a la realidad es necesario
-                        actualizar
-                        el monto de todos los viajes desde el 16/12 en adelante.</p>
-                    <p>También se actualizará el monto actual de las rutas ya que, como esta app refleja el monto
-                        líquido pagado por viaje,
-                        al haber un cambio de % de retención de ISLR el monto líquido es menos dinero por viaje que el
-                        año anterior.</p>
-                    <p>Trataré de ser lo más cuidadoso posible para no alterar los datos registrados, pero si llega a
-                        pasar algo recuerden que pueden
-                        contactarme para ayudarlos a corregir cualquier problema. Los que tienen mi número pueden
-                        hacerlo
-                        por ahí y si no por correo: admin@biowork.xyz</p>
-                    <!-- Checkbox -->
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="checkNoMostrar">
-                        <label class="form-check-label small" for="checkNoMostrar">
-                            He leído y no deseo ver de nuevo este mensaje
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="guardarDecision()">Aceptar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- fin modal mensaje-->
+    <?php include "modal_detalles/index.php" ?>
+    <?php include "modals.php" ?>
 
 </body>
 <?php include "partials/boostrap_script.php" ?>
@@ -127,8 +92,7 @@ include "partials/header.php";
         cargaBotonesRutas();
         detallesViajes('hoy', 'inicial');
         obtenerUltimosViajes(false);
-        mostrarModal();
-
+        mostrarModalMensaje();
     };
 
     function agregaRuta(e) {
@@ -166,7 +130,7 @@ include "partials/header.php";
         let limit = 10;
         let offset = (numeroPagina - 1) * limit;
         $.post("conexiones.php", {
-            ingresar: "obtener",
+            ingresar: "getUltimosViajes",
             limit: limit,
             offset: offset,
             dataType: "json"
@@ -174,14 +138,20 @@ include "partials/header.php";
             let data = JSON.parse(datos).data;
             let filas = JSON.parse(datos).cantidadFilas;
             data.forEach((element, index) => {
+
+                let iconoDetalle = element.tiene_detalles == 1 ? "fa-check" : "fa-plus";
+                let colorIcono = element.tiene_detalles == 1 ? "text-warning" : "text-success";
                 tablaUltimosViajes.innerHTML += `<tr class=${nuevoViaje == true && index == 0 ? "nuevoDato" : ""}>
-      <td nowrap>${element.destino}</td>
-      <td nowrap>${element.fecha}</td>
-      <td class='text-center'>${element.monto.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
-      <td style='cursor:pointer' class='text-center' onclick='eliminaViaje(${element.idviaje})' >
-      <i class='fa-solid fa-xmark text-danger'></i>
-      </td>
-      </tr>`
+                                                    <td nowrap>${element.destino}</td>
+                                                    <td nowrap>${element.fecha}</td>
+                                                    <td class='text-center'>${element.monto.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}</td>
+                                                    <td style='cursor:pointer' class='text-center'  >
+                                                    <div class="d-flex justify-content-around ">
+                                                        <i class="fa-solid ${iconoDetalle} mr-lg-n5 ${colorIcono}" style="font-size: 1rem" title="Agrega Detalles" onclick='mostrarModalDetalles(${element.idviaje})'></i>
+                                                        <i class='fa-solid fa-xmark text-danger' style="font-size: 1rem" onclick='mostrarModaleliminaViaje(${element.idviaje})' title="Elimina Viaje"></i>
+                                                    </div>
+                                                    </td>
+                                                </tr>`
             })
             crearPaginas(filas, numeroPagina);
         });
@@ -323,7 +293,8 @@ include "partials/header.php";
         }
     }
 
-    function eliminaViaje(id) {
+    function eliminaViaje() {
+        let id = document.getElementById("idEliminaViaje").value;
         $.post("conexiones.php", {
             ingresar: "eliminar",
             id_viaje: id
@@ -365,17 +336,16 @@ include "partials/header.php";
         var checkbox = document.getElementById('checkNoMostrar');
         if (checkbox.checked) {
             // Guardar en localStorage
-            localStorage.setItem('noMostrarModal', 'true');
+            localStorage.setItem('modalActualizacion10012024', 'true');
         }
     }
+    $(function() {
+        $('[data-toggle="popover"]').popover()
 
-    function mostrarModal() {
-        // Verificar si la decisión de no mostrar el modal está almacenada en localStorage
-        if (localStorage.getItem('noMostrarModal') !== 'true') {
-            // Mostrar el modal
-            $('#modalMensaje').modal('show');
-        }
-    }
+    })
+    $('.popover-dismiss').popover({
+        trigger: 'focus'
+    })
 </script>
 
 </html>

@@ -6,9 +6,7 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
 <nav class="navbar navbar-dark bg-danger lighten-4">
     <a class="navbar-brand" href="<?= $rutainicio ?>">Hola, <?= ucfirst($_SESSION['usuario']) ?></a>
     <div>
-        <button class="navbar-toggler toggler-example" type="button" data-toggle="collapse"
-            data-target="#navbarSupportedContent1" aria-controls="navbarSupportedContent1" aria-expanded="false"
-            aria-label="Toggle navigation">
+        <button class="navbar-toggler toggler-example" type="button" data-toggle="collapse" data-target="#navbarSupportedContent1" aria-controls="navbarSupportedContent1" aria-expanded="false" aria-label="Toggle navigation">
             <span class="dark-blue-text">
                 <i class="fas fa-bars fa-1x"></i>
             </span>
@@ -17,13 +15,12 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
     <div class="collapse navbar-collapse" id="navbarSupportedContent1">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link" style="font-size:14px" href="<?= $rutainicio ?>">Inicio <span
-                        class="sr-only">(current)</span></a>
+                <a class="nav-link" style="font-size:14px" href="<?= $rutainicio ?>">Inicio <span class="sr-only">(current)</span></a>
             </li>
-            <?php if ($_SESSION['usuario'] == $_ENV['USUARIO_ADMIN']) { ?>
-            <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_OTRAS_APPS'] ?>">Otras Apps</a>
-            </li>
+            <?php if ($_SESSION['otrasapps']) { ?>
+                <li class="nav-item">
+                    <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_OTRAS_APPS'] ?>">Otras Apps</a>
+                </li>
             <?php } ?>
             <li class="nav-item">
                 <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_ACTUALIZA'] ?>">Actualiza Datos</a>
@@ -38,13 +35,11 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
                 <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_DOWNLOAD'] ?>">Descarga la App</a>
             </li>
             <li class="nav-item pt-2">
-                <a class="border navbar-brand px-1" style="font-size:13px" href="#"
-                    onclick="confirmarCerrarSesion()">Cerrar Sesión</a>
+                <a class="border navbar-brand px-1" style="font-size:13px" href="#" onclick="confirmarCerrarSesion()">Cerrar Sesión</a>
             </li>
         </ul>
         <!-- Modal de confirmación -->
-        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-danger text-light">
@@ -66,14 +61,14 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
     </div>
     <!-- Script para mostrar el modal de confirmación -->
     <script>
-    function confirmarCerrarSesion() {
-        $('#confirmModal').modal('show');
-    }
-    var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
+        function confirmarCerrarSesion() {
+            $('#confirmModal').modal('show');
+        }
+        var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
 
-    // Función para abrir WhatsApp
-    function openWhatsApp() {
-        window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
-    }
+        // Función para abrir WhatsApp
+        function openWhatsApp() {
+            window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
+        }
     </script>
 </nav>
