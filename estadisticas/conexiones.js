@@ -21,6 +21,9 @@ function fechaActual() {
   fecha = mes + "-" + anio;
   return fecha;
 }
+
+// REVISAR ESTA FUNCION SI NO HAY DATOS EL AÑO SALE UNDEFINED DEBERIA SER EL AÑO ACTUAL
+// NO ENTIENDO POR QUE LA VALIDACION DE NISOPCIONES TEXT ES ANIO
 function llenarSelect() {
   $.post("conexiones_estadisticas.php", {
     ingresar: "select_mes",
@@ -78,8 +81,9 @@ function datosMes(fecha) {
 }
 
 async function totalviajes(datos) {
+  let fechaEstadistica = document.getElementById("selectMes").value == "" ? fechaActual() : document.getElementById("selectMes").value;
   var tablaestadisticas = document.getElementById("estadisticas");
-  const { factor } = await calculaFactorIslr();
+  const { factor } = await calculaFactorIslr(fechaEstadistica);
   datos.forEach((element) => {
     let montoBruto = element.montoLiquido / factor;
     let extrasBruto = element.totalExtras / factor;
