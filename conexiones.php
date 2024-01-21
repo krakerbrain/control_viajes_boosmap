@@ -197,8 +197,12 @@ function obtenerDatosPaginados($con, $idusuario, $limit, $offset)
   $query = $con->prepare("SELECT 
                             viajes.*,
                             DATE_FORMAT(viajes.fecha, '%d-%m-%Y') AS fecha,
-                            EXISTS (SELECT 1 FROM peajes WHERE peajes.idviaje = viajes.idviaje 
-                                    OR EXISTS (SELECT 1 FROM extras WHERE extras.idviaje = viajes.idviaje)) AS tiene_detalles
+                          CASE 
+                WHEN EXISTS (SELECT 1 FROM peajes WHERE peajes.idviaje = viajes.idviaje) 
+                  OR EXISTS (SELECT 1 FROM extras WHERE extras.idviaje = viajes.idviaje) 
+                            THEN 1 
+                            ELSE 0 
+                        END AS tiene_detalles
                         FROM 
                             viajes
                         WHERE 
