@@ -8,14 +8,13 @@ require __DIR__ . '/seguridad/JWT/jwt.php';
 $ingresar  = $_POST['ingresar'];
 $datosUsuario = validarToken();
 
-if ($datosUsuario) {
-  $idusuario = $datosUsuario['idusuario'];
-} else {
+if (!$datosUsuario) {
   // El token no es válido o no existe, manejar según sea necesario
   header($_ENV['URL_LOCAL']);
   exit;
 }
 
+$idusuario = $datosUsuario['idusuario'];
 switch ($ingresar) {
   case 'insertar':
     $destino    = $_POST['destino'];

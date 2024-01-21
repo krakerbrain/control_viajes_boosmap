@@ -1,23 +1,19 @@
 <?php
-include __DIR__ . '/../config.php';
-session_start();
-
-if (isset($_SESSION['usuario'])) {
-    $usuario = $_SESSION['usuario'];
-}
-$ingresar = $_REQUEST['ingresar'];
-/**Se obtiene el id del usuario según el nombre que use al iniciar sesión */
-$query = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :usuario");
-$query->bindParam(':usuario', $usuario);
-$query->execute();
-while ($datos = $query->fetch()) {
-    $idusuario = $datos[0];
-};
-
-// Verificar si ya existe un registro para hoy
 date_default_timezone_set('America/Santiago');
 $fechaHoy = date('Y-m-d');
 $fechayHoraHoy = date('Y-m-d H:i:s');
+
+require __DIR__ . '/../config.php';
+require __DIR__ . '/../seguridad/JWT/jwt.php';
+
+$datosUsuario = validarToken();
+$ingresar = $_REQUEST['ingresar'];
+if (!$datosUsuario) {
+    header($_ENV['URL_LOCAL']);
+    exit;
+}
+
+$idusuario = $datosUsuario['idusuario'];
 
 switch ($ingresar) {
     case 'agregaApp':
@@ -79,9 +75,7 @@ switch ($ingresar) {
             // Verifica si la variable $nombre no está vacía
             if (!empty($nombreApp)) {
                 // Agrega una condición adicional
-
                 $query->queryString .= " AND nombre_app = $nombreApp";
-                // var_dump($query->queryString);
             }
 
             $query->execute();

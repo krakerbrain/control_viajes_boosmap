@@ -7,10 +7,9 @@ $ingresar = $_REQUEST['ingresar'];
 if (!$datosUsuario) {
     header($_ENV['URL_LOCAL']);
     exit;
-} else {
-    $idusuario = $datosUsuario['idusuario'];
 }
 
+$idusuario = $datosUsuario['idusuario'];
 
 $url = "comunas-regiones.json";
 $json = file_get_contents($url);

@@ -37,6 +37,32 @@ function validarToken()
     return null;
 }
 
+function generarTokenYConfigurarCookie($data, $usuario)
+{
+    // Clave secreta para firmar el token (reemplázala con tu propia clave secreta)
+    $key = $_ENV['JWTKEY'];
+
+    // Construir el payload del token
+    $payload = array(
+        "id" => $data['idusuario'],
+        "usuario" => $usuario,
+        "admin" => $data['admin'] == 1 ? true : false,
+        "otrasapps" => $data['otrasapps'] == 1 ? true : false
+    );
+
+    // Codificar el token JWT
+    $jwt = JWT::encode($payload, $key, 'HS256');
+
+    // Obtener la fecha y hora de medianoche de hoy
+    $midnightToday = strtotime('today midnight');
+
+    // Obtener la fecha y hora de medianoche de una semana después
+    $midnightNextWeek = $midnightToday + (7 * 24 * 60 * 60);
+
+    // Establecer el token con una duración hasta medianoche de una semana después
+    setcookie("jwt", $jwt, $midnightNextWeek, "/", "", false, true);
+}
+
 //uso en archivos
 // require __DIR__ . '/../config.php';
 // require __DIR__ . '/../seguridad/JWT/jwt.php';

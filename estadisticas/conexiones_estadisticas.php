@@ -8,9 +8,10 @@ $ingresar = $_REQUEST['ingresar'];
 if (!$datosUsuario) {
     header($_ENV['URL_LOCAL']);
     exit;
-} else {
-    $idusuario = $datosUsuario['idusuario'];
 }
+
+$idusuario = $datosUsuario['idusuario'];
+
 
 
 switch ($ingresar) {

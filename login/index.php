@@ -24,26 +24,12 @@ if (!$datosUsuario) {
         if ($datos['conteo'] > 0 && $datos['activo'] == 1) {
 
           if (password_verify($pass, $datos['clave'])) {
-            $key = $_ENV['JWTKEY']; // Cambia esto por una clave secreta segura
-            $payload = array(
-              "id" => $datos['idusuario'],
-              "usuario" => $usuario,
-              "admin" => $datos['admin'] == 1 ? true : false,
-              "otrasapps" => $datos['otrasapps'] == 1 ? true : false
-            );
 
-            $jwt = JWT::encode($payload, $key, 'HS256');
-
-
-            // Configura la cookie para almacenar el JWT
-            setcookie("jwt", $jwt, time() + 3600, "/", "", false, true);
-            // session_start();
-            // $_SESSION['usuario'] = $usuario;
-            // $_SESSION['admin'] = $datos['admin'] == 1 ? true : false;
-            // $_SESSION['otrasapps'] = $datos['otrasapps'] == 1 ? true : false;
+            // Generar el token y configurar la cookie
+            generarTokenYConfigurarCookie($datos, $usuario);
 
             $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
-            $sqlUsuario->bindParam(':nombreUsuario', $payload['usuario']);
+            $sqlUsuario->bindParam(':nombreUsuario', $usuario);
             $sqlUsuario->execute();
 
             $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
@@ -75,6 +61,7 @@ if (!$datosUsuario) {
 } else {
   header("location:../index.php");
 }
+
 include "../partials/header.php";
 ?>
 

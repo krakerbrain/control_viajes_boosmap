@@ -1,18 +1,16 @@
 <?php
 include __DIR__ . '/../config.php';
-session_start();
+require __DIR__ . '/../seguridad/JWT/jwt.php';
 
-if (isset($_SESSION['usuario'])) {
-    $usuario = $_SESSION['usuario'];
-}
+$datosUsuario = validarToken();
 $ingresar = $_REQUEST['ingresar'];
-/**Se obtiene el id del usuario según el nombre que use al iniciar sesión */
-$query = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :usuario");
-$query->bindParam(':usuario', $usuario);
-$query->execute();
-while ($datos = $query->fetch()) {
-    $idusuario = $datos[0];
-};
+
+if (!$datosUsuario) {
+    header($_ENV['URL_LOCAL']);
+    exit;
+}
+
+$idusuario = $datosUsuario['idusuario'];
 
 switch ($ingresar) {
     case 'getRutas':
