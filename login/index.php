@@ -1,60 +1,79 @@
 <?php
-include('../config.php');
+
+use Firebase\JWT\JWT;
+
+require __DIR__ . '/../config.php';
+require __DIR__ . '/../seguridad/JWT/jwt.php';
+
+$datosUsuario = validarToken();
 $error = "false";
 $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
 $cambio_clave = isset($_REQUEST['cambio_clave']) ? $_REQUEST['cambio_clave'] : "";
 
-if (isset($_POST['usuario']) && isset($_POST['contrasenia'])) {
-  $pass     = $_POST['contrasenia'];
-  $usuario  = $_POST['usuario'];
-  if ($pass != "" && $usuario != "") {
-    $query = $con->prepare("SELECT count(*) as conteo, clave, activo, otrasapps, admin FROM usuarios WHERE nombre = :usuario");
-    $query->bindParam(':usuario', $usuario);
-    $query->execute();
-    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+if (!$datosUsuario) {
+  if (isset($_POST['usuario']) && isset($_POST['contrasenia'])) {
+    $pass     = $_POST['contrasenia'];
+    $usuario  = $_POST['usuario'];
+    if ($pass != "" && $usuario != "") {
+      $query = $con->prepare("SELECT idusuario, count(*) as conteo, clave, activo, otrasapps, admin FROM usuarios WHERE nombre = :usuario");
+      $query->bindParam(':usuario', $usuario);
+      $query->execute();
+      $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($result as $datos) {
-      if ($datos['conteo'] > 0 && $datos['activo'] == 1) {
+      foreach ($result as $datos) {
+        if ($datos['conteo'] > 0 && $datos['activo'] == 1) {
 
-        if (password_verify($pass, $datos['clave'])) {
-          session_start();
-          $_SESSION['usuario'] = $usuario;
-          $_SESSION['admin'] = $datos['admin'] == 1 ? true : false;
-          $_SESSION['otrasapps'] = $datos['otrasapps'] == 1 ? true : false;
+          if (password_verify($pass, $datos['clave'])) {
+            $key = $_ENV['JWTKEY']; // Cambia esto por una clave secreta segura
+            $payload = array(
+              "id" => $datos['idusuario'],
+              "usuario" => $usuario,
+              "admin" => $datos['admin'] == 1 ? true : false,
+              "otrasapps" => $datos['otrasapps'] == 1 ? true : false
+            );
 
-          $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
-          $sqlUsuario->bindParam(':nombreUsuario', $_SESSION['usuario']);
-          $sqlUsuario->execute();
+            $jwt = JWT::encode($payload, $key, 'HS256');
 
-          $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
-          $idusuario = $resultadoUsuario['idusuario'];
 
-          // Realizar la consulta en la tabla viajes utilizando el idusuario
-          $sqlViajes = $con->prepare("SELECT COUNT(*) as count FROM rutas WHERE idusuario = :idusuario");
-          $sqlViajes->bindParam(':idusuario', $idusuario);
-          $sqlViajes->execute();
+            // Configura la cookie para almacenar el JWT
+            setcookie("jwt", $jwt, time() + 3600, "/", "", false, true);
+            // session_start();
+            // $_SESSION['usuario'] = $usuario;
+            // $_SESSION['admin'] = $datos['admin'] == 1 ? true : false;
+            // $_SESSION['otrasapps'] = $datos['otrasapps'] == 1 ? true : false;
 
-          $resultadoViajes = $sqlViajes->fetch(PDO::FETCH_ASSOC);
-          $count = $resultadoViajes['count'];
+            $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
+            $sqlUsuario->bindParam(':nombreUsuario', $payload['usuario']);
+            $sqlUsuario->execute();
 
-          if ($count > 0) {
-            header("location:../index.php");
+            $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
+            $idusuario = $resultadoUsuario['idusuario'];
+
+            // Realizar la consulta en la tabla viajes utilizando el idusuario
+            $sqlViajes = $con->prepare("SELECT COUNT(*) as count FROM rutas WHERE idusuario = :idusuario");
+            $sqlViajes->bindParam(':idusuario', $idusuario);
+            $sqlViajes->execute();
+
+            $resultadoViajes = $sqlViajes->fetch(PDO::FETCH_ASSOC);
+            $count = $resultadoViajes['count'];
+            if ($count > 0) {
+              header("location:../index.php");
+            } else {
+              header("location:../rutas/index.php?creado=false");
+            }
           } else {
-            header("location:../rutas/index.php?creado=false");
+            $error = "true";
           }
         } else {
-          $error = "true";
-          session_abort();
+          $error =  $datos["activo"] == 0 ? "inactivo" : "noexiste";
         }
-      } else {
-        $error =  $datos["activo"] == 0 ? "inactivo" : "noexiste";
-        session_abort();
       }
+    } else {
+      $error = "vacio";
     }
-  } else {
-    $error = "vacio";
-    session_abort();
   }
+} else {
+  header("location:../index.php");
 }
 include "../partials/header.php";
 ?>

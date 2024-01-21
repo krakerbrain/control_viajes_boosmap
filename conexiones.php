@@ -1,21 +1,20 @@
 <?php
-include('config.php');
-session_start();
-if (isset($_SESSION['usuario'])) {
-  $usuario = $_SESSION['usuario'];
-}
 
 /**Se recibe un parámetro que ejecuta el switch según lo que se recibe */
 $ingresar   = $_POST['ingresar'];
 
-/**Se obtiene el id del usuario según el nombre que use al iniciar sesión */
-$query = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :usuario");
-$query->bindParam(':usuario', $usuario);
-$query->execute();
-while ($datos = $query->fetch()) {
-  $idusuario = $datos[0];
-};
+require __DIR__ . '/config.php';
+require __DIR__ . '/seguridad/JWT/jwt.php';
+$ingresar  = $_POST['ingresar'];
+$datosUsuario = validarToken();
 
+if ($datosUsuario) {
+  $idusuario = $datosUsuario['idusuario'];
+} else {
+  // El token no es válido o no existe, manejar según sea necesario
+  header($_ENV['URL_LOCAL']);
+  exit;
+}
 
 switch ($ingresar) {
   case 'insertar':
@@ -33,6 +32,7 @@ switch ($ingresar) {
   case 'getUltimosViajes':
     $limit   = $_POST['limit'];
     $offset  = $_POST['offset'];
+
 
     // Obtener el conteo total de filas
     $totalFilas = obtenerTotalFilas($con, $idusuario);
@@ -186,6 +186,7 @@ switch ($ingresar) {
 
 function obtenerTotalFilas($con, $idusuario)
 {
+
   $queryTotalFilas = $con->prepare("SELECT COUNT(*) as totalFilas FROM viajes WHERE idusuario = :idusuario AND MONTH(fecha) = MONTH(NOW())");
   $queryTotalFilas->bindParam(':idusuario', $idusuario);
   $queryTotalFilas->execute();
@@ -195,25 +196,25 @@ function obtenerTotalFilas($con, $idusuario)
 function obtenerDatosPaginados($con, $idusuario, $limit, $offset)
 {
   $query = $con->prepare("SELECT 
-                            viajes.*,
-                            DATE_FORMAT(viajes.fecha, '%d-%m-%Y') AS fecha,
-                          CASE 
-                WHEN EXISTS (SELECT 1 FROM peajes WHERE peajes.idviaje = viajes.idviaje) 
-                  OR EXISTS (SELECT 1 FROM extras WHERE extras.idviaje = viajes.idviaje) 
-                            THEN 1 
-                            ELSE 0 
-                        END AS tiene_detalles
-                        FROM 
-                            viajes
-                        WHERE 
-                            viajes.idusuario = :idusuario 
-                            AND MONTH(viajes.fecha) = MONTH(NOW()) 
-                            AND YEAR(viajes.fecha) = YEAR(NOW()) 
-                        ORDER BY 
-                            CASE WHEN viajes.fecha < CURDATE() THEN viajes.fecha ELSE CURDATE() END DESC, 
-                            viajes.idviaje DESC 
-                        LIMIT 
-                            :limit OFFSET :offset");
+                          viajes.*,
+                          DATE_FORMAT(viajes.fecha, '%d-%m-%Y') AS fecha,
+                        CASE 
+              WHEN EXISTS (SELECT 1 FROM peajes WHERE peajes.idviaje = viajes.idviaje) 
+                OR EXISTS (SELECT 1 FROM extras WHERE extras.idviaje = viajes.idviaje) 
+                          THEN 1 
+                          ELSE 0 
+                      END AS tiene_detalles
+                      FROM 
+                          viajes
+                      WHERE 
+                          viajes.idusuario = :idusuario 
+                          AND MONTH(viajes.fecha) = MONTH(NOW()) 
+                          AND YEAR(viajes.fecha) = YEAR(NOW()) 
+                      ORDER BY 
+                          CASE WHEN viajes.fecha < CURDATE() THEN viajes.fecha ELSE CURDATE() END DESC, 
+                          viajes.idviaje DESC 
+                      LIMIT 
+                          :limit OFFSET :offset");
 
   $query->bindParam(':idusuario', $idusuario);
   $query->bindParam(':limit', $limit, PDO::PARAM_INT);

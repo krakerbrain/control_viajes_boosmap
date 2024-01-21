@@ -1,16 +1,14 @@
 <?php
-session_start();
-$sesion = isset($_SESSION['usuario']);
 
 require __DIR__ . '/../config.php';
-include __DIR__ . "/../partials/header.php";
+require __DIR__ . '/../seguridad/JWT/jwt.php';
+include __DIR__ . '/../partials/header.php';
+$datosUsuario = validarToken();
 $indice = "aplicaciones";
 
-// Verificar si el usuario está autenticado y es "admin2"
-if (!$sesion || !$_SESSION['otrasapps']) {
-    // Si el usuario no está autenticado o no tiene activo el modulo, redirigir o mostrar un mensaje de error.
+if (!$datosUsuario) {
     header($_ENV['URL_LOCAL']);
-    exit();
+    exit;
 }
 ?>
 

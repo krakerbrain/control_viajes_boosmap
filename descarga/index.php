@@ -1,16 +1,19 @@
 <?php
-session_start();
-$sesion = isset($_SESSION['usuario']);
-
 require __DIR__ . '/../config.php';
-include __DIR__."/../partials/header.php"; 
+require __DIR__ . '/../seguridad/JWT/jwt.php';
+include __DIR__ . "/../partials/header.php";
+$datosUsuario = validarToken();
 $indice = "descarga";
 
+if (!$datosUsuario) {
+    header($_ENV['URL_LOCAL']);
+    exit;
+}
 ?>
 
 <body>
     <div class="container px-0" style="max-width:850px">
-        <?php include __DIR__."/../partials/navbar.php"; ?>
+        <?php include __DIR__ . "/../partials/navbar.php"; ?>
         <div class="bg-danger text-light d-flex align-items-center justify-content-center mt-4"
             style="height:300px; width:100%">
             <div class="text-center">
@@ -21,4 +24,4 @@ $indice = "descarga";
         </div>
     </div>
 </body>
-<?php include __DIR__."/../partials/boostrap_script.php" ?>
+<?php include __DIR__ . "/../partials/boostrap_script.php" ?>

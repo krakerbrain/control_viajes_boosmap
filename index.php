@@ -1,11 +1,11 @@
 <?php
-session_start();
-$sesion = isset($_SESSION['usuario']);
+
+
 require __DIR__ . '/config.php';
+require __DIR__ . '/seguridad/JWT/jwt.php';
+$datosUsuario = validarToken();
 $indice = "inicio";
-if ($sesion == null || $sesion == "") {
-    header($_ENV['URL_LOCAL']);
-}
+
 include "partials/header.php";
 
 ?>

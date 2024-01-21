@@ -1,20 +1,8 @@
 <?php
-include __DIR__.'/../config.php';
-session_start();
-if(isset($_SESSION['usuario'])){
-    $usuario = $_SESSION['usuario'];
-}
-
+include __DIR__ . '/../config.php';
 /**Se recibe un parámetro que ejecuta el switch según lo que se recibe */
 $ingresar   = $_POST['ingresar'];
-
-/**Se obtiene el id del usuario según el nombre que use al iniciar sesión */
-$query = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :usuario");
-$query->bindParam(':usuario', $usuario);
-$query->execute();
-while ($datos = $query->fetch()){
-    $idusuario = $datos[0];
-};
+$idusuario = $_POST['idusuario'];
 
 
 switch ($ingresar) {
@@ -26,24 +14,24 @@ switch ($ingresar) {
         $password = isset($_POST['password']) ? $_POST['password'] : '';
         $password2 = isset($_POST['password2']) ? $_POST['password2'] : '';
         $pattern = '/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/';
-        
+
         // Verificar igualdad de contraseñas
         if ($correo !== "" && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
             $error = "Formato de correo incorrecto.";
             echo $error;
-        }else if ($password !== $password2) {
+        } else if ($password !== $password2) {
             $error = "Las contraseñas no coinciden.";
             echo $error;
-        }else{
+        } else {
             $query = $con->prepare("SELECT clave FROM usuarios WHERE idusuario = :idusuario");
             $query->bindParam(':idusuario', $idusuario);
             $query->execute();
             $result = $query->fetch();
             if ($result !== null) {
-                if(password_verify($password,$result['clave'])){
+                if (password_verify($password, $result['clave'])) {
                     $respuesta = 'No han habido cambios';
                     echo $respuesta;
-                } else{
+                } else {
                     $hash = $password != "" ? password_hash($password, PASSWORD_BCRYPT, ['cost' => 7]) : $password;
                     // Llamar al procedimiento almacenado utilizando PDO
                     $sqlCallSP = "CALL ActualizarUsuario(:idusuario, :correo, :password, @respuesta, @v_respuesta)";
@@ -52,7 +40,7 @@ switch ($ingresar) {
                     $stmt->bindParam(':correo', $correo);
                     $stmt->bindParam(':password', $hash);
                     $stmt->execute();
-                
+
                     // Obtener la respuesta del procedimiento almacenado
                     $stmt->closeCursor();
                     $stmt = $con->query("SELECT @respuesta AS respuesta, @v_respuesta AS v_respuesta");
@@ -67,23 +55,22 @@ switch ($ingresar) {
                     $correo = $v_respuestaArray['correo'];
                     $clave = $v_respuestaArray['clave'];
                     $correoActual = $v_respuestaArray['correo_actual'];
-                
+
                     // Mostrar la respuesta del procedimiento almacenado
                     $respuestaJson = json_encode([
                         'respuesta' => $respuesta,
                         'correo' => $correo,
                         'clave' => $clave,
                         'correo_actual' => $correoActual
-                      ]);
-                      
-                    echo $respuestaJson;
-                }  
-            }
+                    ]);
 
+                    echo $respuestaJson;
+                }
+            }
         }
         break;
-    
-    
+
+
     default:
         # code...
         break;

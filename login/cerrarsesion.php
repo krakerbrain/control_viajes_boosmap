@@ -1,6 +1,8 @@
 <?php
-session_start();
 include('../config.php');
-session_destroy();
-header($_ENV['URL_REDIRECCION']);
-?>
+if (isset($_GET['logout']) && $_GET['logout'] === 'true') {
+    // Eliminar la cookie (esto puede variar según cómo esté configurada la cookie)
+    setcookie("jwt", "", time() - 1, "/");
+}
+header($_ENV['URL_LOCAL']);
+exit;

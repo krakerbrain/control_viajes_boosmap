@@ -1,10 +1,15 @@
 <?php
-session_start();
-$sesion = isset($_SESSION['usuario']);
-
 require __DIR__ . '/../config.php';
+require __DIR__ . '/../seguridad/JWT/jwt.php';
 include __DIR__ . "/../partials/header.php";
+
+$datosUsuario = validarToken();
 $indice = "estadisticas";
+
+if (!$datosUsuario) {
+    header($_ENV['URL_LOCAL']);
+    exit;
+}
 
 ?>
 
