@@ -22,40 +22,26 @@ function fechaActual() {
   return fecha;
 }
 
-// REVISAR ESTA FUNCION SI NO HAY DATOS EL AÑO SALE UNDEFINED DEBERIA SER EL AÑO ACTUAL
-// NO ENTIENDO POR QUE LA VALIDACION DE NISOPCIONES TEXT ES ANIO
 function llenarSelect() {
   $.post("conexiones_estadisticas.php", {
     ingresar: "select_mes",
   })
     .done(function (datos) {
-      var selectMes = $("#selectMes");
-      var jsonDatos = JSON.parse(datos);
-      let sinOpciones = false;
+      const jsonDatos = JSON.parse(datos);
+      let selectMes = document.querySelector("#selectMes");
+      let mesActual = fechaActual().split("-")[0];
+      let anioActual = fechaActual().split("-")[1];
+      let optionsHTML = "";
 
-      for (var i = 0; i < jsonDatos.length; i++) {
-        var mes = meses[jsonDatos[i].mes - 1]; // Obtiene el nombre del mes en español
-        var anio = jsonDatos[i].anio;
-        var option = $("<option>")
-          .val(jsonDatos[i].mes + "-" + jsonDatos[i].anio)
-          .text(mes + " " + anio);
-
-        if (String(jsonDatos[i].mes).padStart(2, "0") + "-" + jsonDatos[i].anio === fechaActual()) {
-          option.attr("selected", "selected");
-          sinOpciones = true;
-        }
-        selectMes.append(option);
+      if (jsonDatos.length == 0) {
+        optionsHTML = `<option value="${mesActual}-${anioActual}" selected>${meses[mesActual - 1]} ${anioActual}</option>`;
+      } else {
+        jsonDatos.forEach(({ mes, anio }) => {
+          let selected = mes == mesActual && anio == anioActual ? "selected" : "";
+          optionsHTML += `<option value="${mes}-${anio}" ${selected}>${meses[mes - 1]} ${anio}</option>`;
+        });
       }
-      if (!sinOpciones) {
-        var fechaActualString = fechaActual();
-        var mesActual = parseInt(fechaActualString.split("-")[0]); // Obtiene el mes actual a partir del string
-        var anioActual = parseInt(fechaActualString.split("-")[1]);
-        var option = $("<option>")
-          .val(mesActual + "-" + anioActual)
-          .text(meses[mesActual - 1] + " " + anio);
-        option.attr("selected", "selected");
-        selectMes.append(option);
-      }
+      selectMes.innerHTML = optionsHTML;
     })
     .fail(function () {
       alert("error");
