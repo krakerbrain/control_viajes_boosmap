@@ -48,7 +48,7 @@ switch ($ingresar) {
     $query->execute();
     $datos = $query->fetchAll(PDO::FETCH_ASSOC);
     foreach ($datos as $ruta) {
-      echo '<button value="' . $ruta['ruta'] . '" class="btn btn-danger mr-1" onclick="agregaRuta(this)" style="font-size:0.6em">' . $ruta['ruta'] . '</button>';
+      echo '<button value="' . $ruta['ruta'] . '" class="btn btn-danger mr-1" onclick="agregaRuta(this)" style="font-size:0.65em">' . $ruta['ruta'] . '</button>';
     };
     break;
   case 'totalmes';
@@ -56,16 +56,14 @@ switch ($ingresar) {
     // Establece la semana para que comience el lunes (1).
     date_default_timezone_set('UTC'); // Ajusta la zona horaria si es necesario.
     setlocale(LC_TIME, 'es_ES'); // Establece la configuración regional si es necesario.
-
     $today = date('Y-m-d'); // Obtiene la fecha actual.
-
     // Obtiene la fecha del inicio de la semana (lunes) para la fecha actual.
     $inicioSemana = date('Y-m-d', strtotime('monday this week', strtotime($today)));
     $finSemana = date('Y-m-d', strtotime($inicioSemana . ' +6 days'));
 
     try {
       // En producción se debe verificar la hora del servidor. Hostinger por ejemplo tiene una diferencia de -03:00. 
-      $query = $con->prepare('CALL detalles_viajes(?,?,?,?,@viajes, @total)');
+      $query = $con->prepare('CALL detalles_viajes(?,?,?,?,@viajes, @total, @total_extras)');
       $query->bindParam(1, $idusuario, PDO::PARAM_INT);
       $query->bindParam(2, $mes, PDO::PARAM_STR_CHAR);
       $query->bindParam(3, $inicioSemana, PDO::PARAM_STR_CHAR);
@@ -73,7 +71,7 @@ switch ($ingresar) {
       $query->execute();
       $query->closeCursor();
 
-      $select = $con->query('SELECT @viajes as viajes, @total as monto_total');
+      $select = $con->query('SELECT @viajes as viajes, @total as monto_total, @total_extras as total_extras');
       $datos = $select->fetchAll(PDO::FETCH_ASSOC);
       $json = json_encode($datos);
       echo $json;

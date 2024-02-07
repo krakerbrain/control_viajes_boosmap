@@ -25,7 +25,7 @@ if (!$datosUsuario) {
                         <select name="selectMes" id="selectMes"></select>
                     </form>
 
-                    <table class="table table-sm table-striped table-bordered text-center small mt-3">
+                    <table class="table table-sm table-striped table-bordered text-center mt-3" style="font-size:0.8rem;font-weight:400 ;">
                         <tbody id="estadisticas"></tbody>
                     </table>
                 </div>

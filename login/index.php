@@ -28,12 +28,13 @@ if (!$datosUsuario) {
             // Generar el token y configurar la cookie
             generarTokenYConfigurarCookie($datos, $usuario);
 
-            $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
-            $sqlUsuario->bindParam(':nombreUsuario', $usuario);
-            $sqlUsuario->execute();
+            //OJO BORRAR ESTO, ESTA REPETIDO, YA SE OBTIENE EL IDUSUARIO ARRIBA
+            // $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
+            // $sqlUsuario->bindParam(':nombreUsuario', $usuario);
+            // $sqlUsuario->execute();
 
-            $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
-            $idusuario = $resultadoUsuario['idusuario'];
+            // $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
+            $idusuario = $datos['idusuario'];
 
             // Realizar la consulta en la tabla viajes utilizando el idusuario
             $sqlViajes = $con->prepare("SELECT COUNT(*) as count FROM rutas WHERE idusuario = :idusuario");

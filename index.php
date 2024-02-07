@@ -5,6 +5,15 @@ require __DIR__ . '/config.php';
 require __DIR__ . '/seguridad/JWT/jwt.php';
 $datosUsuario = validarToken();
 $indice = "inicio";
+if (!$datosUsuario) {
+    // Obtiene la URL base del sitio web
+    $baseURL = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
+    $baseURL .= $_SERVER['HTTP_HOST'];
+
+    // Redirige a la página de login usando la URL base
+    header("Location: " . $baseURL . $_ENV['URL_LOCAL_NUEVA']);
+    exit;
+}
 
 include "partials/header.php";
 
@@ -16,10 +25,10 @@ include "partials/header.php";
 
         <header class="row m-1">
             <div class="col-sm-7">
-                <p id="lista_excel"></p>
-                <table class="table table-striped table-bordered table-sm" style="font-size:small">
+                <!-- <p id="lista_excel"></p> -->
+                <table class="table table-striped table-bordered table-sm mt-2" style="font-size:small">
                     <thead class="text-center">
-                        <td colspan="3">
+                        <td colspan="3" nowrap>
                             <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('semana',this)">Semana</button>
                             <button class="btn btn-danger btn_periodo" onclick="detallesViajes('hoy',this)">Hoy</button>
                             <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('mes',this)">Mes</button>
@@ -32,6 +41,7 @@ include "partials/header.php";
                     </thead>
                     <tbody id="detalles_viajes"></tbody>
                 </table>
+
             </div>
             <div class="col-sm-5" style="text-align:center">
                 <div class="input-group date mb-2" id="datepicker">
@@ -238,18 +248,31 @@ include "partials/header.php";
             periodo: periodo
         }).done(async function(data) {
             let datos = JSON.parse(data);
+            console.log(datos)
             const {
                 factor
             } = await calculaFactorIslr();
+            let detallesHTML = '';
             datos.forEach(element => {
                 let montoBruto = element.monto_total / factor;
-                let montoLiquido =
-                    detalles_viajes.innerHTML = `
-                                            <td class="text-center">${formatoMoneda(montoBruto)}</td>
-                                            <td class="text-center">${formatoMoneda(element.monto_total)}</td>
-                                            <td class="text-center">${element.viajes}</td>
-                                        `
+                let montoLiquido = element.monto_total;
+
+                detallesHTML += `
+            <tr>
+                <td class="text-center">${formatoMoneda(montoBruto)}</td>
+                <td class="text-center">${formatoMoneda(montoLiquido)}</td>
+                <td class="text-center">${element.viajes}</td>
+            </tr>
+        `;
+
+                detallesHTML += element.total_extras > 0 ? `
+                <tr>
+                    <td colspan="3" class="text-center text-danger m-0 p-0" style="font-size: 0.75rem;">*Se incluyen (${element.total_extras}) bonos</td>
+                </tr>
+            ` : '';
+
             })
+            detalles_viajes.innerHTML = detallesHTML;
         });
     }
 

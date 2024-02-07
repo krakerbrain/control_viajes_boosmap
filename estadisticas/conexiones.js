@@ -85,7 +85,7 @@ async function totalviajes(datos) {
 
     tablaestadisticas.innerHTML = `
                                   <tr>
-                                    <td ${colspan}">VIAJES COMPLETADOS: ${element.totalviajes}</td>
+                                    <td ${colspan}">VIAJES TOTAL: ${element.totalviajes}</td>
                                     <td class="${displayExtra}">EXTRAS: ${element.conteoExtras}</td>
                                   </tr>
                                   <tr class="${displayExtra}">
