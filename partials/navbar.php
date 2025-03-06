@@ -1,6 +1,6 @@
 <?php
 
-$rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
+$rutainicio = isset($indice) && $indice != "inicio" ? $baseUrl . "index.php" : "#";
 
 ?>
 <nav class="navbar navbar-dark bg-danger lighten-4">
@@ -21,21 +21,26 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
                         class="sr-only">(current)</span></a>
             </li>
             <?php if ($datosUsuario['otrasapps']) { ?>
-            <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_OTRAS_APPS'] ?>">Otras Apps</a>
-            </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "aplicaciones/index.php" ?>">Otras
+                        Apps</a>
+                </li>
             <?php } ?>
             <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_ACTUALIZA'] ?>">Actualiza Datos</a>
+                <a class="navbar-brand" style="font-size:14px"
+                    href="<?= $baseUrl . "actualiza_datos/index.php" ?>">Actualiza Datos</a>
             </li>
             <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_CONFIG'] ?>">Configura Viajes</a>
+                <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "rutas/index.php" ?>">Configura
+                    Viajes</a>
             </li>
             <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_ESTADISTICAS'] ?>">Estadísticas</a>
+                <a class="navbar-brand" style="font-size:14px"
+                    href="<?= $baseUrl . "estadisticas/index.php" ?>">Estadísticas</a>
             </li>
             <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $_ENV['URL_DOWNLOAD'] ?>">Descarga la App</a>
+                <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "descarga/index.php" ?>">Descarga la
+                    App</a>
             </li>
             <li class="nav-item pt-2">
                 <a class="border navbar-brand px-1" style="font-size:13px" href="#"
@@ -58,7 +63,8 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <a href="<?= $_ENV['URL_SESSION'] ?>?logout=true" class="btn btn-danger">Cerrar Sesión</a>
+                        <a href="<?= $baseUrl . "login/cerrarsesion.php" ?>?logout=true" class="btn btn-danger">Cerrar
+                            Sesión</a>
                     </div>
                 </div>
             </div>
@@ -66,14 +72,14 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $_ENV['URL_INICIO'] : "#";
     </div>
     <!-- Script para mostrar el modal de confirmación -->
     <script>
-    function confirmarCerrarSesion() {
-        $('#confirmModal').modal('show');
-    }
-    var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
+        function confirmarCerrarSesion() {
+            $('#confirmModal').modal('show');
+        }
+        var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
 
-    // Función para abrir WhatsApp
-    function openWhatsApp() {
-        window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
-    }
+        // Función para abrir WhatsApp
+        function openWhatsApp() {
+            window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
+        }
     </script>
 </nav>

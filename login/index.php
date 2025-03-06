@@ -91,13 +91,15 @@ include "../partials/header.php";
             <div class="input-group-text bg-danger text-light">
               <i class="fa-solid fa-user"></i>
             </div>
-            <input type="text" name="usuario" id="usuario" class="form-control" placeholder="Ingrese su usuario">
+            <input type="text" name="usuario" id="usuario" class="form-control"
+              placeholder="Ingrese su usuario">
           </div>
           <div class="input-group mt-3">
             <div class="input-group-text bg-danger text-light">
               <i class="fa-solid fa-key"></i>
             </div>
-            <input type="password" name="contrasenia" id="contrasenia" class="form-control" placeholder="Ingrese su contraseña">
+            <input type="password" name="contrasenia" id="contrasenia" class="form-control"
+              placeholder="Ingrese su contraseña">
             <div class="input-group-text bg-light">
               <a href="#" class="pe-auto text-danger">
                 <i class="fa-solid fa-eye" onclick="verpass()"></i>
@@ -125,7 +127,7 @@ include "../partials/header.php";
           <a href="recupera.php" class="text-decoration-none">
             <p class="text-center text-danger">¿Olvidó su contraseña?</p>
           </a>
-          <a href="<?= $_ENV['URL_DESCARGA'] ?>" class="text-decoration-none">
+          <a href="<?= $baseUrl . "descarga/app-debug.apk" ?>" class="text-decoration-none">
             <p class="text-center text-danger">Descarga la ANDROID APP <i class="fa-solid fa-download"></i></p>
           </a>
         <?php } ?>

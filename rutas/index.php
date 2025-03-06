@@ -1,13 +1,15 @@
 <?php
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../seguridad/JWT/jwt.php';
+
 include __DIR__ . "/../partials/header.php";
 
 $datosUsuario = validarToken();
 $indice = "rutas";
 
+
 if (!$datosUsuario) {
-    header($_ENV['URL_LOCAL']);
+    header("Location: " . $baseUrl . "login/index.php");
     exit;
 }
 
@@ -61,7 +63,9 @@ if (isset($_REQUEST['creado'])) {
             </div>
         <?php } ?>
         <fieldset style="margin-top:20px">
-            <legend style="font-size:1em;cursor:pointer" class="align-items-center bg-danger d-flex justify-content-between p-1 text-light" onclick="ocultaFieldset('ocultaRutas')">
+            <legend style="font-size:1em;cursor:pointer"
+                class="align-items-center bg-danger d-flex justify-content-between p-1 text-light"
+                onclick="ocultaFieldset('ocultaRutas')">
                 <span>Configuración de Rutas </span>
                 <div class="ocultaRutas">
                     <i class="bi bi-caret-down-square-fill"></i>
@@ -69,7 +73,9 @@ if (isset($_REQUEST['creado'])) {
             </legend>
             <div class="ocultaRutas" style="display: <?= $creado == "false" ? 'none' : 'block' ?>">
                 <div class="text-right">
-                    <i class="text-danger  mr-1 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover" data-placement="bottom" data-content="Aquí podrás agregar nuevas rutas o modificar las actuales. Al ir agregando rutas se irán creando botones en la página inicial que servirán para ir llenando los registros de viajes"></i>
+                    <i class="text-danger  mr-1 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover"
+                        data-placement="bottom"
+                        data-content="Aquí podrás agregar nuevas rutas o modificar las actuales. Al ir agregando rutas se irán creando botones en la página inicial que servirán para ir llenando los registros de viajes"></i>
                 </div>
                 <div id="montosActualizados" class="alert alert-danger" role="alert" style="display:none">
                     Los montos de rutas han sido actualizados
@@ -91,7 +97,8 @@ if (isset($_REQUEST['creado'])) {
                         </div>
                         <div>
                             <label for="montobruto">Monto Bruto</label>
-                            <input class="form-control" type="number" id="montobruto" onkeyup="calculomonto(this,'costoruta')">
+                            <input class="form-control" type="number" id="montobruto"
+                                onkeyup="calculomonto(this,'costoruta')">
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="nobruto" onchange="checkNoBruto(event)">
@@ -117,7 +124,9 @@ if (isset($_REQUEST['creado'])) {
             </div>
         </fieldset>
         <fieldset>
-            <legend style="font-size:1em;cursor:pointer" class="align-items-center bg-danger d-flex justify-content-between p-1 text-light" onclick="ocultaFieldset('modificaMontos')">
+            <legend style="font-size:1em;cursor:pointer"
+                class="align-items-center bg-danger d-flex justify-content-between p-1 text-light"
+                onclick="ocultaFieldset('modificaMontos')">
                 <span>Modificar montos</span>
                 <div class="modificaMontos">
                     <i class="bi bi-caret-down-square-fill"></i>
@@ -125,30 +134,38 @@ if (isset($_REQUEST['creado'])) {
             </legend>
             <div class="modificaMontos text-center" style="display:none">
                 <div class="text-right">
-                    <i class="text-danger  mr-1 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover" data-placement="bottom" data-content="Si tenemos suerte, puede ser que alguna vez aumenten las tarifas. Aquí podrás modificar los montos de las rutas ya sea el líquido o el bruto (al modificar uno el cálculo se hace automático en el otro). Si chequeas 'Actualizar viajes del mes', se actualizan todos los viajes al nuevo monto. Si chequeas 'Actualizar monto actual' se actualizarán a partir de la fecha en que hagas el cambio"></i>
+                    <i class="text-danger  mr-1 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover"
+                        data-placement="bottom"
+                        data-content="Si tenemos suerte, puede ser que alguna vez aumenten las tarifas. Aquí podrás modificar los montos de las rutas ya sea el líquido o el bruto (al modificar uno el cálculo se hace automático en el otro). Si chequeas 'Actualizar viajes del mes', se actualizan todos los viajes al nuevo monto. Si chequeas 'Actualizar monto actual' se actualizarán a partir de la fecha en que hagas el cambio"></i>
                 </div>
                 <table class="table table-striped mx-auto">
                     <thead class="table-danger text-center">
                         <td>Destino</td>
-                        <td>Monto Bruto <input type="checkbox" id="checkEditaBruto" name="" onclick="editaMonto(this,'editaBruto')"></td>
-                        <td>Monto Líquido <input type="checkbox" id="checkEditaLiquido" name="" onclick="editaMonto(this,'editaLiquido')"></td>
+                        <td>Monto Bruto <input type="checkbox" id="checkEditaBruto" name=""
+                                onclick="editaMonto(this,'editaBruto')"></td>
+                        <td>Monto Líquido <input type="checkbox" id="checkEditaLiquido" name=""
+                                onclick="editaMonto(this,'editaLiquido')"></td>
                     </thead>
                     <tbody id="tablamodifica" class="text-center"></tbody>
                 </table>
-                <div class="form-check mx-auto text-left w-75" data-bs-toggle="tooltip" data-placement="left" title="Se actualizaran todos los viajes del mes">
+                <div class="form-check mx-auto text-left w-75" data-bs-toggle="tooltip" data-placement="left"
+                    title="Se actualizaran todos los viajes del mes">
                     <input class="form-check-input" type="checkbox" id="actualizaMes" onclick="activaGuardar(this)">
                     <label class="form-check-label" for="flexCheckDefault">
                         Actualizar viajes del mes
                     </label>
                 </div>
-                <div class="form-check mx-auto text-left w-75" style="margin-left:-3px" data-bs-toggle="tooltip" data-placement="left" title="Todos los viajes que se registren desde ahora tendrán el monto actualizado. Se mantienen los montos de rutas anteriores">
+                <div class="form-check mx-auto text-left w-75" style="margin-left:-3px" data-bs-toggle="tooltip"
+                    data-placement="left"
+                    title="Todos los viajes que se registren desde ahora tendrán el monto actualizado. Se mantienen los montos de rutas anteriores">
                     <input class="form-check-input" type="checkbox" id="actualizaActual" onclick="activaGuardar(this)">
                     <label class="form-check-label" for="flexCheckDefault">
                         Actualizar monto actual
                     </label>
                 </div>
                 <div data-bs-toggle="tooltip" data-bs-placement="top" title="Debe seleccionar al menos una opción">
-                    <button type="button" id="guardar" class="btn btn-danger w-75 my-4" data-toggle="modal" data-target="#exampleModal" onclick="obtieneNuevosPrecios()" disabled>
+                    <button type="button" id="guardar" class="btn btn-danger w-75 my-4" data-toggle="modal"
+                        data-target="#exampleModal" onclick="obtieneNuevosPrecios()" disabled>
                         Guardar
                     </button>
                 </div>
@@ -166,7 +183,8 @@ if (isset($_REQUEST['creado'])) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                        <button type="button" class="btn btn-danger" id="modalConfirm" style="display:none">Confirmar</button>
+                        <button type="button" class="btn btn-danger" id="modalConfirm"
+                            style="display:none">Confirmar</button>
                     </div>
                 </div>
             </div>

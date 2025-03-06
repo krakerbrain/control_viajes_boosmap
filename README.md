@@ -12,4 +12,4 @@ realizados durante el mes
 
 #LINK DE PRUEBAS
 
-http://biowork.xyz/
+https://boosterapp2024.in/

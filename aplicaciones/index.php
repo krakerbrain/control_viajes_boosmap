@@ -36,7 +36,8 @@ if (!$datosUsuario) {
 
                     <form id="registraGanancias" action="conexiones_app.php" method="post" class="mx-auto">
                         <div class="form-group d-flex mt-2">
-                            <input class="form-control" type="number" id="inputRegistraGanancia" placeholder="Último registro App">
+                            <input class="form-control" type="number" id="inputRegistraGanancia"
+                                placeholder="Último registro App">
                             <input class="btn btn-danger mx-2" type="submit" value="Agregar" id="agregar">
                         </div>
                     </form>
@@ -57,7 +58,8 @@ if (!$datosUsuario) {
                         <tbody class="text-center" id="tablaRegistro"></tbody>
                     </table>
                 </div>
-                <div id="carouselExampleControls" class="carousel slide mx-auto" data-ride="carousel" data-interval="false">
+                <div id="carouselExampleControls" class="carousel slide mx-auto" data-ride="carousel"
+                    data-interval="false">
                     <div id="carruselGanancias" class="carousel-inner">
                         <div class="carousel-item active">
                             <div class="text-center">
@@ -84,19 +86,21 @@ if (!$datosUsuario) {
                         </div>
                     </div>
                     <style>
-                        .carousel-control-prev {
-                            left: -20px;
-                        }
+                    .carousel-control-prev {
+                        left: -20px;
+                    }
 
-                        .carousel-control-next {
-                            right: -20px;
-                        }
+                    .carousel-control-next {
+                        right: -20px;
+                    }
                     </style>
-                    <button class="carousel-control-prev" type="button" data-target="#carouselExampleControls" data-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-target="#carouselExampleControls"
+                        data-slide="prev">
                         <span class="bg-secondary carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="sr-only">Previous</span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-target="#carouselExampleControls" data-slide="next">
+                    <button class="carousel-control-next" type="button" data-target="#carouselExampleControls"
+                        data-slide="next">
                         <span class="bg-secondary carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="sr-only">Next</span>
                     </button>
@@ -148,260 +152,260 @@ if (!$datosUsuario) {
 
 <?php include __DIR__ . "/../partials/boostrap_script.php" ?>
 <script>
-    window.onload = function() {
-        detallesBoosmap();
-        opcionesRegistradorGanancias();
-        obtenerUltimasGanancias(false);
-        totalesMes();
-    };
-    // Obtener referencias a los elementos del DOM
-    let checkbox = document.getElementById('checkboxRegistroApp');
-    let nombreAppInput = document.getElementById('nombreApp');
-    let agregaAppBtn = document.getElementById('agregaApp');
+window.onload = async function() {
+    opcionesRegistradorGanancias();
+    obtenerUltimasGanancias(false);
+    await getDataApps();
+    creaCarruselApps();
+    totalesMes();
+};
+// Obtener referencias a los elementos del DOM
+let checkbox = document.getElementById('checkboxRegistroApp');
+let nombreAppInput = document.getElementById('nombreApp');
+let agregaAppBtn = document.getElementById('agregaApp');
 
-    // Escuchar el evento "change" del checkbox
-    checkbox.addEventListener('change', function() {
-        if (this.checked) {
-            nombreAppInput.disabled = false;
-            agregaAppBtn.disabled = false;
+// Escuchar el evento "change" del checkbox
+checkbox.addEventListener('change', function() {
+    if (this.checked) {
+        nombreAppInput.disabled = false;
+        agregaAppBtn.disabled = false;
 
-        } else {
-            nombreAppInput.disabled = true;
-            agregaAppBtn.disabled = true;
-        }
+    } else {
+        nombreAppInput.disabled = true;
+        agregaAppBtn.disabled = true;
+    }
+});
+
+document.getElementById("registraApp").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    $.post("../aplicaciones/conexiones_app.php", {
+        ingresar: "agregaApp",
+        nombreApp: nombreAppInput.value.trim().toUpperCase(),
+    }).done(function(datos) {
+
+        nombreAppInput.value = "";
+        nombreAppInput.disabled = true;
+        agregaAppBtn.disabled = true;
+        checkbox.checked = false;
+        tipoDatoParaTablaAplicacion(datos);
+
+    }).fail(function(error) {
+        console.log(error)
     });
+})
 
-    document.getElementById("registraApp").addEventListener("submit", function(event) {
-        event.preventDefault();
+function opcionesRegistradorGanancias() {
+    $.post("conexiones_app.php", {
+        ingresar: "appRegistradas",
+    }).done(function(data) {
+        let datos = JSON.parse(data);
+        creaOpcionesdeRegistro(datos);
+    }).fail(function(error) {
+        console.log(error)
+    });
+}
 
-        $.post("../aplicaciones/conexiones_app.php", {
-            ingresar: "agregaApp",
-            nombreApp: nombreAppInput.value.trim().toUpperCase(),
-        }).done(function(datos) {
+function creaOpcionesdeRegistro(datos) {
+    document.getElementById("appNombre").innerHTML = "<option>Aplicaciones registradas</option>";
+    datos.forEach(element => {
+        document.getElementById("appNombre").innerHTML +=
+            `<option value="${element.id}">${element.nombre_app}</option>`
+    });
+}
 
-            nombreAppInput.value = "";
-            nombreAppInput.disabled = true;
-            agregaAppBtn.disabled = true;
-            checkbox.checked = false;
-            tipoDatoParaTablaAplicacion(datos);
-
-        }).fail(function(error) {
-            console.log(error)
-        });
-    })
-
-    function detallesBoosmap() {
-
-        $.post("conexiones_app.php", {
-            ingresar: "totalesPeriodo",
-        }).done(function(data) {
-            let datos = JSON.parse(data);
-            // console.log(datos)
-            document.getElementById("dataBoosmap").innerHTML = `
-                                                    <td>${formatoMoneda(datos[0].total)}</td>
-                                                    <td>${formatoMoneda(datos[2].total)}</td>
-                                                    <td>${formatoMoneda(datos[1].total)}</td>
-                                                    `
-        }).fail(function(error) {
-            console.log(error)
-        });
-    }
-
-    function opcionesRegistradorGanancias() {
-        $.post("conexiones_app.php", {
-            ingresar: "appRegistradas",
-        }).done(function(data) {
-            let datos = JSON.parse(data);
-            creaOpcionesdeRegistro(datos);
-            tipoDatoParaTablaAplicacion(datos);
-            llenaDataApps();
-        }).fail(function(error) {
-            console.log(error)
-        });
-    }
-
-    function creaOpcionesdeRegistro(datos) {
-        document.getElementById("appNombre").innerHTML = "<option>Aplicaciones registradas</option>";
-        datos.forEach(element => {
-            document.getElementById("appNombre").innerHTML +=
-                `<option value="${element.id}">${element.nombre_app}</option>`
-        });
-    }
-
-    function tipoDatoParaTablaAplicacion(datos) {
-        if (typeof(datos) != "object" && datos == 'duplicate') {
-            showModal(datos);
-        } else {
-            if (typeof(datos) != "object") {
-                $.post("conexiones_app.php", {
-                    ingresar: "appRegistradas",
-                    nombreApp: datos
-                }).done(function(data) {
-                    let datos = JSON.parse(data);
-                    creaOpcionesdeRegistro(datos)
-                    creaTablaAplicacion(datos);
-                    showModal();
-                }).fail(function(error) {
-                    console.log(error)
-                });
-
-
-            } else {
-                creaTablaAplicacion(datos);
-            }
-        }
-    }
-
-    function creaTablaAplicacion(datos) {
-
-        datos.forEach(element => {
-            document.getElementById("carruselGanancias").innerHTML +=
-                `<div class="carousel-item">
-                            <div class="text-center">
-                                <table class="table table-striped table-sm">
-                                    <thead class="table-danger">
-                                        <tr>
-                                            <td colspan="3">App: ${element.nombre_app}</td>
-                                        </tr>
-                                    </thead>
-                                    <thead>
-                                        <tr>
-                                            <td style="width: 30%;">SEMANA</td>
-                                            <td style="width: 30%;">HOY</td>
-                                            <td style="width: 30%;">MES</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr id="data-${element.id}">
-                                            <td>$0</td>
-                                            <td>$0</td>
-                                            <td>$0</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>`
-        });
-
-    }
-
-    function llenaDataApps() {
+function getDataApps() {
+    return new Promise((resolve, reject) => {
         $.post("conexiones_app.php", {
             ingresar: "obtenerDataApps",
         }).done(function(data) {
-            let montosApp = JSON.parse(data);
-            montosApp.forEach(montos => {
-                document.getElementById(`data-${montos.idapp}`).innerHTML = "";
-                document.getElementById(`data-${montos.idapp}`).innerHTML += `
-                            <td>${formatoMoneda(montos.monto_semana)}</td>
-                            <td>${formatoMoneda(montos.monto_dia)}</td>
-                            <td>${formatoMoneda(montos.monto_mes)}</td>
-                            `
-            })
+            let datos = JSON.parse(data);
+            let localStorageData = localStorage.getItem("dataApps");
+            if (JSON.stringify(datos) !== localStorageData) {
+                localStorage.setItem("dataApps", JSON.stringify(datos));
+            }
+            resolve();
+        }).fail(function(error) {
+            reject(error);
+        });
+    });
+}
+
+document.getElementById("registraGanancias").addEventListener("submit", function(event) {
+    event.preventDefault();
+    let appNombre = document.getElementById("appNombre")
+    let inputRegistraGanancia = document.getElementById("inputRegistraGanancia")
+    let fecha = document.getElementById("fecha");
+    let fechaRegistro = fecha.value == "" ? "" : fecha.value + " 12:00:00";
+
+    if (validaCampo(appNombre, inputRegistraGanancia)) {
+
+        $.post("conexiones_app.php", {
+            ingresar: "registraGanancia",
+            idApp: appNombre.value,
+            monto: inputRegistraGanancia.value,
+            fecha: fecha.value,
+            fechaYHora: fechaRegistro
+        }).done(async function(datos) {
+
+            let data = JSON.parse(datos);
+            let resultado = data[0].resultado;
+            if (resultado != 'ok') {
+                alert(resultado)
+            } else {
+                appNombre.value = "";
+                inputRegistraGanancia.value = "";
+                fecha.value = "";
+                obtenerUltimasGanancias(true)
+                await getDataApps();
+                creaCarruselApps();
+                totalesMes();
+            }
         }).fail(function(error) {
             console.log(error)
         });
+    };
+})
+
+function validaCampo(nombre, monto, fecha) {
+    if (nombre.value == "" || monto.value == "") {
+        document.getElementById("campoVacioAlerta").style.display = "block";
+        return false;
+    } else {
+        return true;
     }
+}
 
-    document.getElementById("registraGanancias").addEventListener("submit", function(event) {
-        event.preventDefault();
-        let appNombre = document.getElementById("appNombre")
-        let inputRegistraGanancia = document.getElementById("inputRegistraGanancia")
-        let fecha = document.getElementById("fecha");
-        let fechaRegistro = fecha.value == "" ? "" : fecha.value + " 12:00:00";
+function obtenerUltimasGanancias(nuevoViaje) {
+    let tablaRegistro = document.getElementById("tablaRegistro")
+    $.post("conexiones_app.php", {
+        ingresar: "ultimasGanancias",
+    }).done(function(data) {
 
-        if (validaCampo(appNombre, inputRegistraGanancia)) {
+        let datos = JSON.parse(data);
+        tablaRegistroHtml = "";
+        datos.forEach((element, index) => {
 
-            $.post("conexiones_app.php", {
-                ingresar: "registraGanancia",
-                idApp: appNombre.value,
-                monto: inputRegistraGanancia.value,
-                fecha: fecha.value,
-                fechaYHora: fechaRegistro
-            }).done(function(datos) {
+            tablaRegistroHtml +=
+                `<tr class=${nuevoViaje == true && index == 0 ? "nuevoDato" : ""}>
+                        <td>${element.nombre_app}</td>
+                        <td>${formatoMoneda(element.monto)}</td>
+                        <td>${element.fecha}</td>
+                        <td><a style="cursor: pointer" onclick="borrarGanancia(${element.id})"><i class="fas fa-trash-alt"></i></a></td>
+                    </tr>`
+        });
 
-                let data = JSON.parse(datos);
-                let resultado = data[0].resultado;
-                if (resultado != 'ok') {
-                    alert(resultado)
-                } else {
-                    appNombre.value = "";
-                    inputRegistraGanancia.value = "";
-                    fecha.value = "";
-                    obtenerUltimasGanancias(true)
-                    llenaDataApps();
-                    totalesMes();
-                }
-            }).fail(function(error) {
-                console.log(error)
-            });
-        };
+        tablaRegistro.innerHTML = tablaRegistroHtml;
+
+    }).fail(function(error) {
+        console.log(error)
+    });
+}
+
+function borrarGanancia(id) {
+
+    $.post("conexiones_app.php", {
+        ingresar: "borrarGanancia",
+        id: id
+    }).done(async function(datos) {
+        obtenerUltimasGanancias(false)
+        await getDataApps();
+        creaCarruselApps();
+        totalesMes();
+    }).fail(function(error) {
+        console.log(error)
     })
+}
 
-    function validaCampo(nombre, monto, fecha) {
-        if (nombre.value == "" || monto.value == "") {
-            document.getElementById("campoVacioAlerta").style.display = "block";
-            return false;
-        } else {
-            return true;
+function creaCarruselApps() {
+    try {
+        //modficar para obtener data del localStorage
+
+        const datos = JSON.parse(localStorage.getItem("dataApps"));
+        // console.log(datos)
+        let carruselHTML = '';
+        for (let aplicacion in datos) {
+            let detalles = datos[aplicacion];
+            let isActive = aplicacion === "BOOSMAP" ? "active" :
+                ""; // Verifica si la aplicación es "boosmap" para activarla
+
+            carruselHTML += `
+        <div class="carousel-item ${isActive}">
+            <div class="text-center">
+                <table class="table table-striped table-sm">
+                    <thead class="table-danger">
+                        <tr>
+                            <td colspan="3">App: ${aplicacion.toUpperCase()}</td>
+                        </tr>
+                    </thead>
+                    <thead>
+                        <tr>
+                            <td style="width: 30%;">SEMANA</td>
+                            <td style="width: 30%;">HOY</td>
+                            <td style="width: 30%;">MES</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="data-${aplicacion}">
+                            <td>${formatoMoneda(detalles.semana)}</td>
+                            <td>${formatoMoneda(detalles.dia)}</td>
+                            <td>${formatoMoneda(detalles.mes)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
         }
+
+        // Agregar el HTML al elemento con id "carruselGanancias"
+        document.getElementById("carruselGanancias").innerHTML = carruselHTML
+
+    } catch (error) {
+        console.log(error)
     }
+}
 
-    function obtenerUltimasGanancias(nuevoViaje) {
-        let tablaRegistro = document.getElementById("tablaRegistro")
-        $.post("conexiones_app.php", {
-            ingresar: "ultimasGanancias",
-        }).done(function(data) {
-
-            let datos = JSON.parse(data);
-            tablaRegistro.innerHTML = "";
-            datos.forEach((element, index) => {
-
-                tablaRegistro.innerHTML +=
-                    `<tr class=${nuevoViaje == true && index == 0 ? "nuevoDato" : ""}>
-                    <td>${element.nombre_app}</td>
-                    <td>${formatoMoneda(element.monto)}</td>
-                    <td>${element.fecha}</td>
-                    <td><a style="cursor: pointer" onclick="borrarGanancia(${element.id})"><i class="fas fa-trash-alt"></i></a></td>
-                </tr>`
-            });
-
-        }).fail(function(error) {
-            console.log(error)
-        });
-    }
-
-    function borrarGanancia(id) {
-
-        $.post("conexiones_app.php", {
-            ingresar: "borrarGanancia",
-            id: id
-        }).done(function(datos) {
-            obtenerUltimasGanancias(false)
-        }).fail(function(error) {
-            console.log(error)
-        })
-    }
-
-    function totalesMes() {
-        $.post("conexiones_app.php", {
-            ingresar: "totalesMes",
-        }).done(function(data) {
-            let datos = JSON.parse(data);
-            document.getElementById("dataTotales").innerHTML = "";
-            document.getElementById("dataTotales").innerHTML = `<td>${formatoMoneda(datos[0].total_monto_semana)}</td>
-                                                                <td>${formatoMoneda(datos[0].total_monto_dia)}</td>
-                                                                <td>${formatoMoneda(datos[0].total_monto_mes)}</td>`;
-        })
-
-    }
-
-    function showModal(datos) {
-        if (datos == 'duplicate') {
-
-            document.getElementById("modalAppLabel").textContent = "ERROR";
-            document.getElementById("modalAppMensaje").textContent = "La aplicación ya ha sido agregada"
+function totalesMes() {
+    try {
+        const data = JSON.parse(localStorage.getItem("dataApps"));
+        // console.log(data)
+        // Variables para almacenar los totales
+        let totalDia = 0;
+        let totalSemana = 0;
+        let totalMes = 0;
+        document.getElementById("dataTotales").innerHTML = "";
+        // Itera sobre las claves (nombre de las aplicaciones) del objeto data
+        for (let appName in data) {
+            if (data.hasOwnProperty(appName)) {
+                // Obtén los datos de la aplicación actual
+                let appData = data[appName];
+                // Suma los montos de la aplicación a los totales respectivos
+                totalDia += parseFloat(appData.dia);
+                totalSemana += parseFloat(appData.semana);
+                totalMes += parseFloat(appData.mes);
+            }
         }
-        $('#modalApp').modal('show');
+
+        // Construye una fila de tabla HTML para mostrar los totales
+        let html = `<tr><td>${formatoMoneda(totalSemana)}</td>
+                 <td>${formatoMoneda(totalDia)}</td>
+                 <td>${formatoMoneda(totalMes)}</td></tr>`;
+
+        // Coloca el HTML generado en el elemento con id "dataTotales"
+        document.getElementById("dataTotales").innerHTML = html;
+    } catch (error) {
+        console.error("Error al obtener los datos totales:", error);
     }
+}
+
+
+
+function showModal(datos) {
+    if (datos == 'duplicate') {
+
+        document.getElementById("modalAppLabel").textContent = "ERROR";
+        document.getElementById("modalAppMensaje").textContent = "La aplicación ya ha sido agregada"
+    }
+    $('#modalApp').modal('show');
+}
 </script>
