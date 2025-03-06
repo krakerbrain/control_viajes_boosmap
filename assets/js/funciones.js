@@ -17,7 +17,7 @@ async function cargarArchivoJSON(url) {
 
 async function calculaFactorIslr(fecha) {
   try {
-    const islrData = await cargarArchivoJSON("/boosmap/islr.json");
+    const islrData = await cargarArchivoJSON(`${baseUrl}islr.json`);
     const anioCalculado = calculaAnio(fecha);
     // Buscar el factor correspondiente al año actual en el archivo islr.json
     let factor;

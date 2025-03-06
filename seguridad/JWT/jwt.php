@@ -5,6 +5,7 @@ use Firebase\JWT\Key;
 
 function validarToken()
 {
+    $baseUrl = ConfigUrl::get();
 
     if (isset($_COOKIE['jwt'])) {
         $key = $_ENV['JWTKEY'];
@@ -25,7 +26,7 @@ function validarToken()
                 ];
             } else {
                 // Manejar el caso en el que el token no decodificado correctamente
-                header($_ENV['URL_LOCAL']);
+                header("Location: " . $baseUrl . "login/index.php");
                 return null;
             }
         } catch (Exception $e) {

@@ -1,17 +1,13 @@
 <?php
-
-
 require __DIR__ . '/config.php';
 require __DIR__ . '/seguridad/JWT/jwt.php';
+
 $datosUsuario = validarToken();
 $indice = "inicio";
+$baseUrl = ConfigUrl::get();
 if (!$datosUsuario) {
-    // Obtiene la URL base del sitio web
-    $baseURL = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
-    $baseURL .= $_SERVER['HTTP_HOST'];
-
     // Redirige a la página de login usando la URL base
-    header("Location: " . $baseURL . $_ENV['URL_LOCAL_NUEVA']);
+    header("Location: " . $baseUrl . "login/index.php");
     exit;
 }
 
@@ -29,9 +25,11 @@ include "partials/header.php";
                 <table class="table table-striped table-bordered table-sm mt-2" style="font-size:small">
                     <thead class="text-center">
                         <td colspan="3" nowrap>
-                            <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('semana',this)">Semana</button>
+                            <button class="btn btn-outline-danger btn_periodo"
+                                onclick="detallesViajes('semana',this)">Semana</button>
                             <button class="btn btn-danger btn_periodo" onclick="detallesViajes('hoy',this)">Hoy</button>
-                            <button class="btn btn-outline-danger btn_periodo" onclick="detallesViajes('mes',this)">Mes</button>
+                            <button class="btn btn-outline-danger btn_periodo"
+                                onclick="detallesViajes('mes',this)">Mes</button>
                         </td>
                     </thead>
                     <thead class="table-secondary text-center">
@@ -65,9 +63,15 @@ include "partials/header.php";
 
         <div class="container text-right mx-n3">
             <span class="small">Leyenda de acciones: </span>
-            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="Agrega Viajes"><i class="fa-solid fa-plus text-success" style="font-size: 1rem"></i></a>
-            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="Viaje con detalles"><i class="fa-solid fa-check text-warning" style="font-size: 1rem"></i></a>
-            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="Elimina Viaje"><i class="fa-solid fa-xmark text-danger" style="font-size: 1rem"></i></a>
+            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus"
+                data-placement="bottom" data-content="Agrega Viajes"><i class="fa-solid fa-plus text-success"
+                    style="font-size: 1rem"></i></a>
+            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus"
+                data-placement="bottom" data-content="Viaje con detalles"><i class="fa-solid fa-check text-warning"
+                    style="font-size: 1rem"></i></a>
+            <a class="ml-3" tabindex="0" role="button" data-toggle="popover" data-trigger="focus"
+                data-placement="bottom" data-content="Elimina Viaje"><i class="fa-solid fa-xmark text-danger"
+                    style="font-size: 1rem"></i></a>
         </div>
         <section style="max-height: 400px; overflow-y: auto;">
             <table class="table table-striped" style="width:97%;margin: 0 auto; table-layout:fixed;font-size:small">

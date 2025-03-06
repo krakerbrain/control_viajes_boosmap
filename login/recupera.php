@@ -48,7 +48,7 @@ include "../partials/header.php";
                     <input type="submit" value="Enviar" class="btn btn-danger w-100">
                 </div>
                 <div>
-                    <a href="<?= $_ENV['URL_LOGIN_INDEX'] ?>">Ir al inicio</a>
+                    <a href="<?= $baseUrl . "index.php" ?>">Ir al inicio</a>
                 </div>
                 <div class="mt-3 text-center">
                     <?php echo $error ?>

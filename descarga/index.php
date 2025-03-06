@@ -1,12 +1,14 @@
 <?php
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../seguridad/JWT/jwt.php';
+
 include __DIR__ . "/../partials/header.php";
 $datosUsuario = validarToken();
 $indice = "descarga";
 
+
 if (!$datosUsuario) {
-    header($_ENV['URL_LOCAL']);
+    header("Location: " . $baseUrl . "login/index.php");
     exit;
 }
 ?>
@@ -18,7 +20,7 @@ if (!$datosUsuario) {
             style="height:300px; width:100%">
             <div class="text-center">
                 <h5>Puedes descargar la aplicación solo para Android</h5>
-                <a class="btn btn-outline-light" href="<?= $_ENV['URL_DESCARGA'] ?>" download>Descargar</a>
+                <a class="btn btn-outline-light" href="<?= $baseUrl . "descarga/app-debug.apk" ?>" download>Descargar</a>
                 <p class="mt-1" style="font-size:0.5rem">V. 4.3 11-07-2023</p>
             </div>
         </div>

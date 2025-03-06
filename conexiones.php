@@ -5,12 +5,14 @@ $ingresar   = $_POST['ingresar'];
 
 require __DIR__ . '/config.php';
 require __DIR__ . '/seguridad/JWT/jwt.php';
+
+
 $ingresar  = $_POST['ingresar'];
 $datosUsuario = validarToken();
 
 if (!$datosUsuario) {
   // El token no es válido o no existe, manejar según sea necesario
-  header($_ENV['URL_LOCAL']);
+  header("Location: " . $baseUrl . "login/index.php");
   exit;
 }
 

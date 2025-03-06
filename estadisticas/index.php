@@ -1,13 +1,15 @@
 <?php
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../seguridad/JWT/jwt.php';
+
 include __DIR__ . "/../partials/header.php";
 
 $datosUsuario = validarToken();
 $indice = "estadisticas";
 
+
 if (!$datosUsuario) {
-    header($_ENV['URL_LOCAL']);
+    header("Location: " . $baseUrl . "login/index.php");
     exit;
 }
 
@@ -25,7 +27,8 @@ if (!$datosUsuario) {
                         <select name="selectMes" id="selectMes"></select>
                     </form>
 
-                    <table class="table table-sm table-striped table-bordered text-center mt-3" style="font-size:0.8rem;font-weight:400 ;">
+                    <table class="table table-sm table-striped table-bordered text-center mt-3"
+                        style="font-size:0.8rem;font-weight:400 ;">
                         <tbody id="estadisticas"></tbody>
                     </table>
                 </div>
@@ -36,8 +39,12 @@ if (!$datosUsuario) {
             </div>
             <table class="table table-striped mt-3 table-sm">
                 <thead class="table-danger text-center">
-                    <td class='p1' style="cursor:pointer" title="Puede ordenar por destino" onclick="viajesporruta(true,'destino')">Destino <i id="iconoOrdenDestino" class="fas fa-sort"></i></td>
-                    <td class='p1' style="cursor:pointer" title="Puede ordenar por cantidad de viajes" onclick="viajesporruta(true,'conteo')">Viajes x Mes <i id="iconoOrdenViajesMes" class="fas fa-sort"></i></td>
+                    <td class='p1' style="cursor:pointer" title="Puede ordenar por destino"
+                        onclick="viajesporruta(true,'destino')">Destino <i id="iconoOrdenDestino"
+                            class="fas fa-sort"></i></td>
+                    <td class='p1' style="cursor:pointer" title="Puede ordenar por cantidad de viajes"
+                        onclick="viajesporruta(true,'conteo')">Viajes x Mes <i id="iconoOrdenViajesMes"
+                            class="fas fa-sort"></i></td>
                 </thead>
                 <tbody id="conteoviajes" class="text-center">
 

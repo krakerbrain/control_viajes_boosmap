@@ -5,6 +5,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
+require_once dirname(__DIR__) . '/config/ConfigUrl.php';
+$baseUrl = ConfigUrl::get();
+
 
 //Create an instance; passing `true` enables exceptions
 $mail = new PHPMailer(true);
@@ -37,11 +40,11 @@ try {
     $mail->Subject = 'Control de Viajes - Cambio de clave';
     $mail->Body    = '<div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
 	                    <p>Para poder cambiar tu clave debes hacer click en el siguiente enlace</p>
-	                    <a href="'.$_ENV['URL_CAMBIO_CLAVE'].'?correo='.urlencode($correo).'&clave='.urlencode($clave_recuperacion).'">Cambio de clave</a>
+	                    <a href="' . $baseUrl . 'login/cambio_clave.php' . '?correo=' . urlencode($correo) . '&clave=' . urlencode($clave_recuperacion) . '">Cambio de clave</a>
 	                    <p>Saludos</p>
                     </div>';
     $mail->AltBody = 'Para cambiar tu clave, copia y pega la siguiente URL en tu navegador web:
-                    '.$_ENV['URL_CAMBIO_CLAVE'].'?correo='.urlencode($correo).'&clave='.urlencode($clave_recuperacion).'
+                    ' . $baseUrl . 'login/cambio_clave.php' .  '?correo=' . urlencode($correo) . '&clave=' . urlencode($clave_recuperacion) . '
                     Saludos';
 
     $mail->send();

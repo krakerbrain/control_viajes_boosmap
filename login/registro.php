@@ -70,7 +70,8 @@ include "../partials/header.php";
                     <div class="input-group-text bg-danger text-light">
                         <i class="fa-solid fa-user"></i>
                     </div>
-                    <input type="text" name="usuario" id="usuario" class="form-control" placeholder="Ingrese un nombre de usuario" ">
+                    <input type="text" name="usuario" id="usuario" class="form-control"
+                        placeholder="Ingrese un nombre de usuario" ">
                 </div>
                 <div class=" input-group mt-2">
                     <div class="input-group-text bg-danger text-light">
@@ -82,7 +83,8 @@ include "../partials/header.php";
                     <div class="input-group-text bg-danger text-light">
                         <i class="fa-solid fa-key"></i>
                     </div>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Ingrese una clave">
+                    <input type="password" name="password" id="password" class="form-control"
+                        placeholder="Ingrese una clave">
                     <div class="input-group-text bg-light">
                         <a href="#" class="pe-auto text-danger">
                             <i class="fa-solid fa-eye" onclick="verpass(1)"></i>
@@ -93,7 +95,8 @@ include "../partials/header.php";
                     <div class="input-group-text bg-danger text-light">
                         <i class="fa-solid fa-key"></i>
                     </div>
-                    <input type="password" name="password2" id="password2" class="form-control" placeholder="Ingrese otra vez">
+                    <input type="password" name="password2" id="password2" class="form-control"
+                        placeholder="Ingrese otra vez">
                     <div class="input-group-text bg-light">
                         <a href="#" class="pe-auto text-danger">
                             <i class="fa-solid fa-eye" onclick="verpass(2)"></i>
@@ -107,7 +110,7 @@ include "../partials/header.php";
                     <?php echo $error ?>
                 </div>
                 <div>
-                    <a href="<?= $_ENV['URL_LOGIN_INDEX'] ?>">Ir al inicio</a>
+                    <a href="<? $baseUrl . " index.php" ?>">Ir al inicio</a>
                 </div>
             </form>
             <script>

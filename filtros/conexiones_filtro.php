@@ -2,11 +2,13 @@
 include __DIR__ . '/../config.php';
 require __DIR__ . '/../seguridad/JWT/jwt.php';
 
+
 $datosUsuario = validarToken();
 $ingresar = $_REQUEST['ingresar'];
 
+
 if (!$datosUsuario) {
-    header($_ENV['URL_LOCAL']);
+    header("Location: " . $baseUrl . "login/index.php");
     exit;
 }
 

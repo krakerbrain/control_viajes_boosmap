@@ -1,7 +1,9 @@
 <?php
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../seguridad/JWT/jwt.php';
+
 include __DIR__ . "/../partials/header.php";
+
 
 $datosUsuario = validarToken();
 $idusuario = $datosUsuario['idusuario'];
@@ -22,7 +24,9 @@ $correoUsuario = $resultadoUsuario['correo'];
         <?php include __DIR__ . "/../partials/navbar.php"; ?>
     </div>
     <div class="text-right">
-        <i class="text-danger  mr-4 mt-2 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover" data-placement="bottom" data-content="Aquí podrás modificar el correo, el password o ambos. Es importante tener el correo actualizado para enviar notificaciones de algunos cambios críticos que se pueden presentar"></i>
+        <i class="text-danger  mr-4 mt-2 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover"
+            data-placement="bottom"
+            data-content="Aquí podrás modificar el correo, el password o ambos. Es importante tener el correo actualizado para enviar notificaciones de algunos cambios críticos que se pueden presentar"></i>
     </div>
 
     <div class="row-cols-lg-2">
@@ -32,19 +36,22 @@ $correoUsuario = $resultadoUsuario['correo'];
                     <i class="fa-solid fa-user"></i>
                 </div>
                 <input type="hidden" name="idusuario" id="idusuario" class="form-control" value="<?= $idusuario ?>">
-                <input type="text" name="usuario" id="usuario" class="form-control" value="<?= $nombreUsuario ?>" disabled>
+                <input type="text" name="usuario" id="usuario" class="form-control" value="<?= $nombreUsuario ?>"
+                    disabled>
             </div>
             <div class=" input-group mt-2">
                 <div class="input-group-text bg-danger text-light">
                     <i class="fa-solid fa-envelope"></i>
                 </div>
-                <input type="mail" name="correo" id="correo" class="form-control" placeholder="Ingrese su correo" value="<?= $correoUsuario ?>">
+                <input type="mail" name="correo" id="correo" class="form-control" placeholder="Ingrese su correo"
+                    value="<?= $correoUsuario ?>">
             </div>
             <div class="input-group mt-2">
                 <div class="input-group-text bg-danger text-light">
                     <i class="fa-solid fa-key"></i>
                 </div>
-                <input type="password" name="password" id="password" class="form-control" placeholder="Ingrese su nueva clave">
+                <input type="password" name="password" id="password" class="form-control"
+                    placeholder="Ingrese su nueva clave">
                 <div class="input-group-text bg-light">
                     <a href="#" class="pe-auto text-danger">
                         <i class="fa-solid fa-eye" onclick="verpass(1)"></i>
@@ -55,7 +62,8 @@ $correoUsuario = $resultadoUsuario['correo'];
                 <div class="input-group-text bg-danger text-light">
                     <i class="fa-solid fa-key"></i>
                 </div>
-                <input type="password" name="password2" id="password2" class="form-control" placeholder="Repita la clave" autocomplete="off">
+                <input type="password" name="password2" id="password2" class="form-control"
+                    placeholder="Repita la clave" autocomplete="off">
                 <div class="input-group-text bg-light">
                     <a href="#" class="pe-auto text-danger">
                         <i class="fa-solid fa-eye" onclick="verpass(2)"></i>
@@ -68,7 +76,7 @@ $correoUsuario = $resultadoUsuario['correo'];
             <div class="mt-3 text-center" id="respuesta">
             </div>
             <div>
-                <a href="<?= $_ENV['URL_INICIO'] ?>">Ir al inicio</a>
+                <a href="<?= $baseUrl . "index.php" ?>">Ir al inicio</a>
             </div>
         </form>
     </div>
@@ -118,10 +126,10 @@ $correoUsuario = $resultadoUsuario['correo'];
                         respuesta = 'El correo se ha actualizado correctamente'
                     } else if (clave_actualizada == 'true' && correo_actualizado == 'false') {
                         respuesta =
-                            'El password ha sido actualizado correctamente. <br> Se recomienda <a href="<?= $_ENV['URL_SESSION'] ?>?logout=true ">CERRAR SESIÓN</a> y acceder con la nueva clave'
+                            'El password ha sido actualizado correctamente. <br> Se recomienda <a href="<?= $baseUrl . "login/cerrarsesion.php" ?>?logout=true ">CERRAR SESIÓN</a> y acceder con la nueva clave'
                     } else if (correo_actualizado == 'true' && clave_actualizada == 'true') {
                         respuesta =
-                            `${data.respuesta} <br> Se recomienda <a href="<?= $_ENV['URL_SESSION'] ?>?logout=true ">CERRAR SESIÓN</a> y acceder con la nueva clave`
+                            `${data.respuesta} <br> Se recomienda <a href="<?= $baseUrl . "login/cerrarsesion.php" ?>?logout=true ">CERRAR SESIÓN</a> y acceder con la nueva clave`
                     } else {
                         respuesta = data.respuesta;
                     }

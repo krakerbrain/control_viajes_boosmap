@@ -120,4 +120,55 @@ DELIMITER ;
 
 
 
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `obtenerDatosPeriodicos`(IN `_idusuario` INT, IN `_fechaHoy` VARCHAR(10))
+BEGIN
+    SELECT 
+        1 AS idapp,
+        'BOOSMAP' AS nombre_app,
+        COALESCE(SUM(CASE WHEN periodo = 'dia' THEN total ELSE 0 END), 0) AS monto_dia,
+        COALESCE(SUM(CASE WHEN periodo = 'semana' THEN total ELSE 0 END), 0) AS monto_semana,
+        COALESCE(SUM(CASE WHEN periodo = 'mes' THEN total ELSE 0 END), 0) AS monto_mes
+    FROM (
+        SELECT 
+            'semana' AS periodo,
+            SUM(v.monto + COALESCE(extra_sum.monto_extra, 0)) as total
+        FROM 
+            viajes v
+        LEFT JOIN 
+            (SELECT idviaje, SUM(monto) AS monto_extra FROM extras GROUP BY idviaje) AS extra_sum 
+            ON v.idviaje = extra_sum.idviaje
+        WHERE 
+            v.idusuario = _idusuario
+            AND YEARWEEK(fecha, 1) = YEARWEEK(CURRENT_DATE(), 1)
 
+        UNION ALL
+
+        SELECT 
+            'mes' as periodo,
+            SUM(v.monto + COALESCE(extra_sum.monto_extra, 0)) as total
+        FROM 
+            viajes v
+        LEFT JOIN 
+            (SELECT idviaje, SUM(monto) AS monto_extra FROM extras GROUP BY idviaje) AS extra_sum 
+            ON v.idviaje = extra_sum.idviaje
+        WHERE 
+            v.idusuario = _idusuario
+            AND YEAR(fecha) = YEAR(CURRENT_DATE())
+            AND MONTH(fecha) = MONTH(CURRENT_DATE())
+
+        UNION ALL
+
+        SELECT 
+            'dia' as periodo,
+            SUM(v.monto + COALESCE(extra_sum.monto_extra, 0)) as total
+        FROM 
+            viajes v
+        LEFT JOIN 
+            (SELECT idviaje, SUM(monto) AS monto_extra FROM extras GROUP BY idviaje) AS extra_sum 
+            ON v.idviaje = extra_sum.idviaje
+        WHERE 
+            v.idusuario = _idusuario
+                   AND DATE(fecha) = DATE(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR))) AS periodo;
+END$$
+DELIMITER ;

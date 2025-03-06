@@ -41,30 +41,6 @@ switch ($ingresar) {
             echo $nombreApp;
         }
         break;
-    case 'totalesPeriodo';
-
-        try {
-            $query = $con->prepare('CALL obtenerDatosPeriodicos(?,?)');
-            $query->bindParam(1, $idusuario, PDO::PARAM_INT);
-            $query->bindParam(2, $fechaHoy, PDO::PARAM_STR_CHAR);
-            $query->execute();
-
-            // Obtener los resultados directamente de la rutina
-            $datos = $query->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($datos as &$fila) {
-                foreach ($fila as $clave => &$valor) {
-                    if ($valor === null) {
-                        $valor = 0;
-                    }
-                }
-            }
-            $json = json_encode($datos);
-            echo $json;
-        } catch (PDOException $e) {
-            die("Error occurred:" . $e->getMessage());
-        }
-
-        break;
     case 'appRegistradas':
         $nombreApp = isset($_POST['nombreApp']) ?  $_POST['nombreApp'] : '';
         try {
@@ -138,53 +114,55 @@ switch ($ingresar) {
         }
         break;
     case 'obtenerDataApps':
-        $query = $con->prepare("SELECT idapp,
-                                    SUM(CASE WHEN DATE(fecha) = :fechaHoy THEN monto ELSE 0 END) AS monto_dia,
-                                    SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(:fechaHoy,1) THEN monto ELSE 0 END) AS monto_semana,
-                                    SUM(CASE WHEN YEAR(fecha) = YEAR(:fechaHoy) AND MONTH(fecha) = MONTH(:fechaHoy) THEN monto ELSE 0 END) AS monto_mes
-                                FROM viajes_aplicaciones
-                                WHERE idusuario = :idusuario
-                                GROUP BY idapp;");
+        // Llamar al procedimiento almacenado para obtener los datos de forma periódica
+        $query = $con->prepare('CALL obtenerDatosPeriodicos(?,?)');
+        $query->bindParam(1, $idusuario, PDO::PARAM_INT);
+        $query->bindParam(2, $fechaHoy, PDO::PARAM_STR_CHAR);
+        $query->execute();
+
+        // Obtener los resultados directamente de la rutina
+        $datosPeriodicos = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        // Consultar y procesar los datos para las demás aplicaciones
+        $query = $con->prepare("SELECT a.id AS idapp, a.nombre_app,
+                                       SUM(CASE WHEN DATE(fecha) = :fechaHoy THEN monto ELSE 0 END) AS monto_dia,
+                                       SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(:fechaHoy,1) THEN monto ELSE 0 END) AS monto_semana,
+                                       SUM(CASE WHEN YEAR(fecha) = YEAR(:fechaHoy) AND MONTH(fecha) = MONTH(:fechaHoy) THEN monto ELSE 0 END) AS monto_mes
+                                FROM aplicaciones a
+                                LEFT JOIN viajes_aplicaciones va 
+                                ON a.id = va.idapp 
+                                AND va.idusuario = :idusuario
+                                GROUP BY a.id, a.nombre_app;");
         $query->bindParam(':idusuario', $idusuario);
         $query->bindParam(':fechaHoy', $fechaHoy);
         $query->execute();
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        $json_result = json_encode($result);
-        echo $json_result;
-        break;
-    case 'totalesMes':
-        $query = $con->prepare("SELECT
-        SUM(monto_dia) AS total_monto_dia,
-        SUM(monto_semana) AS total_monto_semana,
-        SUM(monto_mes) AS total_monto_mes
-    FROM (
-        SELECT
-            SUM(CASE WHEN DATE(fecha) = :fechaHoy THEN monto ELSE 0 END) AS monto_dia,
-            SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(:fechaHoy,1) THEN monto ELSE 0 END) AS monto_semana,
-            SUM(CASE WHEN YEAR(fecha) = YEAR(:fechaHoy) AND MONTH(fecha) = MONTH(:fechaHoy) THEN monto ELSE 0 END) AS monto_mes
-        FROM viajes
-        WHERE YEAR(fecha) = YEAR(:fechaHoy)
-        AND idusuario = :idusuario
-        UNION ALL
-        SELECT
-            SUM(CASE WHEN DATE(fecha) = :fechaHoy THEN monto ELSE 0 END) AS monto_dia,
-            SUM(CASE WHEN YEARWEEK(fecha,1) = YEARWEEK(:fechaHoy,1) THEN monto ELSE 0 END) AS monto_semana,
-            SUM(CASE WHEN YEAR(fecha) = YEAR(:fechaHoy) AND MONTH(fecha) = MONTH(:fechaHoy) THEN monto ELSE 0 END) AS monto_mes
-        FROM viajes_aplicaciones
-        WHERE YEAR(fecha) = YEAR(:fechaHoy)
-        AND idusuario = :idusuario
-    ) AS subquery_total;
-    ");
-        $query->bindParam(':idusuario', $idusuario);
-        $query->bindParam(':fechaHoy', $fechaHoy);
-        $query->execute();
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        $json_result = json_encode($result);
-        echo $json_result;
+        $otrosDatos = $query->fetchAll(PDO::FETCH_ASSOC);
 
+        // Combinar los dos arreglos en uno solo
+        $datosCombinados = array_merge($datosPeriodicos, $otrosDatos);
+        // Insertar los datos en el archivo JSON
+        echo insertarDatosEnArchivoJSON($datosCombinados);
         break;
-
     default:
         # code...
         break;
+}
+function insertarDatosEnArchivoJSON($datos)
+{
+    // Crear un nuevo objeto totalApps
+    $totalApps = array();
+
+    foreach ($datos as $row) {
+        $nombre_app = $row['nombre_app'];
+        $monto_dia = $row['monto_dia'];
+        $monto_semana = $row['monto_semana'];
+        $monto_mes = $row['monto_mes'];
+
+        $totalApps[$nombre_app] = array(
+            'dia' => $monto_dia,
+            'semana' => $monto_semana,
+            'mes' => $monto_mes
+        );
+    }
+    return json_encode($totalApps);
 }
