@@ -8,3 +8,4 @@ querysGenerales.sql
 /backup
 /PRUEBAS
 .prettierignore
+.vscode
