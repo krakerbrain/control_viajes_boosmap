@@ -1,9 +1,10 @@
 <?php
 include('../config.php');
 
-include "../partials/header.php";
 $correo =   isset($_GET['correo']) ? $_GET['correo'] : "";
 $invalido = isset($_GET['invalido']) ? $_GET['invalido'] : "";
+$indice = "login";
+include "../partials/header.php";
 ?>
 
 <body class="bg-danger d-flex justify-content-center align-items-center vh-100">

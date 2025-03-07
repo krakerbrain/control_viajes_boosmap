@@ -18,3 +18,9 @@
         const baseUrl = "<?= $baseUrl ?>";
     </script>
 </head>
+<?php if ($indice != 'inicio' && $indice != 'login') { ?>
+
+    <body>
+        <div class="container px-0" style="max-width:850px">
+            <?php include __DIR__ . "/../partials/navbar.php"; ?>
+        <?php } ?>

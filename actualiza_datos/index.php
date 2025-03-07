@@ -2,7 +2,6 @@
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../seguridad/JWT/jwt.php';
 
-include __DIR__ . "/../partials/header.php";
 
 
 $datosUsuario = validarToken();
@@ -17,69 +16,65 @@ $sqlUsuario->execute();
 $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
 $correoUsuario = $resultadoUsuario['correo'];
 
+include __DIR__ . "/../partials/header.php";
 ?>
 
-<body class="container px-0" style="max-width:850px">
-    <div>
-        <?php include __DIR__ . "/../partials/navbar.php"; ?>
-    </div>
-    <div class="text-right">
-        <i class="text-danger  mr-4 mt-2 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover"
-            data-placement="bottom"
-            data-content="Aquí podrás modificar el correo, el password o ambos. Es importante tener el correo actualizado para enviar notificaciones de algunos cambios críticos que se pueden presentar"></i>
-    </div>
+<div class="text-right">
+    <i class="text-danger  mr-4 mt-2 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover"
+        data-placement="bottom"
+        data-content="Aquí podrás modificar el correo, el password o ambos. Es importante tener el correo actualizado para enviar notificaciones de algunos cambios críticos que se pueden presentar"></i>
+</div>
 
-    <div class="row-cols-lg-2">
-        <form action="" method="post" class="form-group mt-3 mx-auto">
-            <div class="input-group">
-                <div class="input-group-text bg-danger text-light">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-                <input type="hidden" name="idusuario" id="idusuario" class="form-control" value="<?= $idusuario ?>">
-                <input type="text" name="usuario" id="usuario" class="form-control" value="<?= $nombreUsuario ?>"
-                    disabled>
+<div class="row-cols-lg-2">
+    <form action="" method="post" class="form-group mt-3 mx-auto">
+        <div class="input-group">
+            <div class="input-group-text bg-danger text-light">
+                <i class="fa-solid fa-user"></i>
             </div>
-            <div class=" input-group mt-2">
-                <div class="input-group-text bg-danger text-light">
-                    <i class="fa-solid fa-envelope"></i>
-                </div>
-                <input type="mail" name="correo" id="correo" class="form-control" placeholder="Ingrese su correo"
-                    value="<?= $correoUsuario ?>">
+            <input type="hidden" name="idusuario" id="idusuario" class="form-control" value="<?= $idusuario ?>">
+            <input type="text" name="usuario" id="usuario" class="form-control" value="<?= $nombreUsuario ?>" disabled>
+        </div>
+        <div class=" input-group mt-2">
+            <div class="input-group-text bg-danger text-light">
+                <i class="fa-solid fa-envelope"></i>
             </div>
-            <div class="input-group mt-2">
-                <div class="input-group-text bg-danger text-light">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-                <input type="password" name="password" id="password" class="form-control"
-                    placeholder="Ingrese su nueva clave">
-                <div class="input-group-text bg-light">
-                    <a href="#" class="pe-auto text-danger">
-                        <i class="fa-solid fa-eye" onclick="verpass(1)"></i>
-                    </a>
-                </div>
+            <input type="mail" name="correo" id="correo" class="form-control" placeholder="Ingrese su correo"
+                value="<?= $correoUsuario ?>">
+        </div>
+        <div class="input-group mt-2">
+            <div class="input-group-text bg-danger text-light">
+                <i class="fa-solid fa-key"></i>
             </div>
-            <div class="input-group mt-2">
-                <div class="input-group-text bg-danger text-light">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-                <input type="password" name="password2" id="password2" class="form-control"
-                    placeholder="Repita la clave" autocomplete="off">
-                <div class="input-group-text bg-light">
-                    <a href="#" class="pe-auto text-danger">
-                        <i class="fa-solid fa-eye" onclick="verpass(2)"></i>
-                    </a>
-                </div>
+            <input type="password" name="password" id="password" class="form-control"
+                placeholder="Ingrese su nueva clave">
+            <div class="input-group-text bg-light">
+                <a href="#" class="pe-auto text-danger">
+                    <i class="fa-solid fa-eye" onclick="verpass(1)"></i>
+                </a>
             </div>
-            <div class="form-group mt-3">
-                <input type="button" value="Actualizar" class="btn btn-danger w-100" onclick="actualizaDatos(event)">
+        </div>
+        <div class="input-group mt-2">
+            <div class="input-group-text bg-danger text-light">
+                <i class="fa-solid fa-key"></i>
             </div>
-            <div class="mt-3 text-center" id="respuesta">
+            <input type="password" name="password2" id="password2" class="form-control" placeholder="Repita la clave"
+                autocomplete="off">
+            <div class="input-group-text bg-light">
+                <a href="#" class="pe-auto text-danger">
+                    <i class="fa-solid fa-eye" onclick="verpass(2)"></i>
+                </a>
             </div>
-            <div>
-                <a href="<?= $baseUrl . "index.php" ?>">Ir al inicio</a>
-            </div>
-        </form>
-    </div>
+        </div>
+        <div class="form-group mt-3">
+            <input type="button" value="Actualizar" class="btn btn-danger w-100" onclick="actualizaDatos(event)">
+        </div>
+        <div class="mt-3 text-center" id="respuesta">
+        </div>
+        <div>
+            <a href="<?= $baseUrl . "index.php" ?>">Ir al inicio</a>
+        </div>
+    </form>
+</div>
 </body>
 <?php include __DIR__ . "/../partials/boostrap_script.php" ?>
 

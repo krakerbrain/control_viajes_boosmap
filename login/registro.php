@@ -2,6 +2,7 @@
 include('../config.php');
 $creado = "false";
 $error = "";
+$indice = "login";
 
 if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['password']) && isset($_POST['password2'])) {
     $usuario_registro = $_POST['usuario'];

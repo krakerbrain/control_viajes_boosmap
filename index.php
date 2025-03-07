@@ -18,7 +18,6 @@ include "partials/header.php";
 <body>
     <div class="container px-0" style="max-width:850px">
         <?php include "partials/navbar.php" ?>
-
         <header class="row m-1">
             <div class="col-sm-7">
                 <!-- <p id="lista_excel"></p> -->
