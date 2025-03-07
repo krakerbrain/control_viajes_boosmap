@@ -2,6 +2,7 @@
 include('../config.php');
 
 $error = "";
+$indice = "login";
 
 if (isset($_POST['correo'])) {
     $correo  = $_POST['correo'];

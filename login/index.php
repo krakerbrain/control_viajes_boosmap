@@ -10,6 +10,8 @@ $error = "false";
 $creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
 $cambio_clave = isset($_REQUEST['cambio_clave']) ? $_REQUEST['cambio_clave'] : "";
 
+
+
 if (!$datosUsuario) {
   if (isset($_POST['usuario']) && isset($_POST['contrasenia'])) {
     $pass     = $_POST['contrasenia'];
@@ -28,12 +30,6 @@ if (!$datosUsuario) {
             // Generar el token y configurar la cookie
             generarTokenYConfigurarCookie($datos, $usuario);
 
-            //OJO BORRAR ESTO, ESTA REPETIDO, YA SE OBTIENE EL IDUSUARIO ARRIBA
-            // $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
-            // $sqlUsuario->bindParam(':nombreUsuario', $usuario);
-            // $sqlUsuario->execute();
-
-            // $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
             $idusuario = $datos['idusuario'];
 
             // Realizar la consulta en la tabla viajes utilizando el idusuario
@@ -62,7 +58,7 @@ if (!$datosUsuario) {
 } else {
   header("location:../index.php");
 }
-
+$indice = "login";
 include "../partials/header.php";
 ?>
 
