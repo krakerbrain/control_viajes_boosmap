@@ -1,6 +1,12 @@
 <?php
+require dirname(__DIR__) . '/config/HaColaborado.php';
+
 
 $rutainicio = isset($indice) && $indice != "inicio" ? $baseUrl . "index.php" : "#";
+$colaboraciones = new HaColaborado($con, $datosUsuario['idusuario']);
+$datos = $colaboraciones->haColaborado();
+$haColaborado = $datos[0]['verificado'];
+
 
 ?>
 <nav class="navbar navbar-dark bg-danger lighten-4">
@@ -21,10 +27,16 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $baseUrl . "index.php" : "
                         class="sr-only">(current)</span></a>
             </li>
             <?php if ($datosUsuario['otrasapps']) { ?>
-                <li class="nav-item">
-                    <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "aplicaciones/index.php" ?>">Otras
-                        Apps</a>
-                </li>
+            <li class="nav-item">
+                <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "aplicaciones/index.php" ?>">Otras
+                    Apps</a>
+            </li>
+            <?php } ?>
+            <?php if ($datosUsuario['admin']) { ?>
+            <li class="nav-item">
+                <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "colab/colab_list.php" ?>">Lista de
+                    Colaboraciones</a>
+            </li>
             <?php } ?>
             <li class="nav-item">
                 <a class="navbar-brand" style="font-size:14px"
@@ -72,14 +84,23 @@ $rutainicio = isset($indice) && $indice != "inicio" ? $baseUrl . "index.php" : "
     </div>
     <!-- Script para mostrar el modal de confirmación -->
     <script>
-        function confirmarCerrarSesion() {
-            $('#confirmModal').modal('show');
-        }
-        var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
+    function confirmarCerrarSesion() {
+        $('#confirmModal').modal('show');
+    }
+    var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
 
-        // Función para abrir WhatsApp
-        function openWhatsApp() {
-            window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
-        }
+    // Función para abrir WhatsApp
+    function openWhatsApp() {
+        window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
+    }
     </script>
 </nav>
+<?php
+if ($indice != 'login' && $indice != 'colaboracion' && !$haColaborado) {
+?>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    🚗 ¡Apoya el proyecto!
+    Si esta aplicación te ha sido útil y quieres colaborar, puedes hacer un aporte para renovar el hosting.
+    <a href="<?= $baseUrl . "colab/colab.php" ?>" class="alert-link">Haz clic aquí para ver cómo colaborar.</a>
+</div>
+<?php } ?>

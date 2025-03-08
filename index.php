@@ -251,7 +251,7 @@ include "partials/header.php";
             periodo: periodo
         }).done(async function(data) {
             let datos = JSON.parse(data);
-            console.log(datos)
+
             const {
                 factor
             } = await calculaFactorIslr();
