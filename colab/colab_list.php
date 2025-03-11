@@ -24,6 +24,7 @@ include dirname(__DIR__) . "/partials/header.php";
                 <td style="width:23%">Usuario</td>
                 <td style="width:20%">Fecha</td>
                 <td style="width:13%">Monto</td>
+                <td style="width:13%">No. Transaccion</td>
                 <td style="width:16%">Acciones</td>
             </thead>
             <tbody id="tablaColaboraciones" class="text-center"></tbody>
@@ -50,6 +51,9 @@ include dirname(__DIR__) . "/partials/header.php";
                 <td>${element.fecha_colaboracion}</td>
                 <td>${element.monto}</td>
                 <td>
+                    <input type="text" class="numero-transaccion" data-id="${element.idcolaboracion}" value="${element.numero_transaccion || ''}">
+                </td>
+                <td>
                     <input type="checkbox" class="verificar-colab" data-id="${element.idcolaboracion}" ${element.verificado == 1 ? 'checked' : ''}>
                 </td>
             </tr>
@@ -57,22 +61,43 @@ include dirname(__DIR__) . "/partials/header.php";
             });
             tablaColaboraciones.innerHTML = listaColabHtml;
 
-            // Agregar eventos a los checkboxes
             document.querySelectorAll('.verificar-colab').forEach(item => {
                 item.addEventListener('change', function() {
-                    actualizarVerificacion(this.dataset.id, this.checked);
+                    let idColab = this.dataset.id;
+                    let numeroTransaccion = document.querySelector(
+                        `.numero-transaccion[data-id="${idColab}"]`).value;
+
+                    // Verificar si el número de transacción está vacío
+                    if (!numeroTransaccion.trim()) {
+                        // Si no hay número de transacción, mostrar un alert y desmarcar el checkbox
+                        alert("Debes ingresar un número de transacción para verificar.");
+                        this.checked = false; // Desmarcar el checkbox
+                        return; // Evitar que la función se ejecute si no hay número de transacción
+                    }
+
+                    // Si el número de transacción existe, llamar a la función para actualizar
+                    actualizarVerificacion(idColab, this.checked, numeroTransaccion);
                 });
             });
         });
     }
 
-    function actualizarVerificacion(idColab, estado) {
+    function actualizarVerificacion(idColab, estado, numeroTransaccion) {
         $.post("conexion_colab.php", {
             ingresar: "actualizar_verificado",
             id: idColab,
-            verificado: estado ? 1 : 0
+            verificado: estado ? 1 : 0,
+            numero_transaccion: numeroTransaccion
         }).done(function(respuesta) {
-            console.log(respuesta); // Puedes manejar una notificación si quieres
+            let data = JSON.parse(respuesta);
+            if (data.success) {
+                console.log(data.message); // Mostrar mensaje de éxito en la consola
+            } else {
+                alert(data.message); // Mostrar mensaje de error al usuario
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            // En caso de que ocurra un error con la petición
+            alert("Error de comunicación con el servidor: " + textStatus + " " + errorThrown);
         });
     }
 </script>

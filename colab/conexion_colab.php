@@ -39,19 +39,41 @@ switch ($ingresar) {
         };
         break;
     case 'actualizar_verificado':
-
-        // hacer update de columna verificado en true
+        // Recibir los datos del frontend
         $idcolaboracion = $_POST['id'];
         $verificado = $_POST['verificado'];
+        $numeroTransaccion = $_POST['numero_transaccion'];
 
-        $sql = $con->prepare("UPDATE colaboraciones SET verificado = :verificado WHERE idcolaboracion = :idcolaboracion");
-        $sql->bindParam(':idcolaboracion', $idcolaboracion);
-        $sql->bindParam(':verificado', $verificado);
-        if ($sql->execute()) {
-            echo "true";
-        } else {
-            echo "false";
+        try {
+            // Verificar si el número de transacción ya existe
+            $checkNumTransQuery = $con->prepare("SELECT COUNT(*) FROM colaboraciones WHERE numero_transaccion = :numero_transaccion AND idcolaboracion != :idcolaboracion");
+            $checkNumTransQuery->bindParam(':numero_transaccion', $numeroTransaccion);
+            $checkNumTransQuery->bindParam(':idcolaboracion', $idcolaboracion);
+            $checkNumTransQuery->execute();
+            $numTransExistente = $checkNumTransQuery->fetchColumn();
+
+            if ($numTransExistente > 0) {
+                // Si el número de transacción ya existe, devolver un mensaje al frontend
+                echo json_encode(["success" => false, "message" => "El número de transacción ya existe en otro registro."]);
+            } else {
+                // Si el número de transacción no existe, actualizar el registro
+                $sql = $con->prepare("UPDATE colaboraciones SET verificado = :verificado, numero_transaccion = :numero_transaccion WHERE idcolaboracion = :idcolaboracion");
+                $sql->bindParam(':idcolaboracion', $idcolaboracion);
+                $sql->bindParam(':verificado', $verificado);
+                $sql->bindParam(':numero_transaccion', $numeroTransaccion);
+
+                if ($sql->execute()) {
+                    echo json_encode(["success" => true, "message" => "Actualización exitosa."]);
+                } else {
+                    throw new Exception("Error al actualizar la colaboración.");
+                }
+            }
+        } catch (Exception $e) {
+            // Captura cualquier error y envíalo al frontend
+            echo json_encode(["success" => false, "message" => "Error en la operación: " . $e->getMessage()]);
         }
+        break;
+
     default:
         # code...
         break;
