@@ -13,6 +13,27 @@ if (!$datosUsuario || !$datosUsuario['admin']) {
 
 include dirname(__DIR__) . "/partials/header.php";
 ?>
+<style>
+    @media (max-width: 1000px) {
+        body {
+            font-size: 0.85rem;
+        }
+
+        tr.head-table th {
+            display: none;
+        }
+
+        tr.body-table td {
+            display: block;
+        }
+
+        .data::before {
+            content: attr(data-cell) ": ";
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+    }
+</style>
 
 <body class="bg-light">
     <div class="container py-5">
@@ -21,11 +42,14 @@ include dirname(__DIR__) . "/partials/header.php";
         </div>
         <table class="table table-striped" style="width:97%;margin: 0 auto; table-layout:fixed;font-size:small">
             <thead class="table-danger text-center" style="position: sticky; top:-1px; z-index: 1;">
-                <td style="width:23%">Usuario</td>
-                <td style="width:20%">Fecha</td>
-                <td style="width:13%">Monto</td>
-                <td style="width:13%">No. Transaccion</td>
-                <td style="width:16%">Acciones</td>
+                <tr class="head-table">
+                    <th style="width:23%">Usuario</th>
+                    <th style="width:23%">Correo</th>
+                    <th style="width:20%">Fecha</th>
+                    <th style="width:13%">Monto</th>
+                    <th style="width:13%">No. Transaccion</th>
+                    <th style="width:16%">Acciones</th>
+                </tr>
             </thead>
             <tbody id="tablaColaboraciones" class="text-center"></tbody>
         </table>
@@ -46,14 +70,15 @@ include dirname(__DIR__) . "/partials/header.php";
             let listaColabHtml = "";
             datos.forEach(element => {
                 listaColabHtml += `
-            <tr>
-                <td>${element.user}</td>
-                <td>${element.fecha_colaboracion}</td>
-                <td>${element.monto}</td>
-                <td>
+            <tr class="body-table">
+                <td data-cell="Usuario" class="data">${element.user}</td>
+                <td data-cell="Correo" class="data">${element.correo}</td>
+                <td data-cell="Fecha" class="data">${element.fecha_colaboracion}</td>
+                <td data-cell="Monto" class="data">${element.monto}</td>
+                <td data-cell="No. Tansaccion" class="data" Transacción">
                     <input type="text" class="numero-transaccion" data-id="${element.idcolaboracion}" value="${element.numero_transaccion || ''}">
                 </td>
-                <td>
+                <td data-cell="Acciones" class="data">
                     <input type="checkbox" class="verificar-colab" data-id="${element.idcolaboracion}" ${element.verificado == 1 ? 'checked' : ''}>
                 </td>
             </tr>

@@ -20,7 +20,7 @@ $idusuario = $datosUsuario['idusuario'];
 
 switch ($ingresar) {
     case 'colab_list':
-        $sql = $con->prepare("SELECT *, u.nombre as user  FROM colaboraciones c INNER JOIN usuarios u ON c.idusuario = u.idusuario");
+        $sql = $con->prepare("SELECT *, u.nombre as user, u.correo as correo  FROM colaboraciones c INNER JOIN usuarios u ON c.idusuario = u.idusuario");
         $sql->execute();
         $datos = $sql->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($datos);
