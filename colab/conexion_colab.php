@@ -27,17 +27,33 @@ switch ($ingresar) {
         break;
     case 'colaboracion_insert':
 
-        $monto      = $_POST['monto'];
+        // Revisar si el usuario ya colaboró
+        $sql = $con->prepare("SELECT 1 FROM colaboraciones WHERE idusuario = :idusuario LIMIT 1");
+        $sql->bindParam(':idusuario', $idusuario, PDO::PARAM_INT);
+        $sql->execute();
+        $colaboro = $sql->fetchColumn();
 
-        $sql = $con->prepare("INSERT INTO colaboraciones(idusuario,monto) VALUES (:idusuario,:monto)");
-        $sql->bindParam(':idusuario', $idusuario);
-        $sql->bindParam(':monto', $monto);
-        if ($sql->execute()) {
-            echo "true";
-        } else {
+        if ($colaboro) {
             echo "false";
-        };
+            exit;
+        }
+
+        // Validar el monto
+        if (!isset($_POST['monto']) || !is_numeric($_POST['monto']) || $_POST['monto'] <= 0) {
+            echo "false";
+            exit;
+        }
+
+        $monto = floatval($_POST['monto']); // Asegurar que monto sea numérico
+
+        // Insertar la colaboración
+        $sql = $con->prepare("INSERT INTO colaboraciones (idusuario, monto) VALUES (:idusuario, :monto)");
+        $sql->bindParam(':idusuario', $idusuario, PDO::PARAM_INT);
+        $sql->bindParam(':monto', $monto, PDO::PARAM_STR); // Usamos STR porque puede ser decimal
+
+        echo $sql->execute() ? "true" : "false";
         break;
+
     case 'actualizar_verificado':
         // Recibir los datos del frontend
         $idcolaboracion = $_POST['id'];
