@@ -91,16 +91,16 @@ include dirname(__DIR__) . "/partials/header.php";
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-light">
-                    <h5 class="modal-title" id="modalAgradecimientoLabel">Gracias por tu aporte 👍</h5>
+                    <h5 class="modal-title" id="modalAgradecimientoLabel"></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                         <span aria-hidden="true" class="text-light">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Pronto quitaré los mensajes y podrás continuar usando la app con normalidad</p>
+
                 </div>
                 <div class="modal-footer">
-                    <a href="<?= $baseUrl . "index.php" ?>" class="btn btn-danger mt-3">Ir a la app</a>
+
                 </div>
             </div>
         </div>
@@ -110,20 +110,39 @@ include dirname(__DIR__) . "/partials/header.php";
 <script>
     function insertaColaboracion() {
         event.preventDefault();
+
+        let monto = document.getElementById("monto").value;
+        if (monto == 0 || monto == "" || isNaN(monto)) {
+            modificaModal("Error", "El monto ingresado es incorrecto");
+            // agregar footer boton cancelar
+            return;
+        }
+
         $.post("conexion_colab.php", {
             ingresar: "colaboracion_insert",
             monto: $("#monto").val()
         }).done(function(data, error) {
             if (data == "true") {
-                mostrarAgradecimiento();
+                modificaModal("Gracias por tu aporte 👍",
+                    "Pronto quitaré los mensajes y podrás continuar usando la app con normalidad", false);
+            } else {
+                modificaModal("Gracias 👍", "Tu aporte ya ha sido registrado, pronto quitaré los mensajes", false);
             }
         }).fail(function() {
             alert("error");
         });
     }
 
-    function mostrarAgradecimiento() {
-        // Mostrar el modal
+    function modificaModal(title, body, footer = true) {
+        document.getElementById("modalAgradecimientoLabel").innerHTML = title;
+        document.querySelector("#modalAgradecimiento .modal-body").innerHTML = body;
+        if (footer) {
+            document.querySelector("#modalAgradecimiento .modal-footer").innerHTML =
+                `<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>`;
+        } else {
+            document.querySelector("#modalAgradecimiento .modal-footer").innerHTML =
+                `<a href="<?= $baseUrl . "index.php" ?>" class="btn btn-danger mt-3">Ir a la app</a>`;
+        }
         $('#modalAgradecimiento').modal('show');
     }
 </script>

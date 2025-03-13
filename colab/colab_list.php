@@ -76,7 +76,7 @@ include dirname(__DIR__) . "/partials/header.php";
                 <td data-cell="Fecha" class="data">${element.fecha_colaboracion}</td>
                 <td data-cell="Monto" class="data">${element.monto}</td>
                 <td data-cell="No. Tansaccion" class="data" Transacción">
-                    <input type="text" class="numero-transaccion" data-id="${element.idcolaboracion}" value="${element.numero_transaccion || ''}">
+                    <input type="text" class="numero-transaccion w-100" data-id="${element.idcolaboracion}" value="${element.numero_transaccion || ''}">
                 </td>
                 <td data-cell="Acciones" class="data">
                     <input type="checkbox" class="verificar-colab" data-id="${element.idcolaboracion}" ${element.verificado == 1 ? 'checked' : ''}>
