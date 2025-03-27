@@ -5,6 +5,12 @@ class HaColaborado
     private $con;
     private $idusuario;
 
+    /**
+     * Constructor de la clase.
+     *
+     * @param PDO $conexion Conexión a la base de datos.
+     * @param int $idusuario ID del usuario a verificar.
+     */
     public function __construct($conexion, $idusuario)
     {
         $this->con = $conexion;
@@ -12,17 +18,27 @@ class HaColaborado
     }
 
     /**
-     * Verifica si el usuario ha colaborado y devuelve el resultado en un array
-     * con un unico elemento con la clave "verificado" con valor booleano
+     * Verifica si el usuario ha colaborado.
      *
-     * @return array
+     * @return bool True si el usuario ha colaborado, false en caso contrario.
+     * @throws PDOException Si ocurre un error al ejecutar la consulta.
      */
     public function haColaborado()
     {
-        $sql = $this->con->prepare("SELECT verificado FROM colaboraciones WHERE idusuario = :idusuario");
-        $sql->bindParam(':idusuario', $this->idusuario);
-        $sql->execute();
-        $datos = $sql->fetchAll(PDO::FETCH_ASSOC);
-        return $datos;
+        try {
+            // Consulta para verificar si el usuario ha colaborado
+            $sql = $this->con->prepare("SELECT COUNT(*) as colaborado FROM colaboraciones WHERE idusuario = :idusuario AND verificado = 1");
+            $sql->bindParam(':idusuario', $this->idusuario, PDO::PARAM_INT);
+            $sql->execute();
+
+            // Obtener el resultado
+            $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+
+            // Devolver true si el usuario ha colaborado, false en caso contrario
+            return $resultado['colaborado'] > 0;
+        } catch (PDOException $e) {
+            // Lanzar la excepción para manejarla en un nivel superior
+            throw new PDOException("Error al verificar la colaboración: " . $e->getMessage());
+        }
     }
 }

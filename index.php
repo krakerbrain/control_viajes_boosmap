@@ -1,16 +1,6 @@
 <?php
-require __DIR__ . '/config.php';
-require __DIR__ . '/seguridad/JWT/jwt.php';
-
-$datosUsuario = validarToken();
+require __DIR__ . '/seguridad/auth.php';
 $indice = "inicio";
-$baseUrl = ConfigUrl::get();
-if (!$datosUsuario) {
-    // Redirige a la página de login usando la URL base
-    header("Location: " . $baseUrl . "login/index.php");
-    exit;
-}
-
 include "partials/header.php";
 
 ?>
@@ -105,7 +95,7 @@ include "partials/header.php";
         cargaBotonesRutas();
         detallesViajes('hoy', 'inicial');
         obtenerUltimosViajes(false);
-        mostrarModalMensaje();
+        mostrarModalCambioDominio();
     };
 
     function agregaRuta(e) {
@@ -316,22 +306,24 @@ include "partials/header.php";
         });
     }
 
-    // Función para guardar la decisión en localStorage
-    function guardarDecision() {
-        // Verificar si el checkbox está marcado
-        var checkbox = document.getElementById('checkNoMostrar');
-        if (checkbox.checked) {
-            // Guardar en localStorage
-            localStorage.setItem('modalActualizacion10012024', 'true');
-        }
-    }
-    $(function() {
-        $('[data-toggle="popover"]').popover()
 
-    })
-    $('.popover-dismiss').popover({
-        trigger: 'focus'
-    })
+
+    // Función para guardar la decisión en localStorage
+    // function guardarDecision() {
+    //     // Verificar si el checkbox está marcado
+    //     var checkbox = document.getElementById('checkNoMostrar');
+    //     if (checkbox.checked) {
+    //         // Guardar en localStorage
+    //         localStorage.setItem('modalActualizacion10012024', 'true');
+    //     }
+    // }
+    // $(function() {
+    //     $('[data-toggle="popover"]').popover()
+
+    // })
+    // $('.popover-dismiss').popover({
+    //     trigger: 'focus'
+    // })
 </script>
 
 </html>

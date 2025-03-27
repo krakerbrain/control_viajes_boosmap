@@ -1,16 +1,6 @@
 <?php
-require __DIR__ . '/../config.php';
-require __DIR__ . '/../seguridad/JWT/jwt.php';
-
-
-$datosUsuario = validarToken();
+require dirname(__DIR__) . '/seguridad/auth.php';
 $indice = "rutas";
-
-if (!$datosUsuario) {
-    header("Location: " . $baseUrl . "login/index.php");
-    exit;
-}
-
 include __DIR__ . "/../partials/header.php";
 $idusuario = $datosUsuario['idusuario'];
 
