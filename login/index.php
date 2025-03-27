@@ -19,6 +19,7 @@ if ($datosUsuario) {
 $error = false;
 $errorType = '';
 $creado = $_REQUEST['creado'] ?? "";
+$nombre = $_REQUEST['usuario'] ?? "";
 $cambio_clave = $_REQUEST['cambio_clave'] ?? "";
 
 // Procesar formulario de login
@@ -87,7 +88,7 @@ include "../partials/header.php";
           <div class="form-group text-center mt-3">
             <?php if ($creado === "true"): ?>
               <div class="alert alert-success py-1">
-                <small>¡Registro exitoso! Ingresa tus credenciales.</small>
+                <small>¡Registro exitoso! Ingresa usando tu nombre de usuario y contraseña.</small>
               </div>
             <?php elseif ($cambio_clave === "true"): ?>
               <div class="alert alert-success py-1">
@@ -102,7 +103,8 @@ include "../partials/header.php";
               <i class="fa-solid fa-user"></i>
             </div>
             <input type="text" name="usuario" id="usuario" class="form-control"
-              placeholder="Ingrese su usuario" required autofocus>
+              placeholder="Ingrese su usuario" value="<?= isset($nombre) ? $nombre : "" ?>" required
+              autofocus>
           </div>
 
           <!-- Campo contraseña -->

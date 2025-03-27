@@ -44,7 +44,7 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
             // $idusuario = $con->lastInsertId();
 
             if ($count2) {
-                header("location:index.php?creado=true");
+                header("location:index.php?creado=true&usuario=$usuario_registro");
                 include(__DIR__ . '/../mail/regMail.php');
             } else {
                 $error = "conex";
@@ -111,7 +111,7 @@ include "../partials/header.php";
                     <?php echo $error ?>
                 </div>
                 <div>
-                    <a href="<? $baseUrl . " index.php" ?>">Ir al inicio</a>
+                    <a href="<?= $baseUrl . "index.php" ?>">Ir al inicio</a>
                 </div>
             </form>
             <script>
