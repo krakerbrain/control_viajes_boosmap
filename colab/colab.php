@@ -16,6 +16,15 @@ if (!$datosUsuario) {
 $indice = "colaboracion";
 include dirname(__DIR__) . "/partials/header.php";
 ?>
+<style>
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .lead {
+        font-size: 0.9em;
+    }
+</style>
 
 <body class="bg-light">
 

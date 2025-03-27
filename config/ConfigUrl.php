@@ -7,7 +7,7 @@ class ConfigUrl
         if ($_SERVER['HTTP_HOST'] == 'localhost') {
             return 'http://localhost/control_viajes_boosmap/';
         } else {
-            return 'https://boosterapp2024.in/';
+            return 'https://boosterappsite.in/';
         }
     }
 }
