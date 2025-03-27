@@ -117,3 +117,66 @@
         }
     </script>
     <!-- fin eliminar viaje -->
+
+    <!-- modal cambio dominio -->
+    <div class="modal fade" id="cambioDominioModal" tabindex="-1" aria-labelledby="cambioDominioModalLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-light">
+                    <h5 class="modal-title" id="cambioDominioModalLabel">¡Importante cambio de dominio!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true" class="text-light">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>A partir del <strong>1 de abril</strong>, nuestra plataforma migrará a un nuevo dominio.</p>
+
+                    <div class="alert alert-info mt-3">
+                        <h6 class="fw-bold">Para usuarios web:</h6>
+                        <p>La nueva dirección será: <a href="https://boosterapp.site"
+                                class="fw-bold">boosterapp.site</a></p>
+                        <p>La dirección antigua <strong>boosterapp2024.in</strong> dejará de funcionar.</p>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <h6 class="fw-bold">Para usuarios de Android:</h6>
+                        <p>Deben descargar la nueva versión de la aplicación para continuar usando el servicio sin
+                            interrupciones.</p>
+                        <p>La versión actual dejará de funcionar después del 1 de abril.</p>
+                    </div>
+
+                    <div class="alert alert-danger mt-4">
+                        <p class="mb-0"><strong>Fecha límite:</strong> 1 de abril de 2025. Después de esta fecha, tanto
+                            la app como la dirección antigua quedarán inoperativas.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <a href="https://boosterapp.site" class="btn btn-success">Ir al nuevo sitio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para mostrar el modal automáticamente -->
+    <script>
+        function mostrarModalCambioDominio() {
+            // ID del modal y clave para almacenar en localStorage
+            const modalId = 'cambioDominioModal';
+            const storageKey = 'lastModalShownDate';
+
+            // Obtener la fecha de la última vez que se mostró el modal
+            const lastShownDate = localStorage.getItem(storageKey);
+            const today = new Date().toDateString(); // Fecha actual en formato legible (sin hora)
+
+            // Si no se ha mostrado hoy (o nunca), mostrar el modal
+            if (!lastShownDate || lastShownDate !== today) {
+                const modal = new bootstrap.Modal(document.getElementById(modalId));
+                modal.show();
+
+                // Guardar la fecha actual en localStorage
+                localStorage.setItem(storageKey, today);
+            }
+        }
+    </script>

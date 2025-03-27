@@ -11,30 +11,28 @@ function validarToken()
         $key = $_ENV['JWTKEY'];
         try {
             $decoded = JWT::decode($_COOKIE['jwt'], new Key($key, 'HS256'));
-            if (is_object($decoded)) {
-                // Acceder a la información del payload
-                $idusuario = $decoded->id;
-                $nombre = $decoded->usuario;
-                $admin = $decoded->admin;
-                $otrasapps = $decoded->otrasapps;
 
-                return [
-                    'idusuario' => $idusuario,
-                    'nombre' => $nombre,
-                    'admin' => $admin,
-                    'otrasapps' => $otrasapps
-                ];
-            } else {
-                // Manejar el caso en el que el token no decodificado correctamente
-                header("Location: " . $baseUrl . "login/index.php");
+            // Borrar la cookie si el token está expirado (opcional)
+            if (isset($decoded->exp) && $decoded->exp < time()) {
+                setcookie('jwt', '', time() - 3600, '/');
                 return null;
             }
+
+            return [
+                'idusuario' => $decoded->id,
+                'nombre' => $decoded->usuario,
+                'admin' => $decoded->admin,
+                'otrasapps' => $decoded->otrasapps
+            ];
+        } catch (Firebase\JWT\SignatureInvalidException $e) {
+            // Error específico por cambio de JWTKEY
+            setcookie('jwt', '', time() - 3600, '/'); // Borra la cookie inválida
+            return null;
         } catch (Exception $e) {
-            echo "Error JWT: " . $e->getMessage();
+            // Otros errores (token malformado, expirado, etc.)
             return null;
         }
     }
-
     return null;
 }
 

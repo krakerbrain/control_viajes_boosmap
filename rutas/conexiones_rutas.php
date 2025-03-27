@@ -1,16 +1,7 @@
 <?php
-require __DIR__ . '/../config.php';
-require __DIR__ . '/../seguridad/JWT/jwt.php';
+require dirname(__DIR__) . '/seguridad/auth.php';
 
-
-$datosUsuario = validarToken();
 $ingresar = $_REQUEST['ingresar'];
-
-if (!$datosUsuario) {
-    header("Location: " . $baseUrl . "login/index.php");
-    exit;
-}
-
 $idusuario = $datosUsuario['idusuario'];
 
 $url = "comunas-regiones.json";

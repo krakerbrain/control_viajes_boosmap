@@ -1,22 +1,13 @@
 <?php
-
-/**Se recibe un parámetro que ejecuta el switch según lo que se recibe */
-$ingresar   = $_POST['ingresar'];
-
-require dirname(__DIR__) . '/config.php';
-require dirname(__DIR__) . '/seguridad/JWT/jwt.php';
+if (isset($_POST['idusuario'])) {
+    require dirname(__DIR__) . '/config.php';
+} else {
+    require dirname(__DIR__) . '/seguridad/auth.php';
+}
 
 
 $ingresar  = $_POST['ingresar'];
-$datosUsuario = validarToken();
-
-if (!$datosUsuario) {
-    // El token no es válido o no existe, manejar según sea necesario
-    header("Location: " . $baseUrl . "login/index.php");
-    exit;
-}
-
-$idusuario = $datosUsuario['idusuario'];
+$idusuario = isset($_POST['idusuario']) ? $_POST['idusuario'] : $datosUsuario['idusuario'];
 
 switch ($ingresar) {
     case 'colab_list':

@@ -1,16 +1,6 @@
 <?php
-require dirname(__DIR__) . '/config.php';
-require dirname(__DIR__) . '/seguridad/JWT/jwt.php';
-
-$datosUsuario = validarToken();
+require dirname(__DIR__) . '/seguridad/auth.php';
 $indice = "colaboracion";
-$baseUrl = ConfigUrl::get();
-
-if (!$datosUsuario || !$datosUsuario['admin']) {
-    header("Location: " . $baseUrl . "login/index.php");
-    exit;
-}
-
 include dirname(__DIR__) . "/partials/header.php";
 ?>
 <style>

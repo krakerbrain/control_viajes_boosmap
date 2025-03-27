@@ -1,10 +1,5 @@
 <?php
-require __DIR__ . '/../config.php';
-require __DIR__ . '/../seguridad/JWT/jwt.php';
-
-
-
-$datosUsuario = validarToken();
+require dirname(__DIR__) . '/seguridad/auth.php';
 $idusuario = $datosUsuario['idusuario'];
 $nombreUsuario = $datosUsuario['nombre'];
 $indice = "actualiza_datos";

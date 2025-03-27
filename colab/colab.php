@@ -1,10 +1,10 @@
 <?php
 require dirname(__DIR__) . '/config.php';
 require dirname(__DIR__) . '/seguridad/JWT/jwt.php';
+require dirname(__DIR__) . '/config/HaColaborado.php';
 
 
 $datosUsuario = validarToken();
-$indice = "colaboracion";
 $baseUrl = ConfigUrl::get();
 
 if (!$datosUsuario) {
@@ -13,6 +13,7 @@ if (!$datosUsuario) {
     exit;
 }
 
+$indice = "colaboracion";
 include dirname(__DIR__) . "/partials/header.php";
 ?>
 
@@ -31,6 +32,11 @@ include dirname(__DIR__) . "/partials/header.php";
                 Con el tiempo, esta plataforma se hizo conocida y comenzó a ser utilizada por más colegas que, al igual
                 que yo, necesitaban tener <strong>orden y resumen diario, semanal y mensual</strong> de su trabajo.
             </p>
+            <!-- <p class="lead">
+                A partir de ahora, el acceso completo a la aplicación estará disponible solo para aquellos que
+                colaboren. Tu contribución nos ayudará a cubrir los costos de hosting y dominio, asegurando que la
+                aplicación siga funcionando sin interrupciones.
+            </p> -->
             <p class="lead">
                 Hasta hoy, <strong>he asumido personalmente todos los costos anuales</strong> para mantenerla online,
                 pero los gastos han aumentado considerablemente.
@@ -42,7 +48,7 @@ include dirname(__DIR__) . "/partials/header.php";
                 <strong>lamentablemente el proyecto dejará de estar disponible a partir de esa fecha</strong>.
             </p>
             <p class="lead">
-                Desde ya, <strong>¡muchas gracias por tu apoyo!</strong>
+                <strong>¡Gracias por tu comprensión y apoyo!</strong>
             </p>
         </div>
 
@@ -62,15 +68,15 @@ include dirname(__DIR__) . "/partials/header.php";
                 </div>
             </div>
         </div>
-
         <div class="card shadow-sm">
             <div class="card-body">
                 <h4 class="card-title mb-3">📩 Confirma tu colaboración</h4>
                 <p>
-                    Por favor, completa el siguiente formulario para verificar tu aporte y así quitar el mensaje de
-                    aviso de tu cuenta.
+                    Por favor, completa el siguiente formulario para verificar tu aporte y continuar usando la
+                    aplicación.
                 </p>
                 <form>
+                    <input type="hidden" name="user_id" value="<?= $datosUsuario['idusuario'] ?>">
                     <div class="mb-3">
                         <label for="monto" class="form-label">Yo colaboré con:</label>
                         <input type="text" class="form-control" id="monto" name="monto" placeholder="Ejemplo: 5.000">
@@ -120,7 +126,8 @@ include dirname(__DIR__) . "/partials/header.php";
 
         $.post("conexion_colab.php", {
             ingresar: "colaboracion_insert",
-            monto: $("#monto").val()
+            monto: $("#monto").val(),
+            idusuario: document.querySelector("input[name='user_id']").value
         }).done(function(data, error) {
             if (data == "true") {
                 modificaModal("Gracias por tu aporte 👍",

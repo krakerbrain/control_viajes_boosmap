@@ -5,65 +5,75 @@ use Firebase\JWT\JWT;
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../seguridad/JWT/jwt.php';
 
+// Verificar si hay un error de token inválido (por actualización de la app)
+$tokenError = isset($_GET['error']) && $_GET['error'] === 'invalid_token';
+
+// Si el usuario ya tiene sesión válida, redirigir
 $datosUsuario = validarToken();
-$error = "false";
-$creado = isset($_REQUEST['creado']) ? $_REQUEST['creado'] : "";
-$cambio_clave = isset($_REQUEST['cambio_clave']) ? $_REQUEST['cambio_clave'] : "";
+if ($datosUsuario) {
+  header("location:../index.php");
+  exit;
+}
 
+// Manejo de errores de login
+$error = false;
+$errorType = '';
+$creado = $_REQUEST['creado'] ?? "";
+$cambio_clave = $_REQUEST['cambio_clave'] ?? "";
 
+// Procesar formulario de login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario'], $_POST['contrasenia'])) {
+  $usuario = trim($_POST['usuario']);
+  $pass = $_POST['contrasenia'];
 
-if (!$datosUsuario) {
-  if (isset($_POST['usuario']) && isset($_POST['contrasenia'])) {
-    $pass     = $_POST['contrasenia'];
-    $usuario  = $_POST['usuario'];
-    if ($pass != "" && $usuario != "") {
-      $query = $con->prepare("SELECT idusuario, count(*) as conteo, clave, activo, otrasapps, admin FROM usuarios WHERE nombre = :usuario");
-      $query->bindParam(':usuario', $usuario);
-      $query->execute();
-      $result = $query->fetchAll(PDO::FETCH_ASSOC);
+  if (empty($usuario) || empty($pass)) {
+    $error = true;
+    $errorType = 'vacio';
+  } else {
+    $query = $con->prepare("SELECT idusuario, clave, activo, otrasapps, admin FROM usuarios WHERE nombre = :usuario");
+    $query->bindParam(':usuario', $usuario);
+    $query->execute();
+    $datos = $query->fetch(PDO::FETCH_ASSOC);
 
-      foreach ($result as $datos) {
-        if ($datos['conteo'] > 0 && $datos['activo'] == 1) {
+    if ($datos) {
+      if ($datos['activo'] != 1) {
+        $error = true;
+        $errorType = 'inactivo';
+      } elseif (password_verify($pass, $datos['clave'])) {
+        generarTokenYConfigurarCookie($datos, $usuario);
 
-          if (password_verify($pass, $datos['clave'])) {
+        // Verificar si tiene rutas creadas
+        $sqlViajes = $con->prepare("SELECT COUNT(*) as count FROM rutas WHERE idusuario = :idusuario");
+        $sqlViajes->bindParam(':idusuario', $datos['idusuario']);
+        $sqlViajes->execute();
+        $resultadoViajes = $sqlViajes->fetch(PDO::FETCH_ASSOC);
 
-            // Generar el token y configurar la cookie
-            generarTokenYConfigurarCookie($datos, $usuario);
-
-            $idusuario = $datos['idusuario'];
-
-            // Realizar la consulta en la tabla viajes utilizando el idusuario
-            $sqlViajes = $con->prepare("SELECT COUNT(*) as count FROM rutas WHERE idusuario = :idusuario");
-            $sqlViajes->bindParam(':idusuario', $idusuario);
-            $sqlViajes->execute();
-
-            $resultadoViajes = $sqlViajes->fetch(PDO::FETCH_ASSOC);
-            $count = $resultadoViajes['count'];
-            if ($count > 0) {
-              header("location:../index.php");
-            } else {
-              header("location:../rutas/index.php?creado=false");
-            }
-          } else {
-            $error = "true";
-          }
-        } else {
-          $error =  $datos["activo"] == 0 ? "inactivo" : "noexiste";
-        }
+        header("location: " . ($resultadoViajes['count'] > 0 ? "../index.php" : "../rutas/index.php?creado=false"));
+        exit;
+      } else {
+        $error = true;
+        $errorType = 'true';
       }
     } else {
-      $error = "vacio";
+      $error = true;
+      $errorType = 'noexiste';
     }
   }
-} else {
-  header("location:../index.php");
 }
+
 $indice = "login";
 include "../partials/header.php";
 ?>
 
 <body class="bg-danger d-flex justify-content-center align-items-center vh-100">
-  <div class="bg-white p-5 rounded">
+  <div class="bg-white p-2 p-sm-4 rounded" style="width: 100%; max-width: 400px;">
+
+    <!-- Notificación por actualización de aplicación -->
+    <?php if ($tokenError): ?>
+      <div class="alert alert-info mb-4">
+        <i class="fas fa-info-circle me-2"></i> Hemos actualizado la aplicación. Por favor ingresa nuevamente.
+      </div>
+    <?php endif; ?>
 
     <div class="justify-content-center">
       <div class="">
@@ -72,67 +82,100 @@ include "../partials/header.php";
             <h4>CONTROL DE VIAJES</h4>
             <H4>BOOSMAP</H4>
           </div>
+
+          <!-- Mensajes de éxito -->
           <div class="form-group text-center mt-3">
-            <div class="mb-3">
-              <?php if ($creado == "true") { ?>
-                <span class="text-danger fw-semibold">¡Se ha registrado correctamente!</span><br>
-                <small>Por favor ingrese al sistema.</small>
-              <?php } else if ($cambio_clave == "true") { ?>
-                <span class="text-danger fw-semibold">¡El cambio de clave ha sido exitoso!</span><br>
-                <small>Por favor ingrese al sistema.</small>
-              <?php } ?>
-            </div>
+            <?php if ($creado === "true"): ?>
+              <div class="alert alert-success py-1">
+                <small>¡Registro exitoso! Ingresa tus credenciales.</small>
+              </div>
+            <?php elseif ($cambio_clave === "true"): ?>
+              <div class="alert alert-success py-1">
+                <small>¡Contraseña actualizada! Ingresa con tu nueva clave.</small>
+              </div>
+            <?php endif; ?>
           </div>
-          <div class="input-group">
+
+          <!-- Campo usuario -->
+          <div class="input-group mb-3">
             <div class="input-group-text bg-danger text-light">
               <i class="fa-solid fa-user"></i>
             </div>
             <input type="text" name="usuario" id="usuario" class="form-control"
-              placeholder="Ingrese su usuario">
+              placeholder="Ingrese su usuario" required autofocus>
           </div>
-          <div class="input-group mt-3">
+
+          <!-- Campo contraseña -->
+          <div class="input-group mb-3">
             <div class="input-group-text bg-danger text-light">
               <i class="fa-solid fa-key"></i>
             </div>
             <input type="password" name="contrasenia" id="contrasenia" class="form-control"
-              placeholder="Ingrese su contraseña">
-            <div class="input-group-text bg-light">
-              <a href="#" class="pe-auto text-danger">
-                <i class="fa-solid fa-eye" onclick="verpass()"></i>
-              </a>
+              placeholder="Ingrese su contraseña" required>
+            <button type="button" class="input-group-text bg-light border-start-0" onclick="verpass()">
+              <i class="fa-solid fa-eye text-danger"></i>
+            </button>
+          </div>
+
+          <!-- Botón de submit -->
+          <button type="submit" class="btn btn-danger w-100 mb-3">
+            <i class="fas fa-sign-in-alt me-2"></i> Ingresar
+          </button>
+
+          <!-- Mensajes de error -->
+          <?php if ($error): ?>
+            <div class="alert alert-info py-2 text-center">
+              <i class="fas fa-info-circle me-2"></i>
+              <?php switch ($errorType):
+                case 'true': ?> Credenciales incorrectas
+                  <?php break; ?>
+                <?php
+                case 'vacio': ?> Complete todos los campos
+                  <?php break; ?>
+                <?php
+                case 'noexiste': ?> Usuario no registrado
+                  <?php break; ?>
+                <?php
+                case 'inactivo': ?> Cuenta inactiva. Contacte al administrador
+                  <?php break; ?>
+              <?php endswitch; ?>
             </div>
-          </div>
-          <div class="form-group mt-3">
-            <input type="submit" value="Ingresar" class="btn btn-danger w-100">
-          </div>
-          <?php if ($error == "true") { ?>
-            <span class=" d-flex justify-content-center mt-1">Password incorrecto.</span>
-          <?php } else if ($error == "vacio") { ?>
-            <span class=" d-flex justify-content-center mt-1">Debe llenar todos los campos.</span>
-          <?php } else if ($error == "noexiste") { ?>
-            <span class=" d-flex justify-content-center mt-1">Usuario No Existe.</span>
-          <?php } else if ($error == "inactivo") { ?>
-            <span class=" d-flex justify-content-center mt-1">Consulte al Administrador.</span>
-          <?php } ?>
+          <?php endif; ?>
         </form>
-        <?php if ($error != "inactivo") { ?>
-          <div class="d-flex gap-1 justify-content-center mt-1">
-            <div style="margin-right:5px">¿No tiene una cuenta?</div>
-            <a href="registro.php" class="text-decoration-none text-danger fw-semibold">Registrese</a>
+
+        <!-- Enlaces adicionales -->
+        <?php if ($errorType !== 'inactivo'): ?>
+          <div class="d-flex d-md-block flex-column text-center">
+            <a href="registro.php" class="text-decoration-none text-danger fw-semibold me-2">
+              <i class="fas fa-user-plus me-1"></i> Registrarse
+            </a>
+            <a href="recupera.php" class="text-decoration-none text-danger fw-semibold">
+              <i class="fas fa-key me-1"></i> Recuperar contraseña
+            </a>
           </div>
-          <a href="recupera.php" class="text-decoration-none">
-            <p class="text-center text-danger">¿Olvidó su contraseña?</p>
-          </a>
-          <a href="<?= $baseUrl . "descarga/app-debug.apk" ?>" class="text-decoration-none">
-            <p class="text-center text-danger">Descarga la ANDROID APP <i class="fa-solid fa-download"></i></p>
-          </a>
-        <?php } ?>
-        <script>
-          function verpass() {
-            var pass = document.getElementById('contrasenia');
-            pass.type = pass.type == "password" ? "text" : "password"
-          }
-        </script>
-        <?php
-        include "../partials/footer.php";
-        ?>
+          <div class="text-center mt-3">
+            <a href="<?= $baseUrl ?>descarga/app-debug.apk" class="btn btn-outline-danger btn-sm">
+              <i class="fa-solid fa-download me-1"></i> Descargar APP Android
+            </a>
+          </div>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function verpass() {
+      const passInput = document.getElementById('contrasenia');
+      const icon = passInput.nextElementSibling.querySelector('i');
+      if (passInput.type === "password") {
+        passInput.type = "text";
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        passInput.type = "password";
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
+  </script>
+
+  <?php include "../partials/footer.php"; ?>
+</body>
