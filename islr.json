@@ -18,5 +18,20 @@
     "anio": 2025,
     "impuesto": 14.5,
     "factor": 0.855
+  },
+  {
+    "anio": 2026,
+    "impuesto": 15.25,
+    "factor": 0.8475
+  },
+  {
+    "anio": 2027,
+    "impuesto": 16,
+    "factor": 0.84
+  },
+  {
+    "anio": 2028,
+    "impuesto": 17,
+    "factor": 0.825
   }
 ]

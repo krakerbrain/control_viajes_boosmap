@@ -1,19 +1,12 @@
 <?php
 require dirname(__DIR__) . '/seguridad/auth.php';
 $indice = "rutas";
-include __DIR__ . "/../partials/header.php";
+include dirname(__DIR__) . "/partials/header.php";
 $idusuario = $datosUsuario['idusuario'];
 
 if (isset($_REQUEST['creado'])) {
     $creado = $_REQUEST['creado'];
 } else {
-    // $sqlUsuario = $con->prepare("SELECT idusuario FROM usuarios WHERE nombre = :nombreUsuario");
-    // $sqlUsuario->bindParam(':nombreUsuario', $_SESSION['usuario']);
-    // $sqlUsuario->execute();
-
-    // $resultadoUsuario = $sqlUsuario->fetch(PDO::FETCH_ASSOC);
-    // $idusuario = $resultadoUsuario['idusuario'];
-
     // Realizar la consulta en la tabla viajes utilizando el idusuario
     $sqlViajes = $con->prepare("SELECT COUNT(*) as count FROM rutas WHERE idusuario = :idusuario");
     $sqlViajes->bindParam(':idusuario', $idusuario);
@@ -63,12 +56,9 @@ if (isset($_REQUEST['creado'])) {
                 data-placement="bottom"
                 data-content="Aquí podrás agregar nuevas rutas o modificar las actuales. Al ir agregando rutas se irán creando botones en la página inicial que servirán para ir llenando los registros de viajes"></i>
         </div>
-        <div id="montosActualizados" class="alert alert-danger" role="alert" style="display:none">
-            Los montos de rutas han sido actualizados
-        </div>
+
         <div class="row-cols-lg-2 m-2">
-            <form action="conexiones_rutas.php" method="post" class="mx-auto">
-                <button type="submit" disabled hidden aria-hidden="true"></button>
+            <form id="formRutas" class="form-group mx-auto">
                 <div>
                     <label class="form-label" for="region">Región</label>
                     <select class="custom-select" name="region" id="region">
@@ -101,7 +91,7 @@ if (isset($_REQUEST['creado'])) {
         <table id="tabla-rutas" class="table table-striped">
             <thead class="table-danger text-center">
                 <td>Destino</td>
-                <td>Monto</td>
+                <td>Monto Líquido</td>
                 <td>Eliminar</td>
             </thead>
             <tbody id="tablarutas" class="text-center"></tbody>
@@ -118,6 +108,9 @@ if (isset($_REQUEST['creado'])) {
         </div>
     </legend>
     <div class="modificaMontos text-center" style="display:none">
+        <div id="montosActualizados" class="alert alert-danger" role="alert" style="display:none">
+            Los montos de rutas han sido actualizados
+        </div>
         <div class="text-right">
             <i class="text-danger  mr-1 far fa-question-circle" style="font-size:1.5rem" data-toggle="popover"
                 data-placement="bottom"
@@ -135,89 +128,62 @@ if (isset($_REQUEST['creado'])) {
         </table>
         <div class="form-check mx-auto text-left w-75" data-bs-toggle="tooltip" data-placement="left"
             title="Se actualizaran todos los viajes del mes">
-            <input class="form-check-input" type="checkbox" id="actualizaMes" onclick="activaGuardar(this)">
+            <input class="form-check-input" type="checkbox" id="actualizaMes">
             <label class="form-check-label" for="flexCheckDefault">
                 Actualizar viajes del mes
             </label>
         </div>
-        <div class="form-check mx-auto text-left w-75" style="margin-left:-3px" data-bs-toggle="tooltip"
-            data-placement="left"
-            title="Todos los viajes que se registren desde ahora tendrán el monto actualizado. Se mantienen los montos de rutas anteriores">
-            <input class="form-check-input" type="checkbox" id="actualizaActual" onclick="activaGuardar(this)">
-            <label class="form-check-label" for="flexCheckDefault">
-                Actualizar monto actual
-            </label>
-        </div>
-        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Debe seleccionar al menos una opción">
-            <button type="button" id="guardar" class="btn btn-danger w-75 my-4" data-toggle="modal"
-                data-target="#exampleModal" onclick="obtieneNuevosPrecios()" disabled>
-                Guardar
-            </button>
-        </div>
+        <button type="button" id="guardar" class="btn btn-danger w-75 my-4" data-toggle="modal"
+            data-target="#exampleModal" onclick="guardaCambioMontoRuta()">
+            Guardar
+        </button>
+
     </div>
 </fieldset>
-<!-- Modal Actualiza Precios-->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">PRECIOS ACTUALIZADOS</h5>
-            </div>
-            <div class="modal-body">
-                Los precios han sido actualizados
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-danger" id="modalConfirm" style="display:none">Confirmar</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- fin modal -->
+
+<?php
+require_once 'modales_rutas.php';
+require_once dirname(__DIR__) . '/modal/warningModal.php';
+?>
 </body>
-<?php include __DIR__ . "/../partials/boostrap_script.php" ?>
+<?php include dirname(__DIR__) . "/partials/boostrap_script.php" ?>
 <script type="text/javascript" src="../componente/js/manejo-de-fieldsets.js"></script>
 
 </html>
 
 <script>
-    function activaGuardar(e) {
-        let actualizaMes = document.getElementById('actualizaMes').checked;
-        let actualizaActual = document.getElementById('actualizaActual').checked;
-        if (e.checked || actualizaMes || actualizaActual) {
-            document.getElementById('guardar').disabled = false;
-        } else {
-            document.getElementById('guardar').disabled = true;
-        }
-    }
+    function guardaCambioMontoRuta() {
+        const inputConPrecios = document.querySelectorAll('.editaLiquido');
+        const actualizaMes = document.getElementById('actualizaMes').checked;
+        const nuevosPrecios = [];
 
-    function obtieneNuevosPrecios() {
-        let inputConPrecios = document.querySelectorAll('.editaLiquido');
-        let actualizaMes = document.getElementById('actualizaMes').checked;
-        let actualizaActual = document.getElementById('actualizaActual').checked;
-        let nuevosPrecios = new Array;
-        for (let i = 0; i < inputConPrecios.length; i++) {
-            const element = inputConPrecios[i];
-            if (element.value != element.defaultValue) {
-                data = {
+        for (const element of inputConPrecios) {
+            if (actualizaMes || element.value !== element.defaultValue) {
+                nuevosPrecios.push({
                     id: element.id,
                     precio: element.value
-                }
-                nuevosPrecios.push(data);
+                });
             }
         }
-        actualizaPrecios(nuevosPrecios, actualizaMes, actualizaActual)
+
+        if (nuevosPrecios.length > 0) {
+            actualizaPrecios(nuevosPrecios, actualizaMes);
+        } else {
+            warningModal("Atención", "No se han realizado cambios en los montos.");
+        }
     }
 
-    function actualizaPrecios(nuevosprecios, actualizaMes, actualizaActual) {
+    function actualizaPrecios(nuevosprecios, actualizaMes) {
         if (nuevosprecios != "") {
             $.post("conexiones_rutas.php", {
                 ingresar: "actualizaPrecios",
                 nuevosPrecios: JSON.stringify(nuevosprecios),
                 actualizaMes: actualizaMes,
-                actualizaActual: actualizaActual
+                // actualizaActual: actualizaActual
             }).done(function(datos) {
-                sessionStorage.setItem('actualizado', true);
+                warningModal("Éxito", datos);
+                // sessionStorage.setItem('actualizado', true);
+                recargaFieldsetCambioMontos()
             }).fail(function() {
                 alert("error");
             });
@@ -254,18 +220,33 @@ if (isset($_REQUEST['creado'])) {
     const btnAgregar = document.getElementById('agregar');
 
     window.onload = function() {
-        if (sessionStorage.getItem('actualizado')) {
-            activaAlerta()
-        }
-        $.get("conexiones_rutas.php", {
-                ingresar: "cargaregiones"
-            })
-            .done(function(datos) {
-                region.innerHTML += datos;
+        cargarRegiones(); // Llamada a la función para cargar regiones
+    }
+
+    function cargarRegiones() {
+        fetch('comunas-regiones.json') // Ruta al archivo JSON
+            .then(response => response.json()) // Convierte la respuesta a JSON
+            .then(data => {
+                // Obtener el select de regiones
+                const region = document.getElementById("region");
+
+                // Limpiar las opciones existentes
+                region.innerHTML = "";
+
+                // Crear la opción inicial "Seleccione"
+                region.innerHTML += '<option value="">Seleccione</option>';
+
+                // Recorrer las regiones y agregar las opciones al select
+                data.regiones.forEach(reg => {
+                    region.innerHTML += `<option value="${reg.clave}">${reg.region}</option>`;
+                });
+
+                // Llamar a la función obtenerruta si es necesario
                 obtenerruta();
             })
-            .fail(function() {
-                alert("error")
+            .catch(error => {
+                console.error("Error al cargar las regiones:", error);
+                alert("Hubo un error al cargar las regiones");
             });
     }
 
@@ -273,20 +254,44 @@ if (isset($_REQUEST['creado'])) {
         document.getElementById('montosActualizados').style.display = "block";
         setTimeout(() => {
             document.getElementById('montosActualizados').style.display = "none"
-            sessionStorage.removeItem('actualizado')
+            // sessionStorage.removeItem('actualizado')
         }, 4000);
     }
 
-    seleccionaRegion.addEventListener("change", function(e) {
-        $.post("conexiones_rutas.php", {
-            ingresar: "cargacomunas",
-            region: e.target.form.region.value
-        }).done(function(datos) {
-            comunas.innerHTML = datos;
-        }).fail(function() {
-            alert("error");
-        });
-    })
+    // Evento para cuando se selecciona una región
+    document.getElementById("region").addEventListener("change", function(e) {
+        // Obtener la clave de la región seleccionada
+        const claveRegion = e.target.value;
+
+        // Obtener el select de comunas
+        const selectComunas = document.getElementById("comunas");
+
+        // Limpiar las opciones previas
+        selectComunas.innerHTML = '<option value="">Seleccione</option>';
+
+        // Cargar el archivo JSON de las comunas y regiones
+        fetch('comunas-regiones.json')
+            .then(response => response.json()) // Convertir la respuesta a JSON
+            .then(data => {
+                // Buscar las comunas de la región seleccionada
+                const regionSeleccionada = data.regiones.find(region => region.clave === claveRegion);
+
+                // Si encontramos la región seleccionada, cargar sus comunas
+                if (regionSeleccionada) {
+                    // Usamos backticks para crear las opciones dinámicamente
+                    const opcionesComunas = regionSeleccionada.comunas.map(comuna => {
+                        return `<option value="${comuna}">${comuna}</option>`;
+                    }).join(""); // `.join("")` une todas las opciones generadas en un solo string
+
+                    // Insertamos las opciones generadas en el select
+                    selectComunas.innerHTML += opcionesComunas;
+                }
+            })
+            .catch(error => {
+                console.error("Error al cargar el archivo JSON:", error);
+            });
+    });
+
 
     document.querySelector('form').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -310,29 +315,27 @@ if (isset($_REQUEST['creado'])) {
             var datos = await verificaComuna(comunaSeleccionada);
 
             if (datos === "true") {
-                mostrarModal("Error", "La comuna seleccionada ya ha sido ingresada", 'cierre');
+                warningModal("Error", "La comuna seleccionada ya ha sido ingresada");
                 return;
             }
 
             if (comunaSeleccionada === "" || isNaN(costoruta) || isNaN(montobruto) || region === "") {
                 if (checkBruto && costoruta === 0) {
 
-                    mostrarModal("Error", "El monto no puede ser 0.", 'cierre');
+                    warningModal("Error", "El monto no puede ser 0.");
                 } else {
-                    mostrarModal("Error", "Debe llenar todos los campos.", 'cierre');
+                    warningModal("Error", "Debe llenar todos los campos.");
                 }
                 return;
             } else if (costoruta === 0) {
-                mostrarModal("Error", "El monto no puede ser 0.", 'cierre');
+                warningModal("Error", "El monto no puede ser 0.");
                 return;
             }
 
-            var conf =
-                `¿Desea ingresar la comuna de ${comunaSeleccionada} con un monto líquido por viaje de ${parseFloat(costoruta).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}`;
-            mostrarModal("Confirmación", conf, 'confirmacion', comunaSeleccionada, costoruta);
+            confirmModal(comunaSeleccionada, costoruta);
         } catch (error) {
             console.error(error);
-            mostrarModal("Error", "Error al realizar la verificación.", 'cierre');
+            warningModal("Error", "Error al realizar la verificación.");
         }
     }
 
@@ -349,47 +352,64 @@ if (isset($_REQUEST['creado'])) {
         });
     }
 
-    function mostrarModal(titulo, contenido, accion, comuna, costo) {
-        var modalTitle = document.getElementById("exampleModalLabel");
-        var modalBody = document.querySelector("#exampleModal .modal-body");
-        var modalFooter = document.querySelector("#exampleModal .modal-footer");
-        var closeButton = document.querySelector("#exampleModal .modal-footer button");
+    function confirmModal(comunaSeleccionada, costoruta) {
+
+        let modalTitle = document.querySelector("#confirmModalTitle");
+        let modalBody = document.querySelector("#confirmModalBody");
+        modalTitle.innerText = "Confirmación";
+        modalBody.innerText =
+            `¿Desea ingresar la comuna de ${comunaSeleccionada} con un monto líquido por viaje de ${parseFloat(costoruta).toLocaleString('es-CL', {style: 'currency', currency: 'CLP'})}?`;
+
+
+        // Mostrar modal
+        $('#confirmModalRutas').modal('show');
+    }
+
+    document.getElementById('confirmModalAction').addEventListener('click', function() {
+        let comunaSeleccionada = document.getElementById('comunas').value;
+        let costoruta = document.getElementById('costoruta').value;
+        agregaRuta(comunaSeleccionada, costoruta);
+    })
+
+    function warningModal(titulo, contenido) {
+
+        let modalTitle = document.querySelector("#alertModalTitle");
+        let modalBody = document.querySelector("#alertModalBody");
 
         modalTitle.innerText = titulo;
         modalBody.innerText = contenido;
 
-
-        if (accion === "cierre") {
-            closeButton.setAttribute("onclick", `$('#exampleModal').modal('hide')`);
-        } else if (accion === 'confirmacion') {
-            var confirmButton = document.getElementById('modalConfirm');
-            confirmButton.style.display = "block";
-            confirmButton.addEventListener("click", function() {
-                agregaRuta(comuna, costo);
-            });
-        } else {
-            closeButton.setAttribute("onclick", "location.reload()");
-        }
-
-        $("#exampleModal").modal("show");
+        // Mostrar modal
+        $('#alertModal').modal('show');
     }
 
     async function agregaRuta(comunaSeleccionada, costoruta) {
+        // Verifica la comuna antes de enviar los datos
         var datos = await verificaComuna(comunaSeleccionada);
-        if (datos != "true") {
-            $.post("conexiones_rutas.php", {
-                ingresar: "agregaviaje",
+        // Cierra el modal
+        $('#confirmModalRutas').modal('hide');
+
+        if (datos === "true") {
+            warningModal("Error", "La comuna ya está registrada.");
+            return;
+        }
+
+        // Enviar los datos al servidor
+        try {
+            const response = await $.post("conexiones_rutas.php", {
+                ingresar: "agregaruta",
                 comuna: comunaSeleccionada,
                 costoruta: costoruta,
-            }).done(function(datos) {
-                obtenerruta();
-                document.getElementById('modalConfirm').style.display = "none";
-                mostrarModal("Éxito", "La comuna ha sido agregada correctamente.", "cierre");
-            }).fail(function() {
-                alert("error");
             });
+
+            // Mostrar el mensaje basado en la respuesta del servidor
+            warningModal("Éxito", response); // El servidor devuelve un mensaje de éxito o error
+            document.getElementById('formRutas').reset();
+            obtenerruta();
+        } catch (error) {
+            console.error("Error al agregar la ruta:", error);
+            warningModal("Error", "Hubo un problema al agregar la comuna.");
         }
-        return
     }
 
     async function agregaRutaVina() {
@@ -417,7 +437,7 @@ if (isset($_REQUEST['creado'])) {
                 // Si el mes actual es diciembre, se toma el año siguiente
 
                 // Buscar el factor correspondiente al año actual en el archivo islr.json
-                let factor = 0.87; // Valor predeterminado si no se encuentra el año actual
+                let factor;
                 for (const islr of islrData) {
                     if (islr.anio === anioParaCalculo) {
                         factor = islr.factor;
@@ -505,31 +525,58 @@ if (isset($_REQUEST['creado'])) {
 
 
     function editaMonto(checkbox, campos) {
-        let campo = document.getElementsByClassName(campos);
-        if (checkbox.id == 'checkEditaBruto') {
-            if (checkbox.checked) {
-                document.getElementById('checkEditaLiquido').disabled = true
-            } else {
-                document.getElementById('checkEditaLiquido').disabled = false
-            }
-        } else {
-            if (checkbox.checked) {
-                document.getElementById('checkEditaBruto').disabled = true
-            } else {
-                document.getElementById('checkEditaBruto').disabled = false
+        const otroCheckbox = checkbox.id === 'checkEditaBruto' ?
+            document.getElementById('checkEditaLiquido') :
+            document.getElementById('checkEditaBruto');
+
+        // Deshabilitar el otro checkbox cuando este está activado
+        otroCheckbox.disabled = checkbox.checked;
+
+        // Manejar los campos relacionados
+        const elementos = document.getElementsByClassName(campos);
+        const habilitar = checkbox.checked;
+
+        for (let i = 0; i < elementos.length; i++) {
+            elementos[i].disabled = !habilitar;
+
+            if (habilitar) {
+                elementos[i].classList.remove('bg-light', 'border-0');
+                if (i === 0) elementos[i].focus();
             }
         }
 
-        for (let i = 0; i < campo.length; i++) {
-            const element = campo[i];
-            if (checkbox.checked) {
-                element.disabled = false;
-                element.classList.remove('bg-light', 'border-0');
-                campo[0].focus();
-            } else {
-                obtenerruta();
-            }
+        // Si se desmarca, obtener ruta (solo si todos están desmarcados)
+        if (!checkbox.checked && !otroCheckbox.checked) {
+            obtenerruta();
         }
+    }
+
+    function recargaFieldsetCambioMontos() {
+        const todosCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+        todosCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            checkbox.disabled = false;
+        });
+
+        // Deshabilitar todos los campos asociados (bruto y líquido)
+        const camposBruto = document.getElementsByClassName('clase-campos-bruto'); // Ej: "monto-bruto"
+        const camposLiquido = document.getElementsByClassName('clase-campos-liquido'); // Ej: "monto-liquido"
+
+        // Deshabilitar campos de bruto
+        for (let campo of camposBruto) {
+            campo.disabled = true;
+            campo.classList.add('bg-light', 'border-0');
+        }
+
+        // Deshabilitar campos de líquido
+        for (let campo of camposLiquido) {
+            campo.disabled = true;
+            campo.classList.add('bg-light', 'border-0');
+        }
+
+        // Opcional: Resetear valores o llamar a obtenerruta()
+        obtenerruta();
+        activaAlerta();
     }
 
 
@@ -562,9 +609,6 @@ if (isset($_REQUEST['creado'])) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
 
-    $('#myModal').on('shown.bs.modal', function() {
-        $('#myInput').trigger('focus')
-    })
     $(function() {
         $('[data-toggle="popover"]').popover()
     })

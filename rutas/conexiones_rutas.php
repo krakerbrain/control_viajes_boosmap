@@ -4,40 +4,32 @@ require dirname(__DIR__) . '/seguridad/auth.php';
 $ingresar = $_REQUEST['ingresar'];
 $idusuario = $datosUsuario['idusuario'];
 
-$url = "comunas-regiones.json";
-$json = file_get_contents($url);
-$datos = json_decode($json, true)["regiones"];
-$totalregiones = count($datos);
-
 switch ($ingresar) {
-    case 'cargaregiones':
-        foreach ($datos as $key => $value) {
-            echo "<option value=" . $value["clave"] . ">" . $value["region"] . "</option>";
-        }
-        break;
-    case 'cargacomunas':
-        $region = $_POST["region"];
-        $comunas = $datos[$region]["comunas"];
-        foreach ($datos as $key => $value) {
-            if ($value["clave"] == $region) {
-                sort($value["comunas"]);
-                for ($i = 0; $i < count($value["comunas"]); $i++) {
-                    # code...
-                    echo "<option value=" . $value["comunas"][$i] . ">" . $value["comunas"][$i] . "</option>";
-                }
+    case 'agregaruta':
+        try {
+            $comuna = $_POST['comuna'];
+            $costoruta = $_POST['costoruta'];
+
+            // Validación en el backend
+            if (empty($comuna) || empty($costoruta)) {
+                throw new Exception("La comuna o el costo de ruta no pueden estar vacíos.");
             }
+
+            // Inserción de la nueva ruta en la base de datos
+            $sql = $con->prepare("INSERT INTO rutas(idusuario,ruta,costoruta) VALUES (:idusuario,:ruta,:costoruta)");
+            $sql->bindParam(':idusuario', $idusuario);
+            $sql->bindParam(':ruta', $comuna);
+            $sql->bindParam(':costoruta', $costoruta);
+            $sql->execute();
+
+            // Respuesta al frontend con un mensaje de éxito
+            echo "Ruta agregada correctamente.";
+        } catch (Exception $e) {
+            // Respuesta al frontend con un mensaje de error
+            echo "Error al agregar la ruta: " . $e->getMessage();
         }
         break;
-    case 'agregaviaje':
-        $comuna = $_POST['comuna'];
-        $costoruta = $_POST['costoruta'];
-        // var_dump($idusuario);
-        $sql = $con->prepare("INSERT INTO rutas(idusuario,ruta,costoruta) VALUES (:idusuario,:ruta,:costoruta)");
-        $sql->bindParam(':idusuario', $idusuario);
-        $sql->bindParam(':ruta', $comuna);
-        $sql->bindParam(':costoruta', $costoruta);
-        $sql->execute();
-        break;
+
     case 'obtenerRutas':
         $query = $con->prepare("SELECT * FROM rutas WHERE idusuario = :idusuario");
         $query->bindParam(':idusuario', $idusuario);
@@ -53,24 +45,40 @@ switch ($ingresar) {
         $query->bindParam(':idusuario', $idusuario);
         $query->execute();
         break;
-    case 'actualizaPrecios';
-        $nuevosprecios = json_decode($_POST['nuevosPrecios']);
-        $actualizaMes = $_POST['actualizaMes'];
-        $actualizaActual = $_POST['actualizaActual'];
+    case 'actualizaPrecios':
+        try {
+            $nuevosprecios = json_decode($_POST['nuevosPrecios']);
+            $actualizaMes = $_POST['actualizaMes'] === "true";
 
-        for ($i = 0; $i < count($nuevosprecios); $i++) {
-            if ($actualizaMes == "true") {
-                $query = $con->prepare("UPDATE viajes SET monto = :precio WHERE destino = (SELECT ruta from rutas WHERE idruta = :idruta) and date_format(fecha,'%m') = month(now())");
-                $query->bindParam(':precio', $nuevosprecios[$i]->precio);
-                $query->bindParam(':idruta', $nuevosprecios[$i]->id);
-                $query->execute();
-            }
-            if ($actualizaActual == "true") {
+            // 1. Actualizar precios en 'rutas'
+            foreach ($nuevosprecios as $precioData) {
                 $query = $con->prepare("UPDATE rutas SET costoruta = :precio WHERE idruta = :idruta");
-                $query->bindParam(':precio', $nuevosprecios[$i]->precio);
-                $query->bindParam(':idruta', $nuevosprecios[$i]->id);
+                $query->bindParam(':precio', $precioData->precio);
+                $query->bindParam(':idruta', $precioData->id);
                 $query->execute();
             }
+
+            // 2. Actualizar viajes del mes (si está marcado)
+            if ($actualizaMes) {
+                $query = $con->prepare("
+                        UPDATE viajes v
+                        JOIN rutas r ON v.destino = r.ruta
+                        SET v.monto = r.costoruta
+                        WHERE MONTH(v.fecha) = MONTH(CURRENT_DATE())
+                        AND YEAR(v.fecha) = YEAR(CURRENT_DATE())
+                        AND v.idusuario = :idusuario
+                        AND r.idruta IN (" . implode(',', array_map(fn($p) => $p->id, $nuevosprecios)) . ")
+                    ");
+                $query->bindParam(':idusuario', $idusuario);
+                $query->execute();
+            }
+
+            // Respuesta clara y simple
+            echo $actualizaMes
+                ? "¡Se actualizaron los montos de las rutas y los viajes de este mes!"
+                : "¡Se actualizaron los montos de las rutas!";
+        } catch (Exception $e) {
+            echo "Error: No se pudieron guardar los cambios. Por favor, inténtalo de nuevo.";
         }
         break;
     case 'verificarComunas':
