@@ -26,7 +26,7 @@ try {
     $mail->addAddress($correo, $usuario_registro);     //Add a recipient
     // $mail->addAddress('ellen@example.com');               //Name is optional
     $mail->addReplyTo($_ENV['DIRECCIONCORREO'], 'Registro');
-    $mail->addCC($_ENV['DIRECCIONCORREO']);
+    // $mail->addCC($_ENV['DIRECCIONCORREO']);
     // $mail->addBCC('bcc@example.com');    
 
     //Attachments

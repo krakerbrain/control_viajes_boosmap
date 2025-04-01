@@ -24,6 +24,8 @@ include dirname(__DIR__) . "/partials/header.php";
             <div class="alert alert-warning text-dark mx-auto" style="max-width: 600px;">
                 <h6 class="fw-bold">📌 Instrucciones de instalación:</h6>
                 <ol class="text-start">
+                    <!-- desistala la aplicacion anterior -->
+                    <li>Si tienes una versión anterior de la app instalada, desinstálala primero</li>
                     <li>Descarga el archivo <strong>boosterapp-r.apk</strong></li>
                     <li>Al intentar instalar, Android puede mostrar: <br>
                         <em>"Bloqueado por seguridad. No se permiten instalaciones de fuentes desconocidas"</em>
