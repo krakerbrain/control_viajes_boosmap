@@ -25,16 +25,16 @@ $haColaborado = $datos;
                         class="sr-only">(current)</span></a>
             </li>
             <?php if ($datosUsuario['otrasapps']) { ?>
-            <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "aplicaciones/index.php" ?>">Otras
-                    Apps</a>
-            </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "aplicaciones/index.php" ?>">Otras
+                        Apps</a>
+                </li>
             <?php } ?>
             <?php if ($datosUsuario['admin']) { ?>
-            <li class="nav-item">
-                <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "colab/colab_list.php" ?>">Lista de
-                    Colaboraciones</a>
-            </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "colab/colab_list.php" ?>">Lista de
+                        Colaboraciones</a>
+                </li>
             <?php } ?>
             <li class="nav-item">
                 <a class="navbar-brand" style="font-size:14px"
@@ -82,23 +82,25 @@ $haColaborado = $datos;
     </div>
     <!-- Script para mostrar el modal de confirmación -->
     <script>
-    function confirmarCerrarSesion() {
-        $('#confirmModal').modal('show');
-    }
-    var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
+        function confirmarCerrarSesion() {
+            $('#confirmModal').modal('show');
+        }
+        var phoneNumber = "+56975325574"; // Número de teléfono al que se enviará el mensaje
 
-    // Función para abrir WhatsApp
-    function openWhatsApp() {
-        window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
-    }
+        // Función para abrir WhatsApp
+        function openWhatsApp() {
+            window.location.href = "whatsapp://send?phone=" + encodeURIComponent(phoneNumber);
+        }
     </script>
 </nav>
 <?php
 if ($indice != 'login' && $indice != 'colaboracion' && !$haColaborado && !$datosUsuario['admin']) {
 ?>
-<div class="alert alert-warning alert-dismissible fade show" role="alert">
-    🚗 ¡Apoya el proyecto!
-    Si esta aplicación te ha sido útil y quieres colaborar, puedes hacer un aporte para renovar el hosting.
-    <a href="<?= $baseUrl . "colab/colab.php" ?>" class="alert-link">Haz clic aquí para ver cómo colaborar.</a>
-</div>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>🚗 Actualización importante (10/04/2025):</strong>
+        ¡Gracias a los compañeros que han colaborado! Sus aportes permitirán que el proyecto continúe,
+        aunque con funcionalidades limitadas. A partir del 10/ abril, el acceso completo estará disponible
+        solo para usuarios que hayan colaborado. <a href="<?= $baseUrl . "colab/colab.php" ?>" class="alert-link">Ver
+            detalles</a>
+    </div>
 <?php } ?>

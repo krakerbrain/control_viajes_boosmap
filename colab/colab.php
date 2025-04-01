@@ -17,13 +17,13 @@ $indice = "colaboracion";
 include dirname(__DIR__) . "/partials/header.php";
 ?>
 <style>
-    h1 {
-        font-size: 1.8em;
-    }
+h1 {
+    font-size: 1.8em;
+}
 
-    .lead {
-        font-size: 0.9em;
-    }
+.lead {
+    font-size: 0.9em;
+}
 </style>
 
 <body class="bg-light">
@@ -31,33 +31,21 @@ include dirname(__DIR__) . "/partials/header.php";
     <div class="container py-5">
 
         <div class="text-center mb-3">
-            <h1 class="mb-3">🙏 ¡Gracias por querer colaborar!</h1>
+            <h1 class="mb-3">🙏 ¡Gracias por tu apoyo!</h1>
             <p class="lead">
-                Hace ya <strong>tres años</strong> inicié este proyecto como una herramienta personal para llevar el
-                control de mis viajes y ganancias,
-                ya que la aplicación que usamos los conductores no nos ofrecía el detalle completo de cada trayecto.
+                Gracias a <strong>los compañeros que han colaborado</strong>, el proyecto podrá continuar,
+                aunque con algunas limitaciones. A partir del <strong>10 de abril de 2025</strong>, ciertas
+                funcionalidades estarán disponibles solo para usuarios que hayan realizado un aporte.
             </p>
+
             <p class="lead">
-                Con el tiempo, esta plataforma se hizo conocida y comenzó a ser utilizada por más colegas que, al igual
-                que yo, necesitaban tener <strong>orden y resumen diario, semanal y mensual</strong> de su trabajo.
+                <strong>No es mi intención lucrarme</strong> con esta herramienta que nació para ayudarnos
+                a todos. Los aportes recaudados se destinarán exclusivamente al mantenimiento básico del sitio.
             </p>
-            <!-- <p class="lead">
-                A partir de ahora, el acceso completo a la aplicación estará disponible solo para aquellos que
-                colaboren. Tu contribución nos ayudará a cubrir los costos de hosting y dominio, asegurando que la
-                aplicación siga funcionando sin interrupciones.
-            </p> -->
+
             <p class="lead">
-                Hasta hoy, <strong>he asumido personalmente todos los costos anuales</strong> para mantenerla online,
-                pero los gastos han aumentado considerablemente.
-                Si esta herramienta te ha sido útil y quieres que siga activa, <strong>te pido una colaboración</strong>
-                para ayudarme a cubrir los costos de hosting y dominio.
-            </p>
-            <p class="lead">
-                La renovación vence el <strong>1 de abril de 2025</strong>, y si no logro reunir el monto necesario,
-                <strong>lamentablemente el proyecto dejará de estar disponible a partir de esa fecha</strong>.
-            </p>
-            <p class="lead">
-                <strong>¡Gracias por tu comprensión y apoyo!</strong>
+                Si esta aplicación te es útil y puedes colaborar, te lo agradeceré enormemente.
+                Cada aporte, por pequeño que sea, ayuda a mantener el proyecto vivo.
             </p>
         </div>
 
@@ -123,43 +111,43 @@ include dirname(__DIR__) . "/partials/header.php";
     <!-- fin modal agradecimiento -->
 </body>
 <script>
-    function insertaColaboracion() {
-        event.preventDefault();
+function insertaColaboracion() {
+    event.preventDefault();
 
-        let monto = document.getElementById("monto").value;
-        if (monto == 0 || monto == "" || isNaN(monto)) {
-            modificaModal("Error", "El monto ingresado es incorrecto");
-            // agregar footer boton cancelar
-            return;
-        }
-
-        $.post("conexion_colab.php", {
-            ingresar: "colaboracion_insert",
-            monto: $("#monto").val(),
-            idusuario: document.querySelector("input[name='user_id']").value
-        }).done(function(data, error) {
-            if (data == "true") {
-                modificaModal("Gracias por tu aporte 👍",
-                    "Pronto quitaré los mensajes y podrás continuar usando la app con normalidad", false);
-            } else {
-                modificaModal("Gracias 👍", "Tu aporte ya ha sido registrado, pronto quitaré los mensajes", false);
-            }
-        }).fail(function() {
-            alert("error");
-        });
+    let monto = document.getElementById("monto").value;
+    if (monto == 0 || monto == "" || isNaN(monto)) {
+        modificaModal("Error", "El monto ingresado es incorrecto");
+        // agregar footer boton cancelar
+        return;
     }
 
-    function modificaModal(title, body, footer = true) {
-        document.getElementById("modalAgradecimientoLabel").innerHTML = title;
-        document.querySelector("#modalAgradecimiento .modal-body").innerHTML = body;
-        if (footer) {
-            document.querySelector("#modalAgradecimiento .modal-footer").innerHTML =
-                `<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>`;
+    $.post("conexion_colab.php", {
+        ingresar: "colaboracion_insert",
+        monto: $("#monto").val(),
+        idusuario: document.querySelector("input[name='user_id']").value
+    }).done(function(data, error) {
+        if (data == "true") {
+            modificaModal("Gracias por tu aporte 👍",
+                "Pronto quitaré los mensajes y podrás continuar usando la app con normalidad", false);
         } else {
-            document.querySelector("#modalAgradecimiento .modal-footer").innerHTML =
-                `<a href="<?= $baseUrl . "index.php" ?>" class="btn btn-danger mt-3">Ir a la app</a>`;
+            modificaModal("Gracias 👍", "Tu aporte ya ha sido registrado, pronto quitaré los mensajes", false);
         }
-        $('#modalAgradecimiento').modal('show');
+    }).fail(function() {
+        alert("error");
+    });
+}
+
+function modificaModal(title, body, footer = true) {
+    document.getElementById("modalAgradecimientoLabel").innerHTML = title;
+    document.querySelector("#modalAgradecimiento .modal-body").innerHTML = body;
+    if (footer) {
+        document.querySelector("#modalAgradecimiento .modal-footer").innerHTML =
+            `<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>`;
+    } else {
+        document.querySelector("#modalAgradecimiento .modal-footer").innerHTML =
+            `<a href="<?= $baseUrl . "index.php" ?>" class="btn btn-danger mt-3">Ir a la app</a>`;
     }
+    $('#modalAgradecimiento').modal('show');
+}
 </script>
 <?php include dirname(__DIR__) . "/partials/boostrap_script.php" ?>

@@ -95,7 +95,7 @@ include "partials/header.php";
         cargaBotonesRutas();
         detallesViajes('hoy', 'inicial');
         obtenerUltimosViajes(false);
-        mostrarModalCambioDominio();
+        // mostrarModalCambioDominio();
     };
 
     function agregaRuta(e) {
