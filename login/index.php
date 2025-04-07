@@ -156,7 +156,7 @@ include "../partials/header.php";
             </a>
           </div>
           <div class="text-center mt-3">
-            <a href="<?= $baseUrl ?>descarga/app-debug.apk" class="btn btn-outline-danger btn-sm">
+            <a href="<?= $baseUrl ?>descarga/app-release.apk" class="btn btn-outline-danger btn-sm">
               <i class="fa-solid fa-download me-1"></i> Descargar APP Android
             </a>
           </div>

@@ -17,8 +17,8 @@ include dirname(__DIR__) . "/partials/header.php";
                 iOS.
             </div>
 
-            <a class="btn btn-outline-light mb-3" href="<?= $baseUrl . "descarga/boosterapp-r.apk" ?>" download>
-                Descargar boosterapp-r.apk
+            <a class="btn btn-outline-light mb-3" href="<?= $baseUrl . "descarga/app-release.apk" ?>" download>
+                Descargar app-release.apk
             </a>
 
             <div class="alert alert-warning text-dark mx-auto" style="max-width: 600px;">
