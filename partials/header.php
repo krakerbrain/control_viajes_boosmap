@@ -13,14 +13,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href=<?= $baseUrl . "assets/css/styles.css" ?>>
-    <script src=<?= $baseUrl . "assets/js/funciones.js" ?>></script>
+    <script src=<?= $baseUrl . "assets/js/funciones.js?v=1" ?>></script>
     <script>
-        const baseUrl = "<?= $baseUrl ?>";
+    const baseUrl = "<?= $baseUrl ?>";
     </script>
 </head>
 <?php if ($indice != 'inicio' && $indice != 'login') { ?>
 
-    <body>
-        <div class="container px-0" style="max-width:850px">
-            <?php include __DIR__ . "/../partials/navbar.php"; ?>
+<body>
+    <div class="container px-0" style="max-width:850px">
+        <?php include __DIR__ . "/../partials/navbar.php"; ?>
         <?php } ?>
