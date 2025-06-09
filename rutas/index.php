@@ -224,7 +224,7 @@ require_once dirname(__DIR__) . '/modal/warningModal.php';
     }
 
     function cargarRegiones() {
-        fetch('comunas-regiones.json') // Ruta al archivo JSON
+        fetch('comunas-regiones.json?v=2') // Ruta al archivo JSON
             .then(response => response.json()) // Convierte la respuesta a JSON
             .then(data => {
                 // Obtener el select de regiones
@@ -417,7 +417,7 @@ require_once dirname(__DIR__) . '/modal/warningModal.php';
 
             // Cargar los datos de los archivos JSON
             const comunasData = await cargarArchivoJSON('ruta-vina.json');
-            const islrData = await cargarArchivoJSON('../islr.json');
+            const islrData = await cargarArchivoJSON('../islr.json?v=2028');
 
             if (!comunasData || !islrData) {
                 console.error('No se pudieron cargar los datos necesarios.');
