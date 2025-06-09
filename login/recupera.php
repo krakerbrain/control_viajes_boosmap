@@ -20,8 +20,14 @@ if (isset($_POST['correo'])) {
             $stmt->bindParam(':correo', $correo);
             $stmt->bindParam(':clave', $clave_recuperacion);
             $stmt->execute();
-            header("location:aviso_correo.php?correo=" . $correo);
-            include(__DIR__ . '/../mail/recoveryMail.php');
+            $correoEnviado = include(__DIR__ . '/../mail/recoveryMail.php');
+
+            if ($correoEnviado) {
+                header("Location: aviso_correo.php?correo=" . urlencode($correo));
+                exit;
+            } else {
+                $error = '<p class="alert alert-danger">No se pudo enviar el correo. Inténtalo más tarde.</p>';
+            }
         } else {
             $error = '<p class="alert alert-danger">El correo ' . $correo . ' no existe o está inactivo.</p>';
         }

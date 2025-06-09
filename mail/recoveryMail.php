@@ -14,7 +14,7 @@ $mail = new PHPMailer(true);
 
 try {
     //Server settings
-    $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+    // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
     $mail->isSMTP();                                            //Send using SMTP
     $mail->Host       = 'smtp.gmail.com';                     //Set the SMTP server to send through
     $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
@@ -50,5 +50,6 @@ try {
     $mail->send();
     echo 'Message has been sent';
 } catch (Exception $e) {
-    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+    $errorMessage = date('Y-m-d H:i:s') . " - Error al enviar correo a {$correo}: {$mail->ErrorInfo}" . PHP_EOL;
+    file_put_contents(__DIR__ . '/logs/email_errors.log', $errorMessage, FILE_APPEND);
 }

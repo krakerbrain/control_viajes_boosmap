@@ -416,8 +416,8 @@ require_once dirname(__DIR__) . '/modal/warningModal.php';
         try {
 
             // Cargar los datos de los archivos JSON
-            const comunasData = await cargarArchivoJSON('ruta-vina.json');
-            const islrData = await cargarArchivoJSON('../islr.json');
+            const comunasData = await cargarArchivoJSON('ruta-vina.json?v=2');
+            const islrData = await cargarArchivoJSON('../islr.json?v=2028');
 
             if (!comunasData || !islrData) {
                 console.error('No se pudieron cargar los datos necesarios.');
