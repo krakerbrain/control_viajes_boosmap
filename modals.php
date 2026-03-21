@@ -134,8 +134,8 @@
 
                     <div class="alert alert-info mt-3">
                         <h6 class="fw-bold">Para usuarios web:</h6>
-                        <p>La nueva dirección será: <a href="https://boosterapp.site"
-                                class="fw-bold">boosterapp.site</a></p>
+                        <p>La nueva dirección será: <a href="https://boosterapp.de"
+                                class="fw-bold">boosterapp.de</a></p>
                         <p>La dirección antigua <strong>boosterapp2024.in</strong> dejará de funcionar.</p>
                     </div>
 
@@ -153,7 +153,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <a href="https://boosterapp.site" class="btn btn-success">Ir al nuevo sitio</a>
+                    <a href="https://boosterapp.de" class="btn btn-success">Ir al nuevo sitio</a>
                 </div>
             </div>
         </div>
