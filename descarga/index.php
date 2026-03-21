@@ -13,7 +13,7 @@ include dirname(__DIR__) . "/partials/header.php";
             <div class="alert alert-info d-inline-block text-start mb-3">
                 <i class="bi bi-apple"></i> <strong>¿Usas iPhone?</strong> Esta app solo está disponible para
                 Android.<br>
-                Puedes usar la <a href="https://boosterapp.site" class="alert-link">versión web</a> en tu dispositivo
+                Puedes usar la <a href="https://boosterapp.de" class="alert-link">versión web</a> en tu dispositivo
                 iOS.
             </div>
 
@@ -43,7 +43,7 @@ include dirname(__DIR__) . "/partials/header.php";
                 <div class="mt-3 p-2 bg-light rounded">
                     <p class="mb-1 fw-bold">⚠️ ¿No puedes instalarla?</p>
                     <p class="mb-0">Puedes seguir usando la versión web en:<br>
-                        <a href="https://boosterapp.site" class="text-primary">boosterapp.site</a> (ingresa con tu
+                        <a href="https://boosterapp.de" class="text-primary">boosterapp.de</a> (ingresa con tu
                         usuario y contraseña)
                     </p>
                 </div>

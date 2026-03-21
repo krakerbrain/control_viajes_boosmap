@@ -27,7 +27,7 @@ Aplicación web desarrollada para solucionar la falta de visibilidad en el regis
 - **Backend**: PHP
 - **Base de datos**: MySQL
 - **Frontend**: Bootstrap 5 + JavaScript
-- **Hosting**: [boosterapp.site](https://boosterapp.site)
+- **Hosting**: [boosterapp.de](https://boosterapp.de)
 
 ## Instalación local 🖥️
 
