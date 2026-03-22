@@ -11,7 +11,7 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
     $pass2 = $_POST['password2'];
 
     if (!empty($usuario_registro) && !empty($correo) && !empty($pass) && !empty($pass2)) {
-        // Los campos no están vacíos, proceder con la validación y la inserción en la base de datos
+        // Los campos no están vacíos, proceder con la validación e inserción en la base de datos
 
         try {
 
@@ -62,7 +62,7 @@ include "../partials/header.php";
 <body class="bg-danger d-flex justify-content-center align-items-center vh-100">
     <div class="bg-white p-5 rounded">
         <div class="justify-content-center">
-            <form action="" method="post" class="form-group">
+            <form action="" method="post" class="form-group" id="formRegistro">
                 <div class="text-center">
                     <h4>CONTROL DE VIAJES</h4>
                     <h4>BOOSMAP</h4>
@@ -105,7 +105,10 @@ include "../partials/header.php";
                     </div>
                 </div>
                 <div class="form-group mt-3">
-                    <input type="submit" value="Registrar" class="btn btn-danger w-100">
+                    <input type="submit" id="btnRegistrar" value="Registrar" class="btn btn-danger w-100">
+                    <div id="loaderRegistro" style="display:none;" class="text-center mt-2 small text-muted">
+                        <i class="fas fa-spinner fa-spin mr-1"></i> Creando cuenta... por favor espera.
+                    </div>
                 </div>
                 <div class="mt-3 text-center">
                     <?php echo $error ?>
@@ -115,6 +118,13 @@ include "../partials/header.php";
                 </div>
             </form>
             <script>
+                document.getElementById('formRegistro').addEventListener('submit', function() {
+                    const btn = document.getElementById('btnRegistrar');
+                    btn.disabled = true;
+                    btn.value = 'Procesando...';
+                    document.getElementById('loaderRegistro').style.display = 'block';
+                });
+
                 function verpass(param) {
                     var pass1 = document.getElementById('password');
                     var pass2 = document.getElementById('password2');
