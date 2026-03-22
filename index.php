@@ -3,11 +3,22 @@ require __DIR__ . '/seguridad/auth.php';
 $indice = "inicio";
 include "partials/header.php";
 
+// Verificar si el usuario tiene rutas creadas
+$idusuario = $datosUsuario['idusuario'];
+$sqlRutas = $con->prepare("SELECT COUNT(*) as count FROM rutas WHERE idusuario = :idusuario");
+$sqlRutas->bindParam(':idusuario', $idusuario);
+$sqlRutas->execute();
+$countRutas = $sqlRutas->fetch(PDO::FETCH_ASSOC)['count'];
 ?>
 
 <body>
     <div class="container px-0" style="max-width:850px">
         <?php include "partials/navbar.php" ?>
+        <?php if ($countRutas == 0) { ?>
+            <div id="alerta-rutas-inicio" class="alert alert-warning py-1 px-3 mb-2 small text-center" role="alert">
+                ¿Eres de Viña? <a href="#" onclick="event.preventDefault(); agregaRutaVinaInicio()">Crea las rutas automáticamente aquí</a>
+            </div>
+        <?php } ?>
         <header class="row m-1">
             <div class="col-sm-7">
                 <!-- <p id="lista_excel"></p> -->
@@ -95,7 +106,9 @@ include "partials/header.php";
         cargaBotonesRutas();
         detallesViajes('hoy', 'inicial');
         obtenerUltimosViajes(false);
-        // mostrarModalCambioDominio();
+        <?php if (str_contains($_SERVER['HTTP_HOST'], 'boosterapp.site') || str_contains($_SERVER['HTTP_HOST'], 'localhost')) { ?>
+            mostrarModalCambioDominio();
+        <?php } ?>
     };
 
     function agregaRuta(e) {
@@ -240,7 +253,13 @@ include "partials/header.php";
             ingresar: "totalmes",
             periodo: periodo
         }).done(async function(data) {
-            let datos = JSON.parse(data);
+            let datos;
+            try {
+                datos = JSON.parse(data);
+            } catch (e) {
+                console.error('detallesViajes: respuesta no es JSON válido:', data);
+                return;
+            }
 
             const {
                 factor
@@ -324,6 +343,71 @@ include "partials/header.php";
     // $('.popover-dismiss').popover({
     //     trigger: 'focus'
     // })
+    async function agregaRutaVinaInicio() {
+        const link = event.target;
+        const parent = link.parentElement;
+        const originalHTML = parent.innerHTML;
+
+        try {
+            // Mostrar indicador de carga
+            parent.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creando rutas de Viña... por favor espera.';
+
+            // Cargar los datos de los archivos JSON
+            const comunasData = await fetch('rutas/ruta-vina.json').then(r => r.json());
+            const islrData = await fetch('islr.json?v=2028').then(r => r.json());
+
+            const currentDate = new Date();
+            const anioActual = currentDate.getFullYear();
+            const mesActual = currentDate.getMonth() + 1;
+            const anioParaCalculo = mesActual === 12 ? anioActual + 1 : anioActual;
+
+            let factor;
+            for (const islr of islrData) {
+                if (islr.anio === anioParaCalculo) {
+                    factor = islr.factor;
+                    break;
+                }
+            }
+
+            let rutasInsertadas = 0;
+
+            for (let i = 0; i < comunasData.length; i++) {
+                const comuna = comunasData[i].comuna;
+                const montoBruto = comunasData[i]["monto-bruto"];
+                const costoLiquido = Math.round(montoBruto * factor);
+
+                // Verificar comuna antes de insertar
+                const yaExiste = await $.post("rutas/conexiones_rutas.php", {
+                    ingresar: "verificarComunas",
+                    comuna: comuna
+                });
+
+                if (yaExiste !== "true") {
+                    await $.post("rutas/conexiones_rutas.php", {
+                        ingresar: "agregaruta",
+                        comuna: comuna,
+                        costoruta: costoLiquido
+                    });
+                    rutasInsertadas++;
+                }
+            }
+
+            if (rutasInsertadas > 0) {
+                // Ocultar alerta y recargar botones
+                const alerta = document.getElementById('alerta-rutas-inicio');
+                if (alerta) alerta.style.display = "none";
+                cargaBotonesRutas();
+                alert("Rutas de Viña creadas exitosamente.");
+            } else {
+                parent.innerHTML = originalHTML;
+                alert("No se insertaron nuevas rutas.");
+            }
+        } catch (error) {
+            console.error('Error en agregaRutaVinaInicio:', error);
+            parent.innerHTML = originalHTML;
+            alert("Hubo un error al crear las rutas.");
+        }
+    }
 </script>
 
 </html>

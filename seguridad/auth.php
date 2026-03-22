@@ -12,20 +12,12 @@ if (!$datosUsuario) {
     exit;
 }
 
-// Verificar si el usuario ha colaborado
+// Verificar si el usuario ha colaborado (admins siempre cuentan como colaboradores)
+$colaborador = false;
 try {
-    $haColaborado = new HaColaborado($con, $datosUsuario['idusuario']);
-    // si no ha colaborado y no es admin
-    // if (!$haColaborado->haColaborado() && !$datosUsuario['admin']) {
-    //     // Redirige a la página de colaboración si no ha colaborado
-    //     header("Location: " . $baseUrl . "colab/colab.php");
-    //     exit;
-    // }
+    $objColaborador = new HaColaborado($con, $datosUsuario['idusuario']);
+    $colaborador = $objColaborador->haColaborado() || ($datosUsuario['admin'] == 1);
 } catch (PDOException $e) {
-    // Manejar el error (por ejemplo, mostrar un mensaje al usuario o registrar el error)
     error_log("Error al verificar la colaboración: " . $e->getMessage());
-    header("Location: " . $baseUrl . "error.php");
-    exit;
+    $colaborador = false;
 }
-// en descarga agregar instrucciones de descarga
-// comporar el nuevo dominio y avisar que va a cambiar el dominio y que tienen que descargar de nuevo la app

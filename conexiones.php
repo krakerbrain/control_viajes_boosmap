@@ -64,7 +64,7 @@ switch ($ingresar) {
       $json = json_encode($datos);
       echo $json;
     } catch (PDOException $e) {
-      die("Error occurred:" . $e->getMessage());
+      echo json_encode([['viajes' => 0, 'monto_total' => 0, 'total_extras' => 0]]);
     }
     break;
   case 'eliminar';
