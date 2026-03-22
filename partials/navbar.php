@@ -32,6 +32,9 @@ $haColaborado = $datos;
             <?php } ?>
             <?php if ($datosUsuario['admin']) { ?>
                 <li class="nav-item">
+                    <a class="navbar-brand text-warning" style="font-size:14px" href="<?= $baseUrl . "admin/index.php" ?>"><i class="fas fa-crown mr-1"></i>Panel Maestro</a>
+                </li>
+                <li class="nav-item">
                     <a class="navbar-brand" style="font-size:14px" href="<?= $baseUrl . "colab/colab_list.php" ?>">Lista de
                         Colaboraciones</a>
                 </li>
