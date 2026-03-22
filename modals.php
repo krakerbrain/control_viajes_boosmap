@@ -10,36 +10,6 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!-- <p>Durante los próximos días se harán algunas actualizaciones de la app para modificar el nuevo
-                        porcentaje
-                        del ISLR.</p>
-                    <p> El mismo pasa de 13% a 13.75%.</p>
-                    <p>Como el pago de la última quincena (en Viña del Mar) es en Enero va a haber una diferencia en el
-                        pago y para que los montos sean mostrados lo más cercano posible a la realidad es necesario
-                        actualizar
-                        el monto de todos los viajes desde el 16/12 en adelante.</p>
-                    <p>También se actualizará el monto actual de las rutas ya que, como esta app refleja el monto
-                        líquido pagado por viaje,
-                        al haber un cambio de % de retención de ISLR el monto líquido es menos dinero por viaje que el
-                        año anterior.</p>
-                    <p>Trataré de ser lo más cuidadoso posible para no alterar los datos registrados, pero si llega a
-                        pasar algo recuerden que pueden
-                        contactarme para ayudarlos a corregir cualquier problema. Los que tienen mi número pueden
-                        hacerlo
-                        por ahí y si no por correo: admin@biowork.xyz</p> -->
-                    <!-- <p><b>Los cambios han sido realizados.</b></p>
-                    <p>Si consideras que los montos no son los correctos, siempre
-                        puedes
-                        modificar los montos a tu gusto en el menú "Configura Viajes". Puedes tanto borrar todas las
-                        rutas y crearlas de nuevo
-                        (eso no afectará los viajes existentes) o puedes ir más abajo en "Modificar montos" y
-                        cambiarlos, solo que hay
-                        dos opciones a escoger y eso si puede modificar el monto de los viajes existentes. </p>
-                    <p>Recuerden también que si tienen dudas me pueden contactar.</p>
-                    <p>Les agradezco a todos los que usan esta aplicación. Para mí es importante porque me ayuda a
-                        mantenerme activo en
-                        mi trabajo como programador.</p>
-                    <p>Feliz año para todos!!</p> -->
                     <p>Se ha creado la opción de agregar</p>
                     <p>EXTRAS O BONOS Y PEAJES</p>
                     <img width="100%" src="assets/img/img10012024_nuevosIconos.jpg" alt="nuevosIconos">
@@ -124,59 +94,46 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-light">
-                    <h5 class="modal-title" id="cambioDominioModalLabel">¡Importante cambio de dominio!</h5>
+                    <h5 class="modal-title" id="cambioDominioModalLabel">¡IMPORTANTE: CAMBIO DE DOMINIO!</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                         <span aria-hidden="true" class="text-light">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>A partir del <strong>1 de abril</strong>, nuestra plataforma migrará a un nuevo dominio.</p>
-
-                    <div class="alert alert-info mt-3">
-                        <h6 class="fw-bold">Para usuarios web:</h6>
-                        <p>La nueva dirección será: <a href="https://boosterapp.de"
-                                class="fw-bold">boosterapp.de</a></p>
-                        <p>La dirección antigua <strong>boosterapp2024.in</strong> dejará de funcionar.</p>
+                    <p class="text-center font-weight-bold text-danger">Este sitio (boosterapp.site) dejará de funcionar pronto.</p>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <h6 class="font-weight-bold"><i class="fas fa-globe mr-2"></i>Nueva Dirección Web:</h6>
+                        <p>Para entrar desde el navegador, ahora debes usar:</p>
+                        <p class="text-center"><a href="https://boosterapp.de" class="h5 font-weight-bold">boosterapp.de</a></p>
+                        <p class="small text-muted">Tus datos de acceso (usuario y contraseña) siguen siendo los mismos.</p>
                     </div>
 
                     <div class="alert alert-info mt-3">
-                        <h6 class="fw-bold">Para usuarios de Android:</h6>
-                        <p>Deben descargar la nueva versión de la aplicación para continuar usando el servicio sin
-                            interrupciones.</p>
-                        <p>La versión actual dejará de funcionar después del 1 de abril.</p>
+                        <h6 class="font-weight-bold"><i class="fas fa-mobile-alt mr-2"></i>Usuarios de Android:</h6>
+                        <p>1. <strong>Desinstala</strong> la aplicación que tienes actualmente.</p>
+                        <p>2. Entra a <a href="https://boosterapp.de" class="font-weight-bold">boosterapp.de</a> desde tu celular.</p>
+                        <p>3. Ve a <strong>"Descarga la App"</strong> e instala la nueva versión para seguir registrando tus viajes.</p>
                     </div>
 
-                    <div class="alert alert-danger mt-4">
-                        <p class="mb-0"><strong>Fecha límite:</strong> 1 de abril de 2025. Después de esta fecha, tanto
-                            la app como la dirección antigua quedarán inoperativas.</p>
+                    <div class="alert alert-danger mt-3 mb-0 text-center py-2">
+                        <p class="mb-0 small font-italic">Evita pérdida de acceso migrando hoy mismo al nuevo sitio.</p>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <a href="https://boosterapp.de" class="btn btn-success">Ir al nuevo sitio</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Entendido</button>
+                    <a href="https://boosterapp.de" class="btn btn-danger">Ir al nuevo sitio</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Script para mostrar el modal automáticamente -->
     <script>
         function mostrarModalCambioDominio() {
-            // ID del modal y clave para almacenar en localStorage
-            const modalId = 'cambioDominioModal';
-            const storageKey = 'lastModalShownDate';
-
-            // Obtener la fecha de la última vez que se mostró el modal
-            const lastShownDate = localStorage.getItem(storageKey);
-            const today = new Date().toDateString(); // Fecha actual en formato legible (sin hora)
-
-            // Si no se ha mostrado hoy (o nunca), mostrar el modal
-            if (!lastShownDate || lastShownDate !== today) {
-                const modal = new bootstrap.Modal(document.getElementById(modalId));
-                modal.show();
-
-                // Guardar la fecha actual en localStorage
-                localStorage.setItem(storageKey, today);
+            // Mostrar siempre debido a la urgencia (boosterapp.site -> boosterapp.de)
+            const modalEl = document.getElementById('cambioDominioModal');
+            if(modalEl) {
+                $('#cambioDominioModal').modal('show');
             }
         }
     </script>

@@ -57,8 +57,13 @@ if (isset($_REQUEST['creado'])) {
                 data-content="Aquí podrás agregar nuevas rutas o modificar las actuales. Al ir agregando rutas se irán creando botones en la página inicial que servirán para ir llenando los registros de viajes"></i>
         </div>
 
-        <div class="row-cols-lg-2 m-2">
-            <form id="formRutas" class="form-group mx-auto">
+        <div class="row-cols-lg-2 m-2" style="position:relative">
+            <?php if (!$colaborador && $creado == "true") { ?>
+                <div class="alert alert-info text-center py-2" role="alert" style="font-size:0.85rem">
+                    <i class="fas fa-lock mr-2"></i> Para agregar rutas personalizadas debes <a href="<?= $baseUrl ?>colab/colab.php" class="font-weight-bold alert-link">ser colaborador</a>.
+                </div>
+            <?php } ?>
+            <form id="formRutas" class="form-group mx-auto" <?= (!$colaborador && $creado == "true") ? 'style="opacity:0.4; pointer-events:none; user-select:none"' : '' ?>>
                 <div>
                     <label class="form-label" for="region">Región</label>
                     <select class="custom-select" name="region" id="region">
@@ -413,63 +418,80 @@ require_once dirname(__DIR__) . '/modal/warningModal.php';
     }
 
     async function agregaRutaVina() {
-        try {
+        const link = event.target;
+        const parent = link.parentElement;
+        const originalHTML = parent.innerHTML;
 
+        try {
+            // Mostrar indicador de carga y deshabilitar
+            parent.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creando rutas de Viña... por favor no cierres la ventana.';
+            
             // Cargar los datos de los archivos JSON
             const comunasData = await cargarArchivoJSON('ruta-vina.json');
             const islrData = await cargarArchivoJSON('../islr.json?v=2028');
 
             if (!comunasData || !islrData) {
                 console.error('No se pudieron cargar los datos necesarios.');
+                parent.innerHTML = originalHTML;
                 return;
             }
 
-            // Obtener el año actual y el mes actual
             const currentDate = new Date();
             const anioActual = currentDate.getFullYear();
             const mesActual = currentDate.getMonth() + 1;
             const anioParaCalculo = mesActual === 12 ? anioActual + 1 : anioActual;
 
+            let factor;
+            for (const islr of islrData) {
+                if (islr.anio === anioParaCalculo) {
+                    factor = islr.factor;
+                    break;
+                }
+            }
+
+            let rutasInsertadas = 0;
+
             for (let i = 0; i < comunasData.length; i++) {
                 const comuna = comunasData[i].comuna;
                 const montoBruto = comunasData[i]["monto-bruto"];
+                const costoLiquido = Math.round(montoBruto * factor);
 
-                // Si el mes actual es diciembre, se toma el año siguiente
-
-                // Buscar el factor correspondiente al año actual en el archivo islr.json
-                let factor;
-                for (const islr of islrData) {
-                    if (islr.anio === anioParaCalculo) {
-                        factor = islr.factor;
-                        break;
+                const yaExiste = await verificaComuna(comuna);
+                if (yaExiste !== "true") {
+                    try {
+                        await $.post("conexiones_rutas.php", {
+                            ingresar: "agregaruta",
+                            comuna: comuna,
+                            costoruta: costoLiquido
+                        });
+                        rutasInsertadas++;
+                    } catch (err) {
+                        console.error("Error al insertar ruta:", comuna, err);
                     }
                 }
-                // Calcular el costo líquido
-                const costoLiquido = Math.round(montoBruto * factor);
-                var datos = await verificaComuna(comuna);
-                if (datos != "true") {
-                    // Realizar la inserción en la base de datos utilizando la consulta SQL
-                    $.post("conexiones_rutas.php", {
-                        ingresar: "agregaviaje",
-                        comuna: comuna,
-                        costoruta: costoLiquido
-                    }).done(function(datos) {
-                        obtenerruta();
-                        document.getElementsByClassName('ocultaRutas')[1].style.display = "block";
-                        document.getElementById('alerta-primera-vez').classList.remove('show');
-                        document.getElementById('alerta-primera-vez').style.display = "none";
-                        var tablaRutas = document.getElementById('tabla-rutas');
-                        tablaRutas.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'end'
-                        });
-                    }).fail(function() {
-                        alert("Error al insertar los datos");
-                    });
+            }
+
+            if (rutasInsertadas > 0) {
+                obtenerruta();
+                document.getElementsByClassName('ocultaRutas')[1].style.display = "block";
+                const alerta = document.getElementById('alerta-primera-vez');
+                if (alerta) {
+                    alerta.classList.remove('show');
+                    alerta.style.display = "none";
                 }
+                document.getElementById('tabla-rutas').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'end'
+                });
+                alert("Rutas de Viña creadas exitosamente.");
+            } else {
+                parent.innerHTML = originalHTML;
+                warningModal("Aviso", "No se insertaron nuevas rutas (puede que ya existan).");
             }
         } catch (error) {
-            console.error('Error al leer el archivo JSON:', error);
+            console.error('Error en agregaRutaVina:', error);
+            parent.innerHTML = originalHTML;
+            alert("Hubo un error al crear las rutas.");
         }
     }
 
@@ -477,7 +499,13 @@ require_once dirname(__DIR__) . '/modal/warningModal.php';
         $.post("conexiones_rutas.php", {
             ingresar: "obtenerRutas"
         }).done(async function(datos) {
-            let data = JSON.parse(datos);
+            let data;
+            try {
+                data = JSON.parse(datos);
+            } catch (e) {
+                console.error('obtenerruta: respuesta no es JSON válido:', datos);
+                return;
+            }
             let configuraRutas = "";
             let modificaMontos = "";
             const {
