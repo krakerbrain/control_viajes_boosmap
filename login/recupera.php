@@ -6,7 +6,32 @@ $indice = "login";
 
 if (isset($_POST['correo'])) {
     $correo  = $_POST['correo'];
-    $query = $con->prepare("SELECT correo FROM usuarios WHERE correo = :correo AND activo = 1");
+
+    // Validación de Turnstile
+    $turnstileResponse = $_POST['cf-turnstile-response'] ?? '';
+    $url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+    $data = [
+        'secret' => $turnstileSecretKey,
+        'response' => $turnstileResponse,
+        'remoteip' => $_SERVER['REMOTE_ADDR']
+    ];
+
+    $options = [
+        'http' => [
+            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method' => 'POST',
+            'content' => http_build_query($data)
+        ]
+    ];
+
+    $context = stream_context_create($options);
+    $response = @file_get_contents($url, false, $context);
+    $responseKeys = json_decode($response, true);
+
+    if (!$responseKeys || !$responseKeys["success"]) {
+        $error = '<p class="alert alert-danger">Verificación de seguridad fallida. Por favor, completa el captcha.</p>';
+    } else {
+        $query = $con->prepare("SELECT correo FROM usuarios WHERE correo = :correo AND activo = 1");
     $query->bindParam(':correo', $correo);
     $query->execute();
     $count = $query->rowCount();
@@ -31,12 +56,14 @@ if (isset($_POST['correo'])) {
         } else {
             $error = '<p class="alert alert-danger">El correo ' . $correo . ' no existe o está inactivo.</p>';
         }
+        }
     }
 }
 
 
 include "../partials/header.php";
 ?>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <body class="bg-danger d-flex justify-content-center align-items-center vh-100">
     <div class="bg-white p-5 rounded">
@@ -51,6 +78,9 @@ include "../partials/header.php";
                     </div>
                     <input type="mail" name="correo" id="correo" class="form-control" placeholder="Ingrese su correo">
                 </div>
+                <!-- Widget de Turnstile -->
+                <div class="cf-turnstile mt-3" data-sitekey="<?= $turnstileSiteKey ?>" data-theme="light"></div>
+
                 <div class="form-group mt-3">
                     <input type="submit" value="Enviar" class="btn btn-danger w-100">
                 </div>
