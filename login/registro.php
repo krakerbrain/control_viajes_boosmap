@@ -11,7 +11,31 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
     $pass2 = $_POST['password2'];
 
     if (!empty($usuario_registro) && !empty($correo) && !empty($pass) && !empty($pass2)) {
-        // Los campos no están vacíos, proceder con la validación e inserción en la base de datos
+        // Validación de Turnstile
+        $turnstileResponse = $_POST['cf-turnstile-response'] ?? '';
+        $url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+        $data = [
+            'secret' => $turnstileSecretKey,
+            'response' => $turnstileResponse,
+            'remoteip' => $_SERVER['REMOTE_ADDR']
+        ];
+
+        $options = [
+            'http' => [
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($data)
+            ]
+        ];
+
+        $context = stream_context_create($options);
+        $response = @file_get_contents($url, false, $context);
+        $responseKeys = json_decode($response, true);
+
+        if (!$responseKeys || !$responseKeys["success"]) {
+            $error = '<p class="alert alert-danger">Verificación de seguridad fallida. Por favor, completa el captcha.</p>';
+        } else {
+            // Los campos no están vacíos y el captcha es válido, proceder
 
         try {
 
@@ -49,6 +73,7 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
             } else {
                 $error = "conex";
             }
+            }
         }
     } else {
         $error = '<p class="alert alert-danger">Todos los campos son obligatorios</p>';
@@ -58,6 +83,7 @@ if (isset($_POST['usuario']) && isset($_POST['correo']) && isset($_POST['passwor
 
 include "../partials/header.php";
 ?>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <body class="bg-danger d-flex justify-content-center align-items-center vh-100">
     <div class="bg-white p-5 rounded">
@@ -104,6 +130,9 @@ include "../partials/header.php";
                         </a>
                     </div>
                 </div>
+                <!-- Widget de Turnstile -->
+                <div class="cf-turnstile mt-3" data-sitekey="<?= $turnstileSiteKey ?>" data-theme="light"></div>
+
                 <div class="form-group mt-3">
                     <input type="submit" id="btnRegistrar" value="Registrar" class="btn btn-danger w-100">
                     <div id="loaderRegistro" style="display:none;" class="text-center mt-2 small text-muted">

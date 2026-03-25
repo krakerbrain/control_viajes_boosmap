@@ -13,6 +13,8 @@ $host = $_ENV['HOST'];
 $bd = $_ENV['BD'];
 $usuario = $_ENV['USUARIO'];
 $contrasenia = $_ENV['PASS'];
+$turnstileSiteKey = $_ENV['TURNSTILE_SITE_KEY'] ?? '';
+$turnstileSecretKey = $_ENV['TURNSTILE_SECRET_KEY'] ?? '';
 
 try {
     $con = new PDO("mysql:host=$host;dbname=$bd", $usuario, $contrasenia);
