@@ -70,5 +70,57 @@ if (isset($_POST['ingresar'])) {
                  echo "ok";
              }
              break;
+
+        case 'eliminar_masivo':
+            $ids = $_POST['ids'] ?? [];
+            if (!is_array($ids) || empty($ids)) {
+                echo "No hay usuarios seleccionados";
+                break;
+            }
+
+            $ids = array_map('intval', $ids);
+            $currentAdminId = (int)$datosUsuario['idusuario'];
+
+            // Excluir usuario actual
+            $ids = array_filter($ids, function($id) use ($currentAdminId) {
+                return $id > 0 && $id !== $currentAdminId;
+            });
+
+            if (empty($ids)) {
+                echo "No hay usuarios válidos para eliminar";
+                break;
+            }
+
+            // Excluir administradores
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $stmtAdmins = $con->prepare("SELECT idusuario FROM usuarios WHERE idusuario IN ($placeholders) AND admin = 1");
+            $stmtAdmins->execute(array_values($ids));
+            $adminIds = $stmtAdmins->fetchAll(PDO::FETCH_COLUMN);
+
+            $idsToDelete = array_values(array_diff($ids, $adminIds));
+
+            if (empty($idsToDelete)) {
+                echo "No se pueden eliminar usuarios administradores";
+                break;
+            }
+
+            $inQuery = implode(',', array_fill(0, count($idsToDelete), '?'));
+
+            try {
+                $con->beginTransaction();
+
+                $con->prepare("DELETE FROM viajes WHERE idusuario IN ($inQuery)")->execute($idsToDelete);
+                $con->prepare("DELETE FROM rutas WHERE idusuario IN ($inQuery)")->execute($idsToDelete);
+                $con->prepare("DELETE FROM colaboraciones WHERE idusuario IN ($inQuery)")->execute($idsToDelete);
+                $con->prepare("DELETE FROM usuarios WHERE idusuario IN ($inQuery)")->execute($idsToDelete);
+
+                $con->commit();
+                echo "ok";
+            } catch (PDOException $e) {
+                $con->rollBack();
+                echo "Error: " . $e->getMessage();
+            }
+            break;
     }
 }
+

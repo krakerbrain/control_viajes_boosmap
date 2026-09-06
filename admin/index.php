@@ -37,19 +37,27 @@ include __DIR__ . "/../partials/header.php";
 
     <!-- FILTROS Y TABLA -->
     <div class="card shadow-sm border-0 mb-5">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 font-weight-bold text-muted">Gestión de Usuarios</h6>
-            <select id="filtroUsuario" class="form-control form-control-sm" style="width: 150px;" onchange="cargarListado()">
-                <option value="todos">Todos</option>
-                <option value="activos" selected>Activos (6 meses)</option>
-                <option value="inactivos">Inactivos</option>
-            </select>
+        <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap">
+            <h6 class="mb-0 font-weight-bold text-muted my-1">Gestión de Usuarios</h6>
+            <div class="d-flex align-items-center my-1">
+                <button id="btnEliminarMasivo" class="btn btn-sm btn-danger mr-2 d-none" onclick="eliminarMasivo()">
+                    <i class="fas fa-trash-alt mr-1"></i> Eliminar Seleccionados (<span id="countSeleccionados">0</span>)
+                </button>
+                <select id="filtroUsuario" class="form-control form-control-sm" style="width: 150px;" onchange="cargarListado()">
+                    <option value="todos">Todos</option>
+                    <option value="activos" selected>Activos (6 meses)</option>
+                    <option value="inactivos">Inactivos</option>
+                </select>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                 <table class="table table-hover mb-0" style="font-size: 0.85rem;">
                     <thead class="bg-light sticky-top">
                         <tr>
+                            <th class="text-center" style="width: 40px;">
+                                <input type="checkbox" id="checkAll" onchange="toggleSelectAll(this)" title="Seleccionar/Deseleccionar todos">
+                            </th>
                             <th>Nombre / Correo</th>
                             <th class="text-center">Viajes</th>
                             <th>Última Actividad</th>
@@ -58,7 +66,7 @@ include __DIR__ . "/../partials/header.php";
                         </tr>
                     </thead>
                     <tbody id="tablaUsuarios">
-                        <tr><td colspan="5" class="text-center py-4 text-muted">Cargando datos...</td></tr>
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Cargando datos...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -92,35 +100,84 @@ include __DIR__ . "/../partials/header.php";
     function cargarListado() {
         const filtro = document.getElementById('filtroUsuario').value;
         const tbody = document.getElementById('tablaUsuarios');
+        const checkAll = document.getElementById('checkAll');
+        if (checkAll) checkAll.checked = false;
         
         $.post('conexiones_admin.php', { ingresar: 'listado', filtro: filtro }).done(function(data) {
             const usuarios = JSON.parse(data);
             let html = "";
             
             if (usuarios.length === 0) {
-                html = '<tr><td colspan="5" class="text-center py-4">No se encontraron usuarios.</td></tr>';
+                html = '<tr><td colspan="6" class="text-center py-4">No se encontraron usuarios.</td></tr>';
             } else {
                 usuarios.forEach(u => {
                     const ultimaAct = u.ultimo_viaje ? u.ultimo_viaje : '<span class="text-muted italic">Sin viajes</span>';
                     const isAdmin = u.admin == 1 ? '<i class="fas fa-check-circle text-success"></i>' : '-';
-                    const btnEliminar = u.admin == 1 ? '' : `<button class="btn btn-sm btn-outline-danger" onclick="borrarUsuario(${u.idusuario}, '${u.nombre}')"><i class="fas fa-trash-alt"></i></button>`;
+                    const checkbox = u.admin == 1 ? '' : `<input type="checkbox" class="check-usuario" value="${u.idusuario}" onchange="actualizarSeleccion()">`;
+                    const btnEliminar = u.admin == 1 ? '' : `<button class="btn btn-sm btn-outline-danger" title="Eliminar usuario" onclick="borrarUsuario(${u.idusuario}, '${u.nombre}')"><i class="fas fa-trash-alt"></i></button>`;
                     
                     html += `
                         <tr>
+                            <td class="text-center align-middle">${checkbox}</td>
                             <td>
                                 <div class="font-weight-bold">${u.nombre}</div>
                                 <div class="text-muted small">${u.correo}</div>
                             </td>
-                            <td class="text-center font-weight-bold">${u.total_viajes}</td>
-                            <td>${ultimaAct}</td>
-                            <td class="text-center">${isAdmin}</td>
-                            <td class="text-center">${btnEliminar}</td>
+                            <td class="text-center font-weight-bold align-middle">${u.total_viajes}</td>
+                            <td class="align-middle">${ultimaAct}</td>
+                            <td class="text-center align-middle">${isAdmin}</td>
+                            <td class="text-center align-middle">${btnEliminar}</td>
                         </tr>
                     `;
                 });
             }
             tbody.innerHTML = html;
+            actualizarSeleccion();
         });
+    }
+
+    function toggleSelectAll(master) {
+        const checkboxes = document.querySelectorAll('.check-usuario');
+        checkboxes.forEach(cb => cb.checked = master.checked);
+        actualizarSeleccion();
+    }
+
+    function actualizarSeleccion() {
+        const seleccionados = document.querySelectorAll('.check-usuario:checked');
+        const total = seleccionados.length;
+        const btn = document.getElementById('btnEliminarMasivo');
+        const countSpan = document.getElementById('countSeleccionados');
+        const checkAll = document.getElementById('checkAll');
+        const totalCheckboxes = document.querySelectorAll('.check-usuario');
+
+        if (total > 0) {
+            btn.classList.remove('d-none');
+            countSpan.textContent = total;
+        } else {
+            btn.classList.add('d-none');
+        }
+
+        if (checkAll) {
+            checkAll.checked = totalCheckboxes.length > 0 && total === totalCheckboxes.length;
+        }
+    }
+
+    function eliminarMasivo() {
+        const seleccionados = Array.from(document.querySelectorAll('.check-usuario:checked')).map(cb => cb.value);
+        if (seleccionados.length === 0) return;
+
+        if (confirm(`¿Estás SEGURO de eliminar permanentemente a los ${seleccionados.length} usuarios seleccionados? Esta acción no se puede deshacer y borrará todos sus viajes y rutas.`)) {
+            $.post('conexiones_admin.php', { ingresar: 'eliminar_masivo', ids: seleccionados }).done(function(data) {
+                if (data.trim() === 'ok') {
+                    const checkAll = document.getElementById('checkAll');
+                    if (checkAll) checkAll.checked = false;
+                    cargarListado();
+                    cargarStats();
+                } else {
+                    alert('Error al eliminar usuarios: ' + data);
+                }
+            });
+        }
     }
 
     function borrarUsuario(id, nombre) {
@@ -136,6 +193,7 @@ include __DIR__ . "/../partials/header.php";
         }
     }
 </script>
+
 
 </body>
 </html>
