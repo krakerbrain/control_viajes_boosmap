@@ -73,7 +73,11 @@ try {
 
     $mail->send();
     $mailAviso->send();
-    echo 'Message has been sent';
-} catch (Exception $e) {
-    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+    return true;
+} catch (\Throwable $e) {
+    $errorMessage = date('Y-m-d H:i:s') . " - Error al enviar correo de registro a {$correo}: " . $e->getMessage() . PHP_EOL;
+    file_put_contents(__DIR__ . '/logs/email_errors.log', $errorMessage, FILE_APPEND);
+    return false;
 }
+
+

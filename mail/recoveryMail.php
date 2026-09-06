@@ -48,8 +48,11 @@ try {
                     Saludos';
 
     $mail->send();
-    echo 'Message has been sent';
-} catch (Exception $e) {
-    $errorMessage = date('Y-m-d H:i:s') . " - Error al enviar correo a {$correo}: {$mail->ErrorInfo}" . PHP_EOL;
+    return true;
+} catch (\Throwable $e) {
+    $errorMessage = date('Y-m-d H:i:s') . " - Error al enviar correo a {$correo}: " . $e->getMessage() . PHP_EOL;
     file_put_contents(__DIR__ . '/logs/email_errors.log', $errorMessage, FILE_APPEND);
+    return false;
 }
+
+
